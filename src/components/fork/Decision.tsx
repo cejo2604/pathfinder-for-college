@@ -12,7 +12,7 @@ export function PriorityPanel({
 }: {
   priorities: Priority[];
   onChange: (next: Priority[]) => void;
-  topPathName?: string;
+  topPathName?: string | undefined;
 }) {
   const move = (index: number, dir: -1 | 1) => {
     const next = [...priorities];

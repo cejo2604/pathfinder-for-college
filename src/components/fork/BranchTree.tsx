@@ -7,7 +7,7 @@ interface BranchTreeProps {
   currentLabel: string;
   currentSub: string;
   selectedId: string | null;
-  bestId?: string | null;
+  bestId?: string | null | undefined;
   animate?: boolean;
   onSelect: (id: string) => void;
 }
