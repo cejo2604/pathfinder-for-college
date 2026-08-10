@@ -2,7 +2,7 @@ import { Info } from "lucide-react";
 
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
-import type { RiskLevel } from "@/lib/fork/engine";
+import type { RiskLevel, ScoreBreakdown } from "@/lib/fork/engine";
 
 export const SCORE_TOOLTIP =
   "This is a comparison score based on the student's stated goal, academic path, skills and priorities. It is not a prediction or guarantee of career success.";
@@ -57,18 +57,18 @@ export function ScoreBar({
   );
 }
 
-export function ScorePanel({ scores }: { scores: Record<string, number> }) {
+export function ScorePanel({ scores }: { scores: ScoreBreakdown }) {
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
         <h4 className="text-sm font-semibold">Tradeoff scores</h4>
         <EstimateBadge />
       </div>
-      <ScoreBar label="Career fit" value={scores.careerFit as number} />
-      <ScoreBar label="Cost efficiency" value={scores.costEfficiency as number} tone="mint" />
-      <ScoreBar label="Graduation efficiency" value={scores.graduationEfficiency as number} tone="mint" />
-      <ScoreBar label="Flexibility" value={scores.flexibility as number} tone="gold" />
-      <ScoreBar label="Overall fit" value={scores.overallFit as number} tone="navy" />
+      <ScoreBar label="Career fit" value={scores.careerFit} />
+      <ScoreBar label="Cost efficiency" value={scores.costEfficiency} tone="mint" />
+      <ScoreBar label="Graduation efficiency" value={scores.graduationEfficiency} tone="mint" />
+      <ScoreBar label="Flexibility" value={scores.flexibility} tone="gold" />
+      <ScoreBar label="Overall fit" value={scores.overallFit} tone="navy" />
     </div>
   );
 }
