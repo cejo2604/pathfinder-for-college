@@ -10,33 +10,128 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as CareerRouteImport } from './routes/career'
+import { Route as CompareRouteImport } from './routes/compare'
+import { Route as GoalRouteImport } from './routes/goal'
+import { Route as HomeRouteImport } from './routes/home'
+import { Route as PlanRouteImport } from './routes/plan'
+import { Route as ProfileRouteImport } from './routes/profile'
+import { Route as WhatIfRouteImport } from './routes/what-if'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CareerRoute = CareerRouteImport.update({
+  id: '/career',
+  path: '/career',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CompareRoute = CompareRouteImport.update({
+  id: '/compare',
+  path: '/compare',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GoalRoute = GoalRouteImport.update({
+  id: '/goal',
+  path: '/goal',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HomeRoute = HomeRouteImport.update({
+  id: '/home',
+  path: '/home',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PlanRoute = PlanRouteImport.update({
+  id: '/plan',
+  path: '/plan',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProfileRoute = ProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WhatIfRoute = WhatIfRouteImport.update({
+  id: '/what-if',
+  path: '/what-if',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/career': typeof CareerRoute
+  '/compare': typeof CompareRoute
+  '/goal': typeof GoalRoute
+  '/home': typeof HomeRoute
+  '/plan': typeof PlanRoute
+  '/profile': typeof ProfileRoute
+  '/what-if': typeof WhatIfRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/career': typeof CareerRoute
+  '/compare': typeof CompareRoute
+  '/goal': typeof GoalRoute
+  '/home': typeof HomeRoute
+  '/plan': typeof PlanRoute
+  '/profile': typeof ProfileRoute
+  '/what-if': typeof WhatIfRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/career': typeof CareerRoute
+  '/compare': typeof CompareRoute
+  '/goal': typeof GoalRoute
+  '/home': typeof HomeRoute
+  '/plan': typeof PlanRoute
+  '/profile': typeof ProfileRoute
+  '/what-if': typeof WhatIfRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/career'
+    | '/compare'
+    | '/goal'
+    | '/home'
+    | '/plan'
+    | '/profile'
+    | '/what-if'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/career'
+    | '/compare'
+    | '/goal'
+    | '/home'
+    | '/plan'
+    | '/profile'
+    | '/what-if'
+  id:
+    | '__root__'
+    | '/'
+    | '/career'
+    | '/compare'
+    | '/goal'
+    | '/home'
+    | '/plan'
+    | '/profile'
+    | '/what-if'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  CareerRoute: typeof CareerRoute
+  CompareRoute: typeof CompareRoute
+  GoalRoute: typeof GoalRoute
+  HomeRoute: typeof HomeRoute
+  PlanRoute: typeof PlanRoute
+  ProfileRoute: typeof ProfileRoute
+  WhatIfRoute: typeof WhatIfRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,22 +143,68 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/career': {
+      id: '/career'
+      path: '/career'
+      fullPath: '/career'
+      preLoaderRoute: typeof CareerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/compare': {
+      id: '/compare'
+      path: '/compare'
+      fullPath: '/compare'
+      preLoaderRoute: typeof CompareRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/goal': {
+      id: '/goal'
+      path: '/goal'
+      fullPath: '/goal'
+      preLoaderRoute: typeof GoalRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/home': {
+      id: '/home'
+      path: '/home'
+      fullPath: '/home'
+      preLoaderRoute: typeof HomeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/plan': {
+      id: '/plan'
+      path: '/plan'
+      fullPath: '/plan'
+      preLoaderRoute: typeof PlanRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/profile': {
+      id: '/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof ProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/what-if': {
+      id: '/what-if'
+      path: '/what-if'
+      fullPath: '/what-if'
+      preLoaderRoute: typeof WhatIfRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  CareerRoute: CareerRoute,
+  CompareRoute: CompareRoute,
+  GoalRoute: GoalRoute,
+  HomeRoute: HomeRoute,
+  PlanRoute: PlanRoute,
+  ProfileRoute: ProfileRoute,
+  WhatIfRoute: WhatIfRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

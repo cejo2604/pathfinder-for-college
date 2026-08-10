@@ -1,0 +1,289 @@
+/**
+ * Fork demo dataset.
+ *
+ * Deliberately small and internally consistent: every credit total, prerequisite
+ * chain, tuition figure and graduation date below is checked against the others.
+ * Nothing in the UI invents numbers — the engine in ./engine.ts derives all of
+ * them from this file.
+ */
+
+export type Priority =
+  | "graduate_on_time"
+  | "minimize_cost"
+  | "career_opportunities"
+  | "stay_close_to_major"
+  | "minimize_coursework"
+  | "flexibility";
+
+export const PRIORITY_LABELS: Record<Priority, string> = {
+  graduate_on_time: "Graduate on time",
+  minimize_cost: "Minimize cost",
+  career_opportunities: "Maximize career opportunities",
+  stay_close_to_major: "Stay close to my current major",
+  minimize_coursework: "Minimize additional coursework",
+  flexibility: "Maximize flexibility",
+};
+
+export const PRIORITY_ORDER: Priority[] = [
+  "graduate_on_time",
+  "minimize_cost",
+  "career_opportunities",
+  "stay_close_to_major",
+  "minimize_coursework",
+  "flexibility",
+];
+
+export type SkillKey =
+  | "health_domain"
+  | "programming"
+  | "data_analysis"
+  | "statistics"
+  | "informatics"
+  | "research";
+
+export const SKILL_LABELS: Record<SkillKey, string> = {
+  health_domain: "Health & life-science knowledge",
+  programming: "Programming",
+  data_analysis: "Data analysis",
+  statistics: "Statistics",
+  informatics: "Health informatics & systems",
+  research: "Research methods",
+};
+
+export interface Course {
+  code: string;
+  title: string;
+  credits: number;
+  prerequisites: string[];
+}
+
+/** Verified institutional catalog subset (demo dataset). */
+export const COURSES: Course[] = [
+  { code: "BIOL 101", title: "Principles of Biology I", credits: 4, prerequisites: [] },
+  { code: "BIOL 102", title: "Principles of Biology II", credits: 4, prerequisites: ["BIOL 101"] },
+  { code: "BIOL 201", title: "Genetics", credits: 4, prerequisites: ["BIOL 102"] },
+  { code: "BIOL 301", title: "Cell & Molecular Biology", credits: 4, prerequisites: ["BIOL 201"] },
+  { code: "BIOL 302", title: "Physiology", credits: 4, prerequisites: ["BIOL 301"] },
+  { code: "BIOL 410", title: "Advanced Molecular Biology", credits: 4, prerequisites: ["BIOL 301"] },
+  { code: "BIOL 495", title: "Biology Capstone", credits: 3, prerequisites: ["BIOL 302"] },
+  { code: "CHEM 101", title: "General Chemistry I", credits: 4, prerequisites: [] },
+  { code: "CHEM 102", title: "General Chemistry II", credits: 4, prerequisites: ["CHEM 101"] },
+  { code: "CHEM 261", title: "Organic Chemistry I", credits: 4, prerequisites: ["CHEM 102"] },
+  { code: "STAT 155", title: "Introduction to Statistics", credits: 3, prerequisites: [] },
+  { code: "STAT 320", title: "Statistical Modeling", credits: 3, prerequisites: ["STAT 155"] },
+  { code: "PSYC 101", title: "General Psychology", credits: 3, prerequisites: [] },
+  { code: "MATH 152", title: "Calculus I", credits: 4, prerequisites: [] },
+  { code: "MATH 233", title: "Discrete Structures", credits: 3, prerequisites: ["MATH 152"] },
+  { code: "COMP 110", title: "Introduction to Programming", credits: 3, prerequisites: [] },
+  { code: "COMP 210", title: "Data Structures", credits: 4, prerequisites: ["COMP 110"] },
+  { code: "COMP 301", title: "Software Design", credits: 3, prerequisites: ["COMP 210"] },
+  { code: "COMP 311", title: "Computer Organization", credits: 3, prerequisites: ["COMP 210"] },
+  { code: "COMP 410", title: "Algorithms", credits: 3, prerequisites: ["COMP 210", "MATH 233"] },
+  { code: "COMP 480", title: "Machine Learning", credits: 3, prerequisites: ["COMP 210", "STAT 155"] },
+  { code: "COMP 495", title: "Computer Science Capstone", credits: 3, prerequisites: ["COMP 301"] },
+  { code: "HINF 210", title: "Foundations of Health Informatics", credits: 3, prerequisites: [] },
+  { code: "HINF 320", title: "Clinical Data Systems", credits: 3, prerequisites: ["HINF 210"] },
+  { code: "HINF 410", title: "Health Data Analytics", credits: 3, prerequisites: ["HINF 320", "STAT 155"] },
+  { code: "HINF 450", title: "Health Technology Ethics & Policy", credits: 3, prerequisites: ["HINF 210"] },
+];
+
+export const courseByCode = (code: string) => COURSES.find((c) => c.code === code);
+
+export interface DegreeProgram {
+  id: string;
+  name: string;
+  kind: "major" | "minor";
+  requiredCredits: number;
+}
+
+export const PROGRAMS: DegreeProgram[] = [
+  { id: "bio_bs", name: "Biology, B.S.", kind: "major", requiredCredits: 120 },
+  { id: "cs_bs", name: "Computer Science, B.S.", kind: "major", requiredCredits: 120 },
+  { id: "cs_minor", name: "Computer Science minor", kind: "minor", requiredCredits: 18 },
+  { id: "hinf_minor", name: "Health Informatics minor", kind: "minor", requiredCredits: 18 },
+];
+
+export const programById = (id: string) => PROGRAMS.find((p) => p.id === id);
+
+export interface StudentCourse {
+  code: string;
+  status: "completed" | "in_progress";
+  term: string;
+  grade?: string;
+}
+
+export interface StudentProfile {
+  name: string;
+  school: string;
+  degree: string;
+  major: string;
+  minor: string | null;
+  year: string;
+  graduationTarget: string;
+  creditsCompleted: number;
+  gpa: number;
+  interests: string[];
+  careerInterests: string[];
+  skills: string[];
+  priorities: Priority[];
+  goal: string;
+  goalCategory: string;
+  courses: StudentCourse[];
+}
+
+/** Tuition assumptions for the demo institution (estimated values). */
+export const TUITION_PER_CREDIT = 485;
+export const TRANSFER_TUITION_PER_CREDIT = 540;
+
+export const DEMO_STUDENT: StudentProfile = {
+  name: "Maya Rodriguez",
+  school: "University of North Carolina",
+  degree: "Bachelor of Science",
+  major: "Biology",
+  minor: null,
+  year: "Sophomore",
+  graduationTarget: "May 2028",
+  creditsCompleted: 54,
+  gpa: 3.6,
+  interests: ["Healthcare", "Technology", "Problem solving", "Research"],
+  careerInterests: ["Healthcare technology", "Data science", "Biotechnology"],
+  skills: ["Lab technique", "Scientific writing", "Spreadsheet analysis"],
+  priorities: [
+    "graduate_on_time",
+    "career_opportunities",
+    "minimize_cost",
+    "flexibility",
+    "stay_close_to_major",
+    "minimize_coursework",
+  ],
+  goal: "I want to work in healthcare technology.",
+  goalCategory: "Healthcare technology",
+  courses: [
+    // 54 completed credits, verified from the demo institutional record.
+    { code: "BIOL 101", status: "completed", term: "Fall 2024", grade: "A-" },
+    { code: "BIOL 102", status: "completed", term: "Spring 2025", grade: "B+" },
+    { code: "BIOL 201", status: "completed", term: "Fall 2025", grade: "A" },
+    { code: "CHEM 101", status: "completed", term: "Fall 2024", grade: "B+" },
+    { code: "CHEM 102", status: "completed", term: "Spring 2025", grade: "B" },
+    { code: "MATH 152", status: "completed", term: "Fall 2024", grade: "B+" },
+    { code: "STAT 155", status: "completed", term: "Spring 2025", grade: "A-" },
+    { code: "PSYC 101", status: "completed", term: "Fall 2025", grade: "A" },
+    { code: "COMP 110", status: "completed", term: "Spring 2026", grade: "A" },
+    // Remaining 21 completed credits are general-education requirements.
+    { code: "GEN ED", status: "completed", term: "2024 – 2026", grade: "—" },
+    // Current term.
+    { code: "BIOL 301", status: "in_progress", term: "Spring 2026" },
+    { code: "CHEM 261", status: "in_progress", term: "Spring 2026" },
+    { code: "STAT 320", status: "in_progress", term: "Spring 2026" },
+    { code: "PSYC 101", status: "in_progress", term: "Spring 2026" },
+  ],
+};
+
+export const CURRENT_TERM = "Spring 2026";
+export const FIRST_PLANNED_TERM = "Fall 2026";
+
+export interface CareerSkillWeight {
+  skill: SkillKey;
+  weight: number;
+}
+
+export interface Career {
+  id: string;
+  title: string;
+  industry: string;
+  description: string;
+  skillWeights: CareerSkillWeight[];
+  relevantMajors: string[];
+  relevantMinors: string[];
+  coursework: string[];
+  internshipIdeas: string[];
+  portfolioIdeas: string[];
+  entryRoles: string[];
+  adjacentCareers: string[];
+}
+
+export const CAREERS: Career[] = [
+  {
+    id: "healthcare_data_scientist",
+    title: "Healthcare data scientist",
+    industry: "Healthcare technology",
+    description:
+      "Works with clinical, claims and device data to build models and analyses that support care decisions and health products.",
+    skillWeights: [
+      { skill: "programming", weight: 0.25 },
+      { skill: "data_analysis", weight: 0.25 },
+      { skill: "statistics", weight: 0.2 },
+      { skill: "health_domain", weight: 0.15 },
+      { skill: "informatics", weight: 0.1 },
+      { skill: "research", weight: 0.05 },
+    ],
+    relevantMajors: ["Computer Science", "Biology", "Statistics", "Health Informatics"],
+    relevantMinors: ["Computer Science", "Health Informatics", "Statistics"],
+    coursework: ["COMP 210", "COMP 480", "STAT 320", "HINF 410"],
+    internshipIdeas: [
+      "Analytics team at a hospital system",
+      "Clinical data internship at a health-tech startup",
+      "Public health data internship",
+    ],
+    portfolioIdeas: [
+      "Open clinical dataset analysis with a written interpretation",
+      "Readmission-risk model notebook with documented assumptions",
+      "Dashboard summarizing a public health indicator",
+    ],
+    entryRoles: ["Data analyst", "Clinical data analyst", "Junior data scientist"],
+    adjacentCareers: ["Health informatics analyst", "Biostatistician", "Clinical software engineer"],
+  },
+  {
+    id: "health_informatics_analyst",
+    title: "Health informatics analyst",
+    industry: "Healthcare technology",
+    description:
+      "Bridges clinical teams and software systems: data standards, electronic records, workflow and reporting.",
+    skillWeights: [
+      { skill: "informatics", weight: 0.3 },
+      { skill: "health_domain", weight: 0.25 },
+      { skill: "data_analysis", weight: 0.2 },
+      { skill: "programming", weight: 0.15 },
+      { skill: "statistics", weight: 0.05 },
+      { skill: "research", weight: 0.05 },
+    ],
+    relevantMajors: ["Biology", "Health Informatics", "Computer Science"],
+    relevantMinors: ["Health Informatics", "Computer Science"],
+    coursework: ["HINF 210", "HINF 320", "HINF 410", "COMP 110"],
+    internshipIdeas: [
+      "Health system informatics office",
+      "EHR vendor implementation team",
+      "Quality-improvement analytics group",
+    ],
+    portfolioIdeas: [
+      "Workflow map of a clinical process with proposed data fixes",
+      "Interoperability case study using an open standard",
+    ],
+    entryRoles: ["Informatics analyst", "Clinical systems analyst", "Reporting analyst"],
+    adjacentCareers: ["Healthcare data scientist", "Clinical product analyst", "Health policy analyst"],
+  },
+  {
+    id: "biotech_research",
+    title: "Biotechnology research associate",
+    industry: "Biotechnology",
+    description: "Runs experiments and analysis in a lab or R&D setting, increasingly with computational tooling.",
+    skillWeights: [
+      { skill: "health_domain", weight: 0.35 },
+      { skill: "research", weight: 0.25 },
+      { skill: "data_analysis", weight: 0.15 },
+      { skill: "statistics", weight: 0.15 },
+      { skill: "programming", weight: 0.05 },
+      { skill: "informatics", weight: 0.05 },
+    ],
+    relevantMajors: ["Biology", "Biochemistry"],
+    relevantMinors: ["Computer Science", "Statistics"],
+    coursework: ["BIOL 301", "BIOL 410", "CHEM 261", "STAT 320"],
+    internshipIdeas: ["Academic research lab", "Biotech company R&D internship"],
+    portfolioIdeas: ["Research poster", "Reproducible analysis of experimental data"],
+    entryRoles: ["Research associate", "Lab technician", "QC analyst"],
+    adjacentCareers: ["Bioinformatics analyst", "Clinical research coordinator"],
+  },
+];
+
+export const careerById = (id: string) => CAREERS.find((c) => c.id === id);
+export const DEFAULT_CAREER_ID = "healthcare_data_scientist";
