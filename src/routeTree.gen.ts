@@ -10,9 +10,12 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as CareerRouteImport } from './routes/career'
 import { Route as CompareRouteImport } from './routes/compare'
+import { Route as GoalRouteImport } from './routes/goal'
 import { Route as HomeRouteImport } from './routes/home'
 import { Route as PlanRouteImport } from './routes/plan'
+import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as WhatIfRouteImport } from './routes/what-if'
 
 const IndexRoute = IndexRouteImport.update({
@@ -20,9 +23,19 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CareerRoute = CareerRouteImport.update({
+  id: '/career',
+  path: '/career',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CompareRoute = CompareRouteImport.update({
   id: '/compare',
   path: '/compare',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GoalRoute = GoalRouteImport.update({
+  id: '/goal',
+  path: '/goal',
   getParentRoute: () => rootRouteImport,
 } as any)
 const HomeRoute = HomeRouteImport.update({
@@ -35,6 +48,11 @@ const PlanRoute = PlanRouteImport.update({
   path: '/plan',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ProfileRoute = ProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const WhatIfRoute = WhatIfRouteImport.update({
   id: '/what-if',
   path: '/what-if',
@@ -43,39 +61,76 @@ const WhatIfRoute = WhatIfRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/career': typeof CareerRoute
   '/compare': typeof CompareRoute
+  '/goal': typeof GoalRoute
   '/home': typeof HomeRoute
   '/plan': typeof PlanRoute
+  '/profile': typeof ProfileRoute
   '/what-if': typeof WhatIfRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/career': typeof CareerRoute
   '/compare': typeof CompareRoute
+  '/goal': typeof GoalRoute
   '/home': typeof HomeRoute
   '/plan': typeof PlanRoute
+  '/profile': typeof ProfileRoute
   '/what-if': typeof WhatIfRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/career': typeof CareerRoute
   '/compare': typeof CompareRoute
+  '/goal': typeof GoalRoute
   '/home': typeof HomeRoute
   '/plan': typeof PlanRoute
+  '/profile': typeof ProfileRoute
   '/what-if': typeof WhatIfRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/compare' | '/home' | '/plan' | '/what-if'
+  fullPaths:
+    | '/'
+    | '/career'
+    | '/compare'
+    | '/goal'
+    | '/home'
+    | '/plan'
+    | '/profile'
+    | '/what-if'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/compare' | '/home' | '/plan' | '/what-if'
-  id: '__root__' | '/' | '/compare' | '/home' | '/plan' | '/what-if'
+  to:
+    | '/'
+    | '/career'
+    | '/compare'
+    | '/goal'
+    | '/home'
+    | '/plan'
+    | '/profile'
+    | '/what-if'
+  id:
+    | '__root__'
+    | '/'
+    | '/career'
+    | '/compare'
+    | '/goal'
+    | '/home'
+    | '/plan'
+    | '/profile'
+    | '/what-if'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  CareerRoute: typeof CareerRoute
   CompareRoute: typeof CompareRoute
+  GoalRoute: typeof GoalRoute
   HomeRoute: typeof HomeRoute
   PlanRoute: typeof PlanRoute
+  ProfileRoute: typeof ProfileRoute
   WhatIfRoute: typeof WhatIfRoute
 }
 
@@ -88,11 +143,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/career': {
+      id: '/career'
+      path: '/career'
+      fullPath: '/career'
+      preLoaderRoute: typeof CareerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/compare': {
       id: '/compare'
       path: '/compare'
       fullPath: '/compare'
       preLoaderRoute: typeof CompareRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/goal': {
+      id: '/goal'
+      path: '/goal'
+      fullPath: '/goal'
+      preLoaderRoute: typeof GoalRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/home': {
@@ -109,6 +178,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PlanRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/profile': {
+      id: '/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof ProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/what-if': {
       id: '/what-if'
       path: '/what-if'
@@ -121,9 +197,12 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  CareerRoute: CareerRoute,
   CompareRoute: CompareRoute,
+  GoalRoute: GoalRoute,
   HomeRoute: HomeRoute,
   PlanRoute: PlanRoute,
+  ProfileRoute: ProfileRoute,
   WhatIfRoute: WhatIfRoute,
 }
 export const routeTree = rootRouteImport
