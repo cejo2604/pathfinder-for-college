@@ -4,6 +4,8 @@ Build Fork as a decision simulator: a student's current academic position, a fut
 
 Scope for this build: all of P0 plus the P1 items that make the demo whole (career page, saved scenarios, auth, action items, mobile). No P2 work.
 
+**Governing priority:** the What-If experience wins every tradeoff. Whenever added functionality would compete with the depth, speed, clarity, or polish of the What-If input → branching visualization → path cards → tradeoffs → why-this-path loop, that loop gets the time and the extra feature gets cut or simplified. Career page, auth/persistence, and custom-scenario breadth are all droppable in service of it.
+
 ## Experience
 
 **Landing (`/`)** — "See where your choices lead." Animated branching-path graphic (YOU → Stay / Change / Combine, with graduation dates and costs), primary CTA "Explore My Future", secondary "See an Example", and a prominent **Try a Demo Student** button that loads Maya Rodriguez with zero data entry.
