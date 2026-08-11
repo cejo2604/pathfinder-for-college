@@ -129,6 +129,22 @@ function ProfilePage() {
                 ))}
               </ul>
             </div>
+            {waitlisted.length > 0 && (
+              <div>
+                <h3 className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+                  Waitlisted
+                </h3>
+                <ul className="mt-2 flex flex-wrap gap-2">
+                  {waitlisted.map((sc, i) => (
+                    <li key={`${sc.code}-wl-${i}`} className="rounded-full border border-gold/50 bg-gold/10 px-3 py-1">
+                      {sc.code}
+                      {sc.waitlistPosition ? ` · #${sc.waitlistPosition}` : ""}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
           </div>
         </section>
 
