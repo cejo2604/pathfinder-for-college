@@ -11,6 +11,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
 import { careerById, PRIORITY_LABELS } from "@/lib/fork/data";
 import {
+  BASELINE_PATH_ID,
   formatCurrency,
   formatDelta,
   priorityCareerPlan,
@@ -47,7 +48,7 @@ function PathBreakdownPage() {
 
   const pathId = chosenPathId ?? "cs_minor";
   const path = simulatePath(pathId, { profile, careerId, priorities });
-  const baseline = simulatePath("stay", { profile, careerId, priorities });
+  const baseline = simulatePath(BASELINE_PATH_ID, { profile, careerId, priorities });
   const plan = priorityCareerPlan({ profile, careerId, priorities, pathId });
   const career = careerById(careerId);
   const reasons = whyThisPath(path, profile, priorities);
