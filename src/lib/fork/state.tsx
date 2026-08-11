@@ -153,17 +153,37 @@ export function ForkProvider({ children }: { children: ReactNode }) {
 
   // Debounced profile persistence.
   const profileTimer = useRef<number | undefined>(undefined);
+  const writeProfile = useCallback(() => {
+    const { profile, priorities, careerId } = stateRef.current;
+    if (!profile) return;
+    void saveForkProfile({ data: { profile: { ...profile, priorities }, careerId } }).catch((error) =>
+      console.error("Could not save profile", error),
+    );
+  }, []);
   const queueProfileSave = useCallback(() => {
     if (!stateRef.current.profile) return;
     window.clearTimeout(profileTimer.current);
-    profileTimer.current = window.setTimeout(() => {
-      const { profile, priorities, careerId } = stateRef.current;
-      if (!profile) return;
-      void saveForkProfile({ data: { profile: { ...profile, priorities }, careerId } }).catch((error) =>
-        console.error("Could not save profile", error),
-      );
-    }, 600);
-  }, []);
+    profileTimer.current = window.setTimeout(writeProfile, 600);
+  }, [writeProfile]);
+  const flushProfileSave = useCallback(() => {
+    if (profileTimer.current === undefined) return;
+    window.clearTimeout(profileTimer.current);
+    profileTimer.current = undefined;
+    writeProfile();
+  }, [writeProfile]);
+
+  // Don't lose the last edits when a student closes the tab or switches away.
+  useEffect(() => {
+    if (!signedIn) return;
+    const onHide = () => flushProfileSave();
+    window.addEventListener("pagehide", onHide);
+    document.addEventListener("visibilitychange", onHide);
+    return () => {
+      window.removeEventListener("pagehide", onHide);
+      document.removeEventListener("visibilitychange", onHide);
+    };
+  }, [signedIn, flushProfileSave]);
+
 
   const value = useMemo<ForkContextValue>(() => {
     const patch = (p: Partial<ForkState>) => setState((s) => ({ ...s, ...p }));
