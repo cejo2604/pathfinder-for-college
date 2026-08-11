@@ -34,10 +34,12 @@ export function SchoolLink({
   school,
   onSchoolChange,
   onLinked,
+  onRecordChange,
 }: {
   school: string;
   onSchoolChange: (school: string) => void;
   onLinked?: (record: SchoolLinkRecord) => void;
+  onRecordChange?: (record: SchoolLinkRecord | null) => void;
 }) {
   const [record, setRecord] = useState<SchoolLinkRecord | null>(null);
   const [schoolDraft, setSchoolDraft] = useState(school);
@@ -48,10 +50,15 @@ export function SchoolLink({
   useEffect(() => {
     try {
       const raw = window.localStorage.getItem(STORAGE_KEY);
-      if (raw) setRecord(JSON.parse(raw) as SchoolLinkRecord);
+      if (raw) {
+        const stored = JSON.parse(raw) as SchoolLinkRecord;
+        setRecord(stored);
+        onRecordChange?.(stored);
+      }
     } catch {
       /* ignore malformed local state */
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -73,6 +80,7 @@ export function SchoolLink({
       /* private mode — keep the in-memory link */
     }
     setRecord(next);
+    onRecordChange?.(next);
     setStudentId("");
     if (parsed.data.school !== school) onSchoolChange(parsed.data.school);
     onLinked?.(next);
@@ -87,6 +95,7 @@ export function SchoolLink({
       /* ignore */
     }
     setRecord(null);
+    onRecordChange?.(null);
     toast.success("School ID unlinked");
   };
 

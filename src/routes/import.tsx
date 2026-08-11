@@ -17,7 +17,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 
 import { ForkShell } from "@/components/fork/ForkShell";
-import { SchoolLink } from "@/components/fork/SchoolLink";
+import { SchoolLink, type SchoolLinkRecord } from "@/components/fork/SchoolLink";
+import { TranscriptGuide } from "@/components/fork/TranscriptGuide";
 
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -108,6 +109,7 @@ function ImportPage() {
   const [busy, setBusy] = useState<null | "uploading" | "extracting" | "confirming">(null);
   const [error, setError] = useState<string | null>(null);
   const [conflicts, setConflicts] = useState<ConflictField[] | null>(null);
+  const [link, setLink] = useState<SchoolLinkRecord | null>(null);
   const fileInput = useRef<HTMLInputElement | null>(null);
   const pendingType = useRef<"pdf" | "csv">("pdf");
 
@@ -170,8 +172,24 @@ function ImportPage() {
 
       setBusy("extracting");
       const result = await process({ data: { documentId } });
-      await refresh();
-      if (!result.ok) setError(result.error ?? "This document could not be read.");
+      const data = await refresh();
+      if (!result.ok) {
+        setError(result.error ?? "This document could not be read.");
+        return;
+      }
+
+      // With a linked school ID, a clean extraction is confirmed automatically:
+      // every course matched the catalog and nothing came back low-confidence.
+      if (link) {
+        const doc = data.documents.find((d) => d.id === documentId);
+        const extracted = data.courses.filter((r) => r.sourceDocumentId === documentId);
+        const clean =
+          extracted.length > 0 && extracted.every((r) => Boolean(r.courseId) && r.confidence !== "low");
+        if (doc && clean) {
+          setBusy("confirming");
+          await runConfirm(doc, true);
+        }
+      }
     } catch (e) {
       setError(e instanceof Error ? e.message : "The upload failed.");
     } finally {
@@ -257,12 +275,10 @@ function ImportPage() {
     setProfile(patch);
   };
 
-  const onConfirm = async () => {
-    if (!activeDoc) return;
-    setBusy("confirming");
+  const runConfirm = async (doc: AcademicDocument, auto = false) => {
     try {
-      const result = await confirm({ data: { documentId: activeDoc.id } });
-      const fields = activeDoc.extractedProfile;
+      const result = await confirm({ data: { documentId: doc.id } });
+      const fields = doc.extractedProfile;
       const found = detectConflicts(fields, profile);
 
       if (found.length > 0) {
@@ -274,14 +290,21 @@ function ImportPage() {
           (["name", "school", "major", "minor", "graduationTarget"] as const).filter((k) => fields[k]),
         );
         applyToProfile(result.courses, result.creditsCompleted, fields, accepted);
-        toast.success("Your academic history is confirmed.");
+        toast.success(
+          auto ? "Transcript imported and confirmed automatically." : "Your academic history is confirmed.",
+        );
       }
       await refresh();
     } catch {
       setError("Your academic history could not be confirmed.");
-    } finally {
-      setBusy(null);
     }
+  };
+
+  const onConfirm = async () => {
+    if (!activeDoc) return;
+    setBusy("confirming");
+    await runConfirm(activeDoc);
+    setBusy(null);
   };
 
   const resolveConflicts = (chosen: Set<keyof ExtractedProfileFields>) => {
@@ -347,7 +370,11 @@ function ImportPage() {
           <SchoolLink
             school={profile.school}
             onSchoolChange={(school) => setProfile({ ...profile, school })}
+            onRecordChange={setLink}
           />
+
+          {/* Linked: guided download steps straight into extraction */}
+          {link && <TranscriptGuide school={link.school} disabled={busy !== null} onPick={pick} />}
 
           {/* Step 1 — upload */}
           <section className="mt-8 grid gap-4 sm:grid-cols-2 lg:max-w-3xl">
