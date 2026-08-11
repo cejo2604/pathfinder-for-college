@@ -341,8 +341,15 @@ function ImportPage() {
         </section>
       ) : (
         <>
+          {/* Step 0 — link school ID so uploads are tagged to the right institution */}
+          <SchoolLink
+            school={profile.school}
+            onSchoolChange={(school) => setProfile({ ...profile, school })}
+          />
+
           {/* Step 1 — upload */}
           <section className="mt-8 grid gap-4 sm:grid-cols-2 lg:max-w-3xl">
+
             <button
               type="button"
               onClick={() => pick("pdf")}
