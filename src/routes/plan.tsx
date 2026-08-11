@@ -204,12 +204,9 @@ function PlanPage() {
         <section className="rounded-2xl border border-border bg-card p-5">
           <h3 className="font-display text-xl">Keep exploring</h3>
           <p className="mt-1 text-sm text-muted-foreground">
-            Nothing here is locked in. Change the question and the whole plan changes.
+            Nothing here is locked in. Visit the Compare page to see alternatives side by side.
           </p>
           <div className="mt-4 flex flex-wrap gap-2">
-            <Button variant="outline" className="gap-1.5" onClick={() => void navigate({ to: "/what-if" })}>
-              <CalendarCheck className="size-4" /> Run another what-if
-            </Button>
             <Button variant="outline" onClick={() => void navigate({ to: "/compare" })}>
               Compare against other paths
             </Button>
