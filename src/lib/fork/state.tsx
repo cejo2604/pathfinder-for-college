@@ -177,13 +177,21 @@ export function ForkProvider({ children }: { children: ReactNode }) {
       startBlank: () => {
         patch({
           profile: {
-            ...SAMPLE_STUDENT,
             name: "",
             school: "",
+            degree: "",
             major: "",
             minor: null,
-            goal: "",
+            year: "",
+            graduationTarget: "",
             creditsCompleted: 0,
+            gpa: 0,
+            interests: [],
+            careerInterests: [],
+            skills: [],
+            priorities: PRIORITY_ORDER,
+            goal: "",
+            goalCategory: "",
             courses: [],
           },
           priorities: PRIORITY_ORDER,
