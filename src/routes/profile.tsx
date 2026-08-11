@@ -287,17 +287,3 @@ function NumberField({
 
 
 
-function TagList({ title, items }: { title: string; items: string[] }) {
-  return (
-    <div>
-      <h3 className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">{title}</h3>
-      <ul className="mt-2 flex flex-wrap gap-2">
-        {items.map((item) => (
-          <li key={item} className="rounded-full bg-muted px-3 py-1">
-            {item}
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-}
