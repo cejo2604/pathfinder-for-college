@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Sparkles } from "lucide-react";
 
 import { ForkShell } from "@/components/fork/ForkShell";
@@ -23,9 +23,17 @@ export const Route = createFileRoute("/home")({
 
 const DECISION_PATHS = ["stay_biology", "switch_cs", "cs_minor"];
 
+// Each option card opens the What If? simulator with the matching question.
+const SIMULATE_QUESTIONS: Record<string, string> = {
+  stay_biology: "What if I stay in Biology?",
+  switch_cs: "What if I switch to Computer Science?",
+  cs_minor: "What if I add a Computer Science minor?",
+};
+
 function MyPath() {
   const profile = useForkProfile();
   const { profile: loaded, loadDemoStudent, careerId, priorities } = useFork();
+  const navigate = useNavigate();
 
   const options = simulatePaths(DECISION_PATHS, { profile, careerId, priorities });
 
@@ -100,7 +108,7 @@ function MyPath() {
                 size="sm"
                 variant="outline"
                 className="mt-4 w-full gap-1.5"
-                onClick={() => navigate({ to: "/what-if", search: { q: SIMULATE_QUESTIONS[path.id] ?? path.label } })}
+                onClick={() => navigate({ to: "/what-if", search: { q: SIMULATE_QUESTIONS[path.id] ?? "What if I change my plan?" } })}
               >
                 <Sparkles className="size-3.5" /> Simulate this
               </Button>
