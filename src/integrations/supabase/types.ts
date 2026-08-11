@@ -14,6 +14,51 @@ export type Database = {
   }
   public: {
     Tables: {
+      academic_documents: {
+        Row: {
+          confirmed_at: string | null
+          created_at: string
+          extracted_profile: Json
+          extraction_error: string | null
+          file_name: string
+          file_type: string
+          id: string
+          processing_status: string
+          storage_path: string
+          student_id: string
+          updated_at: string
+          uploaded_at: string
+        }
+        Insert: {
+          confirmed_at?: string | null
+          created_at?: string
+          extracted_profile?: Json
+          extraction_error?: string | null
+          file_name: string
+          file_type: string
+          id?: string
+          processing_status?: string
+          storage_path: string
+          student_id: string
+          updated_at?: string
+          uploaded_at?: string
+        }
+        Update: {
+          confirmed_at?: string | null
+          created_at?: string
+          extracted_profile?: Json
+          extraction_error?: string | null
+          file_name?: string
+          file_type?: string
+          id?: string
+          processing_status?: string
+          storage_path?: string
+          student_id?: string
+          updated_at?: string
+          uploaded_at?: string
+        }
+        Relationships: []
+      }
       careers: {
         Row: {
           adjacent_careers: string[]
@@ -253,6 +298,78 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      student_courses: {
+        Row: {
+          confidence: string
+          course_id: string | null
+          created_at: string
+          credits: number
+          extracted_code: string
+          extracted_title: string
+          grade: string | null
+          id: string
+          source_document_id: string | null
+          status: string
+          student_id: string
+          term: string
+          updated_at: string
+          verified_at: string | null
+          verified_by_student: boolean
+          waitlist_position: number | null
+        }
+        Insert: {
+          confidence?: string
+          course_id?: string | null
+          created_at?: string
+          credits?: number
+          extracted_code?: string
+          extracted_title?: string
+          grade?: string | null
+          id?: string
+          source_document_id?: string | null
+          status?: string
+          student_id: string
+          term?: string
+          updated_at?: string
+          verified_at?: string | null
+          verified_by_student?: boolean
+          waitlist_position?: number | null
+        }
+        Update: {
+          confidence?: string
+          course_id?: string | null
+          created_at?: string
+          credits?: number
+          extracted_code?: string
+          extracted_title?: string
+          grade?: string | null
+          id?: string
+          source_document_id?: string | null
+          status?: string
+          student_id?: string
+          term?: string
+          updated_at?: string
+          verified_at?: string | null
+          verified_by_student?: boolean
+          waitlist_position?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "student_courses_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["code"]
+          },
+          {
+            foreignKeyName: "student_courses_source_document_id_fkey"
+            columns: ["source_document_id"]
+            isOneToOne: false
+            referencedRelation: "academic_documents"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
