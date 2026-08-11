@@ -69,11 +69,9 @@ function MyPath() {
 
         <div className="mt-6 grid gap-4 md:grid-cols-3">
           {options.map((path) => (
-            <button
+            <div
               key={path.id}
-              type="button"
-              onClick={() => go(path.id === "switch_cs" ? "switch_major" : path.id === "cs_minor" ? "add_minor" : "career_health_tech")}
-              className="rounded-2xl border border-border bg-background p-4 text-left transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-lift"
+              className="rounded-2xl border border-border bg-background p-4 text-left"
             >
               <p className="font-display text-lg leading-tight">
                 {path.id === "stay_biology"
@@ -98,10 +96,7 @@ function MyPath() {
                   <dd className="font-medium tabular-nums">{path.scores.careerFit} / 100</dd>
                 </div>
               </dl>
-              <p className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-primary">
-                Simulate this <ArrowRight className="size-3.5" />
-              </p>
-            </button>
+            </div>
           ))}
         </div>
       </section>
