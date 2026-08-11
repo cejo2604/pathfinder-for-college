@@ -15,8 +15,8 @@ import { cn } from "@/lib/utils";
 import { useFork } from "@/lib/fork/state";
 
 const PRIMARY_NAV = [
-  { to: "/plan", label: "Plan" },
-  { to: "/home", label: "My Path" },
+  { to: "/plan", label: "My Path" },
+  { to: "/home", label: "Plan" },
   { to: "/compare", label: "Compare" },
 ] as const;
 
