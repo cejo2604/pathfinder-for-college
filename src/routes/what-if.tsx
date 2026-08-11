@@ -18,9 +18,8 @@ import { useFork, useForkProfile } from "@/lib/fork/state";
 
 export const Route = createFileRoute("/what-if")({
   // `?q=` lets other screens (like a waitlist warning) pre-fill the question.
-  validateSearch: (search: Record<string, unknown>) => ({
-    q: typeof search["q"] === "string" ? (search["q"] as string) : undefined,
-  }),
+  validateSearch: (search: Record<string, unknown>): { q?: string } =>
+    typeof search["q"] === "string" ? { q: search["q"] as string } : {},
   head: () => ({
     meta: [
 
