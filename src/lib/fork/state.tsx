@@ -137,19 +137,33 @@ export function ForkProvider({ children }: { children: ReactNode }) {
         }
 
         // First sign-in: keep whatever they already filled in locally and store it.
+        const local = stateRef.current;
+        // A brand-new account never inherits demo/sample data — start them clean.
+        const clearDemo = local.isDemoProfile;
         setState((s) => ({
           ...s,
-          doneActions: remote.doneActions.length ? remote.doneActions : s.doneActions,
+          ...(clearDemo
+            ? {
+                profile: null,
+                isDemoProfile: false,
+                priorities: PRIORITY_ORDER,
+                careerId: DEFAULT_CAREER_ID,
+                scenarioId: null,
+                scenarioQuestion: null,
+                comparison: [],
+                chosenPathId: null,
+                doneActions: [],
+              }
+            : { doneActions: remote.doneActions.length ? remote.doneActions : s.doneActions }),
           savedPaths: remote.savedPaths,
         }));
-        const local = stateRef.current;
-        // Demo/sample data is never written to a real account.
         if (local.profile && !local.isDemoProfile) {
           void saveForkProfile({
             data: { profile: { ...local.profile, priorities: local.priorities }, careerId: local.careerId },
           }).catch((error) => console.error("Could not save profile", error));
         }
       })
+
       .catch((error) => console.error("Could not load saved plan", error));
     return () => {
       cancelled = true;

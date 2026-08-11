@@ -26,7 +26,7 @@ export const Route = createFileRoute("/auth")({
 
 function AuthPage() {
   const navigate = useNavigate();
-  const { session } = useFork();
+  const { session, profile } = useFork();
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -35,8 +35,11 @@ function AuthPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (session) void navigate({ to: "/home" });
-  }, [session, navigate]);
+    if (!session) return;
+    // New accounts have no saved profile yet — send them straight to profile setup.
+    void navigate({ to: profile ? "/home" : "/profile" });
+  }, [session, profile, navigate]);
+
 
   const submit = async (event: React.FormEvent) => {
     event.preventDefault();
