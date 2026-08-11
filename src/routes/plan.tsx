@@ -1,13 +1,16 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useRef } from "react";
 import { ArrowRight, CalendarCheck, Check, GraduationCap } from "lucide-react";
 
 import { ForkShell } from "@/components/fork/ForkShell";
+import { PriorityPanel } from "@/components/fork/Decision";
+import { PriorityPlan } from "@/components/fork/PriorityPlan";
 import { RelevantCourses } from "@/components/fork/RelevantCourses";
 import { AssumptionsPanel } from "@/components/fork/WhyPath";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
-import { formatCurrency, simulatePath, waitlistedCourses } from "@/lib/fork/engine";
+import { formatCurrency, priorityCareerPlan, simulatePath, waitlistedCourses } from "@/lib/fork/engine";
 import { useFork, useForkProfile } from "@/lib/fork/state";
 
 export const Route = createFileRoute("/plan")({
@@ -28,11 +31,16 @@ export const Route = createFileRoute("/plan")({
 function PlanPage() {
   const profile = useForkProfile();
   const navigate = useNavigate();
-  const { chosenPathId, careerId, priorities, doneActions, toggleAction } = useFork();
+  const { chosenPathId, careerId, priorities, doneActions, toggleAction, setPriorities } = useFork();
+  const prioritiesRef = useRef<HTMLDivElement>(null);
 
   const path = simulatePath(chosenPathId ?? "cs_minor", { profile, careerId, priorities });
   // Waitlisted seats come from the verified academic history, never predicted.
   const waitlisted = waitlistedCourses(profile);
+  // The plan itself is ordered by the student's ranked priorities.
+  const plan = priorityCareerPlan({ profile, careerId, priorities, pathId: chosenPathId ?? "cs_minor" });
+
+
 
 
   return (
@@ -84,6 +92,19 @@ function PlanPage() {
           </Button>
         </section>
       )}
+
+      <PriorityPlan
+        className="mt-10"
+        plan={plan}
+        doneActions={doneActions}
+        toggleAction={toggleAction}
+        onReorder={() => prioritiesRef.current?.scrollIntoView({ behavior: "smooth", block: "center" })}
+      />
+
+      <div ref={prioritiesRef} className="mt-8">
+        <PriorityPanel priorities={priorities} onChange={setPriorities} topPathName={plan.ranked[0]?.name} />
+      </div>
+
 
       <section className="mt-10 rounded-3xl border border-primary/30 bg-primary/5 p-6 shadow-lift sm:p-8">
 
