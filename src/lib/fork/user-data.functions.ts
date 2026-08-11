@@ -120,7 +120,7 @@ export const saveForkProfile = createServerFn({ method: "POST" })
         goal: profile.goal,
         goal_category: profile.goalCategory,
         career_id: careerId,
-        courses: profile.courses,
+        courses: profile.courses as unknown as never,
       },
       { onConflict: "id" },
     );
