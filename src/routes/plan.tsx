@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { CalendarCheck, Check, GraduationCap } from "lucide-react";
+import { ArrowRight, CalendarCheck, Check, GraduationCap } from "lucide-react";
 
 import { ForkShell } from "@/components/fork/ForkShell";
 import { RelevantCourses } from "@/components/fork/RelevantCourses";
@@ -7,7 +7,7 @@ import { AssumptionsPanel } from "@/components/fork/WhyPath";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
-import { formatCurrency, simulatePath } from "@/lib/fork/engine";
+import { formatCurrency, simulatePath, waitlistedCourses } from "@/lib/fork/engine";
 import { useFork, useForkProfile } from "@/lib/fork/state";
 
 export const Route = createFileRoute("/plan")({
@@ -31,6 +31,9 @@ function PlanPage() {
   const { chosenPathId, careerId, priorities, doneActions, toggleAction } = useFork();
 
   const path = simulatePath(chosenPathId ?? "cs_minor", { profile, careerId, priorities });
+  // Waitlisted seats come from the verified academic history, never predicted.
+  const waitlisted = waitlistedCourses(profile);
+
 
   return (
     <ForkShell>
@@ -52,7 +55,38 @@ function PlanPage() {
         )}
       </header>
 
+      {waitlisted.length > 0 && (
+        <section className="mt-8 rounded-2xl border border-gold/50 bg-gold/10 p-5 sm:p-6">
+          <h2 className="font-display text-2xl">One thing could change your timeline</h2>
+          <ul className="mt-3 space-y-1 text-sm">
+            {waitlisted.map((sc, i) => (
+              <li key={`${sc.code}-${i}`}>
+                <span className="font-medium">{sc.code}</span>
+                {sc.waitlistPosition ? ` · Waitlisted #${sc.waitlistPosition}` : " · Waitlisted"}
+                {sc.term ? ` · ${sc.term}` : ""}
+              </li>
+            ))}
+          </ul>
+          <p className="mt-2 text-sm text-muted-foreground">
+            {waitlisted.length === 1 ? "This course is" : "These courses are"} important to your current plan. Fork does
+            not predict whether you will get a seat — it shows what happens either way.
+          </p>
+          <Button
+            className="mt-4 gap-1.5"
+            onClick={() =>
+              void navigate({
+                to: "/what-if",
+                search: { q: `What if I don't get ${waitlisted[0]?.code ?? "my waitlisted course"}?` },
+              })
+            }
+          >
+            Explore the Fork <ArrowRight className="size-4" />
+          </Button>
+        </section>
+      )}
+
       <section className="mt-10 rounded-3xl border border-primary/30 bg-primary/5 p-6 shadow-lift sm:p-8">
+
         <h2 className="font-display text-2xl">Your next 3 moves</h2>
         <ol className="mt-5 space-y-3">
           {path.nextMoves.map((move, i) => {

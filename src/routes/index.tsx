@@ -73,13 +73,22 @@ function Landing() {
                 See an example <ArrowRight className="size-4" />
               </Button>
               <Button asChild size="lg" variant="ghost" className="rounded-full px-4">
-                <Link to="/profile">Explore my future</Link>
+                <Link to="/import">Import my academic history</Link>
               </Button>
             </div>
 
             <p className="mt-5 text-sm text-muted-foreground">
-              No sign-up needed. The demo loads a fictional sophomore in about a second.
+              No sign-up needed to try the demo. Upload a transcript or degree audit when you want Fork to simulate{" "}
+              <Link to="/import" className="font-medium text-foreground underline-offset-4 hover:underline">
+                your own
+              </Link>{" "}
+              academic position — or{" "}
+              <Link to="/profile" className="font-medium text-foreground underline-offset-4 hover:underline">
+                enter it manually instead
+              </Link>
+              .
             </p>
+
           </div>
 
           {/* Branching graphic */}

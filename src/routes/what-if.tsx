@@ -17,8 +17,13 @@ import { SCENARIOS, parseScenario, rankPaths, scenarioById, simulatePaths, type 
 import { useFork, useForkProfile } from "@/lib/fork/state";
 
 export const Route = createFileRoute("/what-if")({
+  // `?q=` lets other screens (like a waitlist warning) pre-fill the question.
+  validateSearch: (search: Record<string, unknown>) => ({
+    q: typeof search["q"] === "string" ? (search["q"] as string) : undefined,
+  }),
   head: () => ({
     meta: [
+
       { title: "What If? — Fork" },
       {
         name: "description",
@@ -40,6 +45,8 @@ type Phase = "idle" | "analyzing" | "results";
 function WhatIfPage() {
   const profile = useForkProfile();
   const navigate = useNavigate();
+  const { q: prefilled } = Route.useSearch();
+
   const {
     careerId,
     priorities,
@@ -78,9 +85,17 @@ function WhatIfPage() {
     timers.current.push(setTimeout(() => setRevealBest(true), 2400));
   };
 
+  // A pre-filled question (e.g. a waitlist warning on the Plan screen) runs first.
+  useEffect(() => {
+    if (!hydrated || activeScenarioId || phase !== "idle" || !prefilled) return;
+    start(parseScenario(prefilled).id, prefilled);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hydrated, prefilled]);
+
   // A scenario chosen elsewhere (My Path quick chips) runs on arrival.
   useEffect(() => {
-    if (!hydrated || activeScenarioId || phase !== "idle" || !scenarioId) return;
+    if (!hydrated || activeScenarioId || phase !== "idle" || !scenarioId || prefilled) return;
+
     const scenario = scenarioById(scenarioId);
     if (scenario) start(scenario.id, scenarioQuestion ?? scenario.question);
     // eslint-disable-next-line react-hooks/exhaustive-deps

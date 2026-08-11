@@ -1,5 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { Sparkles } from "lucide-react";
+import { Sparkles, Upload } from "lucide-react";
+import { useState } from "react";
+
 
 import { PriorityPanel } from "@/components/fork/Decision";
 import { ForkShell } from "@/components/fork/ForkShell";
@@ -32,6 +34,7 @@ function ProfilePage() {
 
   const completed = profile.courses.filter((c) => c.status === "completed");
   const current = profile.courses.filter((c) => c.status === "in_progress");
+  const waitlisted = profile.courses.filter((c) => c.status === "waitlisted");
 
   return (
     <ForkShell>
@@ -42,12 +45,18 @@ function ProfilePage() {
           Nothing here is required to try Fork — the demo student fills it all in. Every number in the simulator traces
           back to this page.
         </p>
-        {!loaded && (
-          <Button className="mt-5 gap-1.5" onClick={loadDemoStudent}>
-            <Sparkles className="size-4" /> Load demo student
+        <div className="mt-5 flex flex-wrap gap-2">
+          <Button className="gap-1.5" onClick={() => void navigate({ to: "/import" })}>
+            <Upload className="size-4" /> Import my academic history
           </Button>
-        )}
+          {!loaded && (
+            <Button variant="outline" className="gap-1.5" onClick={loadDemoStudent}>
+              <Sparkles className="size-4" /> Load demo student
+            </Button>
+          )}
+        </div>
       </header>
+
 
       <div className="mt-10 grid gap-6 lg:grid-cols-2">
         <section className="rounded-2xl border border-border bg-card p-5">
@@ -64,12 +73,22 @@ function ProfilePage() {
               value={profile.graduationTarget}
               onChange={(graduationTarget) => setProfile({ graduationTarget })}
             />
-            <Field
+            <NumberField
               label="Credits completed"
-              value={String(profile.creditsCompleted)}
-              onChange={(v) => setProfile({ creditsCompleted: Number(v) || 0 })}
+              value={profile.creditsCompleted}
+              step={1}
+              max={300}
+              onCommit={(creditsCompleted) => setProfile({ creditsCompleted })}
             />
-            <Field label="GPA" value={String(profile.gpa)} onChange={(v) => setProfile({ gpa: Number(v) || 0 })} />
+            <NumberField
+              label="GPA"
+              value={profile.gpa}
+              step={0.01}
+              max={4.5}
+              decimals={2}
+              onCommit={(gpa) => setProfile({ gpa })}
+            />
+
           </div>
         </section>
 
@@ -110,6 +129,22 @@ function ProfilePage() {
                 ))}
               </ul>
             </div>
+            {waitlisted.length > 0 && (
+              <div>
+                <h3 className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+                  Waitlisted
+                </h3>
+                <ul className="mt-2 flex flex-wrap gap-2">
+                  {waitlisted.map((sc, i) => (
+                    <li key={`${sc.code}-wl-${i}`} className="rounded-full border border-gold/50 bg-gold/10 px-3 py-1">
+                      {sc.code}
+                      {sc.waitlistPosition ? ` · #${sc.waitlistPosition}` : ""}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
           </div>
         </section>
 
@@ -142,6 +177,64 @@ function Field({ label, value, onChange }: { label: string; value: string; onCha
     </div>
   );
 }
+
+/**
+ * Numeric field that keeps the student's raw keystrokes while they type, so
+ * partial decimals like "3." survive long enough to become "3.65".
+ */
+function NumberField({
+  label,
+  value,
+  onCommit,
+  step = 1,
+  min = 0,
+  max,
+  decimals = 0,
+}: {
+  label: string;
+  value: number;
+  onCommit: (value: number) => void;
+  step?: number;
+  min?: number;
+  max?: number;
+  decimals?: number;
+}) {
+  const id = label.toLowerCase().replace(/\s+/g, "-");
+  const [draft, setDraft] = useState<string | null>(null);
+
+  const clamp = (n: number) => {
+    const bounded = Math.min(max ?? Number.MAX_SAFE_INTEGER, Math.max(min, n));
+    return decimals > 0 ? Number(bounded.toFixed(decimals)) : Math.round(bounded);
+  };
+
+  return (
+    <div>
+      <Label htmlFor={id} className="text-xs uppercase tracking-[0.1em] text-muted-foreground">
+        {label}
+      </Label>
+      <Input
+        id={id}
+        type="number"
+        inputMode="decimal"
+        step={step}
+        min={min}
+        {...(max === undefined ? {} : { max })}
+        value={draft ?? String(value)}
+        onChange={(e) => {
+          const raw = e.target.value;
+          setDraft(raw);
+          const parsed = Number(raw);
+          // Only commit a complete number; "3." or "" stays in the draft.
+          if (raw !== "" && Number.isFinite(parsed)) onCommit(clamp(parsed));
+        }}
+        onBlur={() => setDraft(null)}
+        className="mt-1.5"
+      />
+    </div>
+  );
+}
+
+
 
 function TagList({ title, items }: { title: string; items: string[] }) {
   return (
