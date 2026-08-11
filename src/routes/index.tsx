@@ -32,9 +32,9 @@ function Landing() {
   const { loadDemoStudent, startBlank } = useFork();
   const navigate = useNavigate();
 
-  const startDemo = (to: "/home" | "/what-if") => {
+  const startDemo = () => {
     loadDemoStudent();
-    void navigate({ to });
+    void navigate({ to: "/home" });
   };
 
 
@@ -47,9 +47,6 @@ function Landing() {
     <div className="min-h-screen bg-background">
       <header className="mx-auto flex h-20 max-w-6xl items-center justify-between px-4 sm:px-6">
         <ForkLogo />
-        <Link to="/what-if" className="text-sm font-medium text-muted-foreground hover:text-foreground">
-          What If?
-        </Link>
       </header>
 
       <section className="mx-auto max-w-6xl px-4 pb-8 pt-8 sm:px-6 sm:pt-16">
@@ -74,7 +71,7 @@ function Landing() {
                 size="lg"
                 variant="outline"
                 className="gap-2 rounded-full px-6"
-                onClick={() => startDemo("/home")}
+                onClick={startDemo}
               >
                 <Sparkles className="size-4" /> Try a demo student
               </Button>
@@ -157,7 +154,7 @@ function Landing() {
           {[
             {
               title: "Ask a real question",
-              body: "What if I switch majors? Add a minor? Graduate early? Type it, or pick a suggested scenario.",
+              body: "Explore different paths: switch majors, add a minor, graduate early, or minimize cost. Type your own scenario or pick a suggested one.",
             },
             {
               title: "Watch the futures branch",

@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useRef } from "react";
-import { ArrowRight, CalendarCheck, Check, GraduationCap } from "lucide-react";
+import { ArrowRight, Check, GraduationCap } from "lucide-react";
 
 import { ForkShell } from "@/components/fork/ForkShell";
 import { PriorityPanel } from "@/components/fork/Decision";
@@ -56,15 +56,6 @@ function PlanPage() {
           See the full path breakdown <ArrowRight className="size-4" />
         </Button>
 
-        {!chosenPathId && (
-          <p className="mt-4 rounded-xl bg-muted px-3 py-2 text-sm">
-            No path chosen yet — this is the plan for the CS minor path.{" "}
-            <button className="font-medium underline" onClick={() => void navigate({ to: "/what-if" })}>
-              Run a what-if
-            </button>{" "}
-            to pick your own.
-          </p>
-        )}
       </header>
 
       {waitlisted.length > 0 && (
@@ -85,14 +76,9 @@ function PlanPage() {
           </p>
           <Button
             className="mt-4 gap-1.5"
-            onClick={() =>
-              void navigate({
-                to: "/what-if",
-                search: { q: `What if I don't get ${waitlisted[0]?.code ?? "my waitlisted course"}?` },
-              })
-            }
+            onClick={() => void navigate({ to: "/path" })}
           >
-            Explore the Fork <ArrowRight className="size-4" />
+            Review your path <ArrowRight className="size-4" />
           </Button>
         </section>
       )}
@@ -218,12 +204,9 @@ function PlanPage() {
         <section className="rounded-2xl border border-border bg-card p-5">
           <h3 className="font-display text-xl">Keep exploring</h3>
           <p className="mt-1 text-sm text-muted-foreground">
-            Nothing here is locked in. Change the question and the whole plan changes.
+            Nothing here is locked in. Visit the Compare page to see alternatives side by side.
           </p>
           <div className="mt-4 flex flex-wrap gap-2">
-            <Button variant="outline" className="gap-1.5" onClick={() => void navigate({ to: "/what-if" })}>
-              <CalendarCheck className="size-4" /> Run another what-if
-            </Button>
             <Button variant="outline" onClick={() => void navigate({ to: "/compare" })}>
               Compare against other paths
             </Button>

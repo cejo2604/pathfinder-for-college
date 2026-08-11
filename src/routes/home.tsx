@@ -1,9 +1,9 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { ArrowRight, Sparkles } from "lucide-react";
+import { createFileRoute } from "@tanstack/react-router";
+import { Sparkles } from "lucide-react";
 
 import { ForkShell } from "@/components/fork/ForkShell";
 import { Button } from "@/components/ui/button";
-import { formatCurrency, formatDelta, scenarioById, simulatePaths } from "@/lib/fork/engine";
+import { formatCurrency, formatDelta, simulatePaths } from "@/lib/fork/engine";
 import { useFork, useForkProfile } from "@/lib/fork/state";
 
 export const Route = createFileRoute("/home")({
@@ -22,21 +22,12 @@ export const Route = createFileRoute("/home")({
 });
 
 const DECISION_PATHS = ["stay_biology", "switch_cs", "cs_minor"];
-const QUICK = ["switch_major", "add_minor", "graduate_early", "minimize_cost"];
 
 function MyPath() {
   const profile = useForkProfile();
-  const { profile: loaded, loadDemoStudent, careerId, priorities, runScenario } = useFork();
-  const navigate = useNavigate();
+  const { profile: loaded, loadDemoStudent, careerId, priorities } = useFork();
 
   const options = simulatePaths(DECISION_PATHS, { profile, careerId, priorities });
-
-  const go = (scenarioId: string) => {
-    const scenario = scenarioById(scenarioId);
-    if (!scenario) return;
-    runScenario(scenario.id, scenario.question);
-    void navigate({ to: "/what-if" });
-  };
 
   return (
     <ForkShell>
@@ -78,11 +69,9 @@ function MyPath() {
 
         <div className="mt-6 grid gap-4 md:grid-cols-3">
           {options.map((path) => (
-            <button
+            <div
               key={path.id}
-              type="button"
-              onClick={() => go(path.id === "switch_cs" ? "switch_major" : path.id === "cs_minor" ? "add_minor" : "career_health_tech")}
-              className="rounded-2xl border border-border bg-background p-4 text-left transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-lift"
+              className="rounded-2xl border border-border bg-background p-4 text-left"
             >
               <p className="font-display text-lg leading-tight">
                 {path.id === "stay_biology"
@@ -107,31 +96,11 @@ function MyPath() {
                   <dd className="font-medium tabular-nums">{path.scores.careerFit} / 100</dd>
                 </div>
               </dl>
-              <p className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-primary">
-                Simulate this <ArrowRight className="size-3.5" />
-              </p>
-            </button>
+            </div>
           ))}
         </div>
       </section>
 
-      <section className="mt-10">
-        <h2 className="font-display text-2xl">Quick What If?</h2>
-        <div className="mt-4 flex flex-wrap gap-2">
-          {QUICK.map((id) => {
-            const scenario = scenarioById(id);
-            if (!scenario) return null;
-            return (
-              <Button key={id} variant="outline" className="rounded-full" onClick={() => go(id)}>
-                {scenario.chip}
-              </Button>
-            );
-          })}
-          <Button className="gap-1.5 rounded-full" onClick={() => void navigate({ to: "/what-if" })}>
-            <Sparkles className="size-4" /> Ask my own question
-          </Button>
-        </div>
-      </section>
 
       <section className="mt-10 grid gap-4 sm:grid-cols-3">
         <Fact label="Current courses" value={profile.courses.filter((c) => c.status === "in_progress").length} sub="in progress this term" />

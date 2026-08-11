@@ -146,7 +146,7 @@ function AuthPage() {
           <button
             type="button"
             className="font-medium text-foreground underline underline-offset-4"
-            onClick={() => void navigate({ to: "/what-if" })}
+            onClick={() => void navigate({ to: "/home" })}
           >
             keep exploring the demo student
           </button>
