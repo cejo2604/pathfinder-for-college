@@ -270,7 +270,7 @@ function WhatIfPage() {
       )}
 
       {phase === "results" && (
-        <p className="text-center text-sm text-muted-foreground">
+        <p className="mb-2 text-center text-sm text-muted-foreground">
           Ask another question below or pick a quick scenario to keep exploring.
         </p>
       )}
