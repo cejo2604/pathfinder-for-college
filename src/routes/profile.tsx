@@ -217,17 +217,34 @@ function ProfilePage() {
   );
 }
 
-function Field({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
+function Field({
+  label,
+  value,
+  onChange,
+  placeholder,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  placeholder?: string;
+}) {
   const id = label.toLowerCase().replace(/\s+/g, "-");
   return (
     <div>
       <Label htmlFor={id} className="text-xs uppercase tracking-[0.1em] text-muted-foreground">
         {label}
       </Label>
-      <Input id={id} value={value} onChange={(e) => onChange(e.target.value)} className="mt-1.5" />
+      <Input
+        id={id}
+        value={value}
+        placeholder={placeholder}
+        onChange={(e) => onChange(e.target.value)}
+        className="mt-1.5"
+      />
     </div>
   );
 }
+
 
 /**
  * Numeric field that keeps the student's raw keystrokes while they type, so
