@@ -28,6 +28,12 @@ export const Route = createFileRoute("/career")({
 function CareerPage() {
   const { careerId, setCareerId } = useFork();
   const profile = useForkProfile();
+  const navigate = useNavigate();
+
+  const chooseCareer = (id: string) => {
+    setCareerId(id);
+    navigate({ to: "/what-if" });
+  };
 
   return (
     <ForkShell>
@@ -36,7 +42,7 @@ function CareerPage() {
         <h1 className="mt-3 font-display text-4xl leading-tight sm:text-5xl">Paths worth exploring</h1>
         <p className="mt-3 text-muted-foreground">
           Fork does not tell you what to become. It shows what each direction typically asks for, and scores your
-          academic paths against the one you pick.
+          academic paths against the one you pick. Pick a career to simulate it in What If?
         </p>
       </header>
 
@@ -45,7 +51,8 @@ function CareerPage() {
           <button
             key={career.id}
             type="button"
-            onClick={() => setCareerId(career.id)}
+            onClick={() => chooseCareer(career.id)}
+
             className={cn(
               "rounded-full border px-3.5 py-1.5 text-sm transition-colors",
               careerId === career.id
