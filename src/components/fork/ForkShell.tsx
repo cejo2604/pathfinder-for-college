@@ -15,9 +15,9 @@ import { cn } from "@/lib/utils";
 import { useFork } from "@/lib/fork/state";
 
 const PRIMARY_NAV = [
+  { to: "/plan", label: "Plan" },
   { to: "/home", label: "My Path" },
   { to: "/compare", label: "Compare" },
-  { to: "/plan", label: "Plan" },
 ] as const;
 
 export function ForkLogo({ className }: { className?: string }) {
