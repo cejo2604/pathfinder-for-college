@@ -116,21 +116,40 @@ export function ForkProvider({ children }: { children: ReactNode }) {
     void loadForkData()
       .then((remote) => {
         if (cancelled) return;
+        // Returning student: the account is the source of truth.
+        const savedProfile = remote.profile;
+        if (savedProfile) {
+          setState((s) => ({
+            ...s,
+            profile: savedProfile,
+            priorities: savedProfile.priorities.length ? savedProfile.priorities : s.priorities,
+            careerId: remote.careerId ?? s.careerId,
+            doneActions: remote.doneActions,
+            savedPaths: remote.savedPaths,
+            chosenPathId: remote.savedPaths.find((p) => p.isChosen)?.pathId ?? s.chosenPathId,
+          }));
+          return;
+        }
+
+        // First sign-in: keep whatever they already filled in locally and store it.
         setState((s) => ({
           ...s,
-          profile: remote.profile ?? s.profile,
-          priorities: remote.profile?.priorities.length ? remote.profile.priorities : s.priorities,
-          careerId: remote.careerId ?? s.careerId,
-          doneActions: remote.doneActions,
+          doneActions: remote.doneActions.length ? remote.doneActions : s.doneActions,
           savedPaths: remote.savedPaths,
-          chosenPathId: remote.savedPaths.find((p) => p.isChosen)?.pathId ?? s.chosenPathId,
         }));
+        const local = stateRef.current;
+        if (local.profile) {
+          void saveForkProfile({
+            data: { profile: { ...local.profile, priorities: local.priorities }, careerId: local.careerId },
+          }).catch((error) => console.error("Could not save profile", error));
+        }
       })
       .catch((error) => console.error("Could not load saved plan", error));
     return () => {
       cancelled = true;
     };
   }, [session]);
+
 
   // Debounced profile persistence.
   const profileTimer = useRef<number | undefined>(undefined);
