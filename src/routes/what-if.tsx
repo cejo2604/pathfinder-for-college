@@ -275,8 +275,9 @@ function WhatIfPage() {
         </p>
       )}
 
-      <div className="mx-auto mt-8 max-w-3xl">
-        <form onSubmit={submit} className="flex flex-col gap-2 sm:flex-row">
+      <div className="mx-auto max-w-3xl text-center">
+        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">What if</p>
+        <form onSubmit={submit} className="mt-3 flex flex-col gap-2 sm:flex-row">
           <Input
             value={input}
             onChange={(e) => setInput(e.target.value)}
