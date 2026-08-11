@@ -17,7 +17,11 @@ import { SCENARIOS, parseScenario, rankPaths, scenarioById, simulatePaths, type 
 import { useFork, useForkProfile } from "@/lib/fork/state";
 
 export const Route = createFileRoute("/what-if")({
-  head: () => ({
+  // `?q=` lets other screens (like a waitlist warning) pre-fill the question.
+  validateSearch: (search: Record<string, unknown>) => ({
+    q: typeof search["q"] === "string" ? (search["q"] as string) : undefined,
+  }),
+
     meta: [
       { title: "What If? — Fork" },
       {
