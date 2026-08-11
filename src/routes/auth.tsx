@@ -52,7 +52,7 @@ function AuthPage() {
         const { data, error: signUpError } = await supabase.auth.signUp({
           email,
           password,
-          options: { emailRedirectTo: window.location.origin },
+          options: { emailRedirectTo: `${window.location.origin}/profile` },
         });
         if (signUpError) throw signUpError;
         if (!data.session) setMessage("Check your email to confirm your account, then sign in.");
