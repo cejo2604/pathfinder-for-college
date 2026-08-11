@@ -456,3 +456,124 @@ export const prerequisiteChain = (code: string): string[] => {
 };
 
 export const ALL_PATH_IDS = PATHS.map((p) => p.id);
+
+/* ------------------------------------------------- priority-ordered planning */
+
+export interface PriorityStep {
+  priority: Priority;
+  /** 1 = the student's top-ranked priority. */
+  rank: number;
+  label: string;
+  /** Weight this priority carried in the overall fit score, as a percentage. */
+  weightPct: number;
+  /** The engine number this priority is measured against on the recommended path. */
+  metric: string;
+  /** Deterministic, actionable moves derived from engine output for this priority. */
+  moves: string[];
+}
+
+export interface PriorityCareerPlan {
+  /** Highest overall fit under the student's current priority order. */
+  recommended: SimulatedPath;
+  runnerUp: SimulatedPath | undefined;
+  /** Every path in the dataset, ranked by overall fit under this priority order. */
+  ranked: SimulatedPath[];
+  /** Steps in the exact order the student ranked their priorities. */
+  steps: PriorityStep[];
+  summary: string;
+}
+
+function movesForPriority(priority: Priority, path: SimulatedPath, career: Career): string[] {
+  switch (priority) {
+    case "graduate_on_time":
+      return [
+        path.additionalSemesters > 0
+          ? `Plan for ${path.semesters} academic semesters — ${path.additionalSemesters} more than staying put — and confirm the ${path.graduationDate} date with your advisor.`
+          : `Hold ${path.semesters} academic semesters at ~${path.averageLoad} credits to keep ${path.graduationDate} intact.`,
+        path.summerSessions > 0
+          ? `Register for ${path.summerSessions} summer session${path.summerSessions > 1 ? "s" : ""} — the timeline above depends on ${path.summerSessions > 1 ? "them" : "it"}.`
+          : `Register on your first enrollment day each term; a missed seat is what usually adds a semester.`,
+      ];
+    case "minimize_cost":
+      return [
+        `Budget ${formatCurrency(path.estimatedCost)} in remaining tuition (${path.creditsRemaining} credits × ${formatCurrency(path.tuitionPerCredit)}) — ${formatDelta(path.additionalCost)} against staying put.`,
+        path.unappliedCredits > 0
+          ? `Ask whether any of the ${path.unappliedCredits} credits that become electives here can be re-applied — each one you recover is ${formatCurrency(path.tuitionPerCredit)}.`
+          : `Every completed credit applies on this path, so there is no re-take cost to recover.`,
+      ];
+    case "career_opportunities":
+      return [
+        `Target ${career.title}: this path scores ${path.scores.careerFit}/100 on career fit.`,
+        career.coursework.length
+          ? `Get ${career.coursework.slice(0, 3).join(", ")} onto your plan — they carry the most weight for this direction.`
+          : `Confirm which courses this direction expects with your department.`,
+        career.internshipIdeas[0]
+          ? `Line up an internship: ${career.internshipIdeas[0]}.`
+          : `Line up one internship in this field before your final year.`,
+      ];
+    case "stay_close_to_major":
+      return [
+        `${path.program} keeps ${path.scores.continuity}/100 continuity with ${path.isBaseline ? "your current major" : "the major you started"}.`,
+        path.prerequisiteCount > 0
+          ? `Clear ${path.prerequisiteCount} prerequisite${path.prerequisiteCount > 1 ? "s" : ""} first: ${path.prerequisiteCourses.join(", ")}.`
+          : `No new prerequisites are needed — you can start with degree requirements straight away.`,
+      ];
+    case "minimize_coursework":
+      return [
+        path.additionalCredits > 0
+          ? `This path adds ${path.additionalCredits} credits beyond the baseline — ask about credit-by-exam or substitutions before you register.`
+          : `This path adds no extra credits beyond the baseline (${path.creditsRemaining} remaining).`,
+        `Verify that ${path.appliedCredits} of your completed credits apply here; that number drives everything above.`,
+      ];
+    case "flexibility":
+      return [
+        `Flexibility scores ${path.scores.flexibility}/100 here, with ${path.risk.toLowerCase()} risk.`,
+        career.adjacentCareers?.length
+          ? `Keep ${career.adjacentCareers.slice(0, 2).join(" and ")} reachable by choosing electives that serve both.`
+          : `Choose electives that serve more than one destination so a change of mind stays cheap.`,
+      ];
+  }
+}
+
+const METRIC_FOR: Record<Priority, (p: SimulatedPath) => string> = {
+  graduate_on_time: (p) => `${p.graduationDate} · ${p.semesters} semesters`,
+  minimize_cost: (p) => `${formatCurrency(p.estimatedCost)} remaining tuition`,
+  career_opportunities: (p) => `${p.scores.careerFit}/100 career fit`,
+  stay_close_to_major: (p) => `${p.scores.continuity}/100 continuity`,
+  minimize_coursework: (p) => `${p.creditsRemaining} credits remaining`,
+  flexibility: (p) => `${p.scores.flexibility}/100 flexibility`,
+};
+
+/**
+ * Builds a plan ordered by the student's own priority ranking. The recommended
+ * path is whichever path scores highest under those weights, and each step is
+ * emitted in priority order — reorder the priorities and the plan reorders.
+ */
+export function priorityCareerPlan(
+  opts: SimulateOptions & { pathId?: string | undefined },
+): PriorityCareerPlan {
+  const priorities = opts.priorities?.length === PRIORITY_ORDER.length ? opts.priorities : PRIORITY_ORDER;
+  const weights = priorityWeights(priorities);
+  const career = careerById(opts.careerId ?? DEFAULT_CAREER_ID) ?? (CAREERS[0] as Career);
+
+  const ranked = rankPaths(simulatePaths(PATHS.map((p) => p.id), opts));
+  const recommended =
+    (opts.pathId ? ranked.find((p) => p.id === opts.pathId) : undefined) ?? (ranked[0] as SimulatedPath);
+  const runnerUp = ranked.find((p) => p.id !== recommended.id);
+
+  const steps: PriorityStep[] = priorities.map((priority, i) => ({
+    priority,
+    rank: i + 1,
+    label: PRIORITY_LABELS[priority],
+    weightPct: Math.round(weights[priority] * 100),
+    metric: METRIC_FOR[priority](recommended),
+    moves: movesForPriority(priority, recommended, career),
+  }));
+
+  const top = priorities.slice(0, 2).map((p) => PRIORITY_LABELS[p].toLowerCase());
+  const summary = `Because you ranked ${top.join(" above ")}, Fork builds this plan around ${recommended.name} — ${recommended.scores.overallFit}/100 overall fit${
+    runnerUp ? `, ahead of ${runnerUp.name} at ${runnerUp.scores.overallFit}/100` : ""
+  }.`;
+
+  return { recommended, runnerUp, ranked, steps, summary };
+}
