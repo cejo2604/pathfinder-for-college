@@ -1,6 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { Sparkles, Upload } from "lucide-react";
+import { ArrowRight, Sparkles, Upload } from "lucide-react";
 import { useState } from "react";
+
 
 
 import { AutofillField } from "@/components/fork/AutofillField";
