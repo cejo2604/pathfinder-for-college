@@ -29,7 +29,7 @@ export const Route = createFileRoute("/")({
 const PREVIEW = simulatePaths(["stay_biology", "switch_cs", "cs_minor"], { profile: DEMO_STUDENT });
 
 function Landing() {
-  const { loadDemoStudent, startBlank } = useFork();
+  const { loadDemoStudent, startBlank, session } = useFork();
   const navigate = useNavigate();
 
   const startDemo = () => {
@@ -40,8 +40,10 @@ function Landing() {
 
   const startFresh = () => {
     startBlank();
-    void navigate({ to: "/auth" });
+    // Already signed in? /auth would bounce right back, so go straight to the profile form.
+    void navigate({ to: session ? "/profile" : "/auth" });
   };
+
 
   return (
     <div className="min-h-screen bg-background">
