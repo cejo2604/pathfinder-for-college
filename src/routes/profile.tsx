@@ -3,6 +3,7 @@ import { Sparkles } from "lucide-react";
 
 import { PriorityPanel } from "@/components/fork/Decision";
 import { ForkShell } from "@/components/fork/ForkShell";
+import { SchoolField } from "@/components/fork/SchoolField";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
