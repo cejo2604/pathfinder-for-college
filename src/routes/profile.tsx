@@ -1,5 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { Sparkles } from "lucide-react";
+import { Sparkles, Upload } from "lucide-react";
+import { useState } from "react";
+
 
 import { PriorityPanel } from "@/components/fork/Decision";
 import { ForkShell } from "@/components/fork/ForkShell";
