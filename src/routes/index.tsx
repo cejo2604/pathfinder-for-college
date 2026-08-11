@@ -29,7 +29,7 @@ export const Route = createFileRoute("/")({
 const PREVIEW = simulatePaths(["stay_biology", "switch_cs", "cs_minor"], { profile: DEMO_STUDENT });
 
 function Landing() {
-  const { loadDemoStudent, loadSampleStudent, startBlank } = useFork();
+  const { loadDemoStudent, startBlank } = useFork();
   const navigate = useNavigate();
 
   const startDemo = (to: "/home" | "/what-if") => {
@@ -37,10 +37,6 @@ function Landing() {
     void navigate({ to });
   };
 
-  const startSample = () => {
-    loadSampleStudent();
-    void navigate({ to: "/what-if", search: {} });
-  };
 
   const startFresh = () => {
     startBlank();
@@ -81,9 +77,6 @@ function Landing() {
                 onClick={() => startDemo("/home")}
               >
                 <Sparkles className="size-4" /> Try a demo student
-              </Button>
-              <Button size="lg" variant="ghost" className="rounded-full px-4" onClick={startSample}>
-                Sample profile
               </Button>
               <Button asChild size="lg" variant="ghost" className="rounded-full px-4">
                 <Link to="/import">Import my academic history</Link>
