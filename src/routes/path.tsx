@@ -17,6 +17,7 @@ import {
   simulatePath,
   whyThisPath,
 } from "@/lib/fork/engine";
+import { BASELINE_PATH_ID } from "@/lib/fork/paths";
 import { useFork, useForkProfile } from "@/lib/fork/state";
 
 export const Route = createFileRoute("/path")({
@@ -47,7 +48,7 @@ function PathBreakdownPage() {
 
   const pathId = chosenPathId ?? "cs_minor";
   const path = simulatePath(pathId, { profile, careerId, priorities });
-  const baseline = simulatePath("stay", { profile, careerId, priorities });
+  const baseline = simulatePath(BASELINE_PATH_ID, { profile, careerId, priorities });
   const plan = priorityCareerPlan({ profile, careerId, priorities, pathId });
   const career = careerById(careerId);
   const reasons = whyThisPath(path, profile, priorities);
