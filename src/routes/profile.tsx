@@ -153,6 +153,64 @@ function Field({ label, value, onChange }: { label: string; value: string; onCha
   );
 }
 
+/**
+ * Numeric field that keeps the student's raw keystrokes while they type, so
+ * partial decimals like "3." survive long enough to become "3.65".
+ */
+function NumberField({
+  label,
+  value,
+  onCommit,
+  step = 1,
+  min = 0,
+  max,
+  decimals = 0,
+}: {
+  label: string;
+  value: number;
+  onCommit: (value: number) => void;
+  step?: number;
+  min?: number;
+  max?: number;
+  decimals?: number;
+}) {
+  const id = label.toLowerCase().replace(/\s+/g, "-");
+  const [draft, setDraft] = useState<string | null>(null);
+
+  const clamp = (n: number) => {
+    const bounded = Math.min(max ?? Number.MAX_SAFE_INTEGER, Math.max(min, n));
+    return decimals > 0 ? Number(bounded.toFixed(decimals)) : Math.round(bounded);
+  };
+
+  return (
+    <div>
+      <Label htmlFor={id} className="text-xs uppercase tracking-[0.1em] text-muted-foreground">
+        {label}
+      </Label>
+      <Input
+        id={id}
+        type="number"
+        inputMode="decimal"
+        step={step}
+        min={min}
+        {...(max === undefined ? {} : { max })}
+        value={draft ?? String(value)}
+        onChange={(e) => {
+          const raw = e.target.value;
+          setDraft(raw);
+          const parsed = Number(raw);
+          // Only commit a complete number; "3." or "" stays in the draft.
+          if (raw !== "" && Number.isFinite(parsed)) onCommit(clamp(parsed));
+        }}
+        onBlur={() => setDraft(null)}
+        className="mt-1.5"
+      />
+    </div>
+  );
+}
+
+
+
 function TagList({ title, items }: { title: string; items: string[] }) {
   return (
     <div>
