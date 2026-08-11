@@ -107,10 +107,15 @@ export const programById = (id: string) => PROGRAMS.find((p) => p.id === id);
 
 export interface StudentCourse {
   code: string;
-  status: "completed" | "in_progress";
+  /** `waitlisted` rows are seats the student does not hold yet. */
+  status: "completed" | "in_progress" | "waitlisted";
   term: string;
   grade?: string;
+  waitlistPosition?: number;
+  /** True once the student confirmed this record (imported or hand-entered). */
+  verified?: boolean;
 }
+
 
 export interface StudentProfile {
   name: string;
