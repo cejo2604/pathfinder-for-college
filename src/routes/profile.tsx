@@ -64,12 +64,22 @@ function ProfilePage() {
               value={profile.graduationTarget}
               onChange={(graduationTarget) => setProfile({ graduationTarget })}
             />
-            <Field
+            <NumberField
               label="Credits completed"
-              value={String(profile.creditsCompleted)}
-              onChange={(v) => setProfile({ creditsCompleted: Number(v) || 0 })}
+              value={profile.creditsCompleted}
+              step={1}
+              max={300}
+              onCommit={(creditsCompleted) => setProfile({ creditsCompleted })}
             />
-            <Field label="GPA" value={String(profile.gpa)} onChange={(v) => setProfile({ gpa: Number(v) || 0 })} />
+            <NumberField
+              label="GPA"
+              value={profile.gpa}
+              step={0.01}
+              max={4.5}
+              decimals={2}
+              onCommit={(gpa) => setProfile({ gpa })}
+            />
+
           </div>
         </section>
 
