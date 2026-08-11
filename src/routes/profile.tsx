@@ -34,6 +34,7 @@ function ProfilePage() {
 
   const completed = profile.courses.filter((c) => c.status === "completed");
   const current = profile.courses.filter((c) => c.status === "in_progress");
+  const waitlisted = profile.courses.filter((c) => c.status === "waitlisted");
 
   return (
     <ForkShell>
@@ -44,12 +45,18 @@ function ProfilePage() {
           Nothing here is required to try Fork — the demo student fills it all in. Every number in the simulator traces
           back to this page.
         </p>
-        {!loaded && (
-          <Button className="mt-5 gap-1.5" onClick={loadDemoStudent}>
-            <Sparkles className="size-4" /> Load demo student
+        <div className="mt-5 flex flex-wrap gap-2">
+          <Button className="gap-1.5" onClick={() => void navigate({ to: "/import" })}>
+            <Upload className="size-4" /> Import my academic history
           </Button>
-        )}
+          {!loaded && (
+            <Button variant="outline" className="gap-1.5" onClick={loadDemoStudent}>
+              <Sparkles className="size-4" /> Load demo student
+            </Button>
+          )}
+        </div>
       </header>
+
 
       <div className="mt-10 grid gap-6 lg:grid-cols-2">
         <section className="rounded-2xl border border-border bg-card p-5">
