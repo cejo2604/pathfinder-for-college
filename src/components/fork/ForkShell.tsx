@@ -37,39 +37,52 @@ export function ForkNav() {
 
   return (
     <header className="sticky top-0 z-40 border-b border-border/70 bg-background/85 backdrop-blur">
-      <div className="mx-auto flex h-16 max-w-6xl items-center gap-3 px-4 sm:px-6">
-        <ForkLogo />
+      <div className="mx-auto flex h-16 max-w-6xl items-center gap-2 px-3 sm:gap-3 sm:px-6">
+        <ForkLogo className="shrink-0" />
 
-        <nav className="ml-auto flex items-center gap-1 text-sm">
-          {PRIMARY_NAV.map((item) => (
-            <Link
-              key={item.to}
-              to={item.to}
-              className={cn(
-                "rounded-md px-2.5 py-2 font-medium text-muted-foreground transition-colors hover:text-foreground sm:px-3",
-                pathname === item.to && "text-foreground",
-              )}
-            >
-              {item.label}
-            </Link>
-          ))}
+        <nav className="ml-auto flex min-w-0 items-center gap-1 text-sm">
+          {/* Text links only from sm up; on phones they live in the menu below. */}
+          <div className="hidden items-center gap-1 sm:flex">
+            {PRIMARY_NAV.map((item) => (
+              <Link
+                key={item.to}
+                to={item.to}
+                className={cn(
+                  "rounded-md px-2.5 py-2 font-medium text-muted-foreground transition-colors hover:text-foreground sm:px-3",
+                  pathname === item.to && "text-foreground",
+                )}
+              >
+                {item.label}
+              </Link>
+            ))}
+          </div>
 
-          <Button asChild size="lg" className="ml-1 gap-1.5 rounded-full px-4 text-[0.95rem] shadow-lift sm:px-5">
+          <Button
+            asChild
+            size="lg"
+            className="ml-1 shrink-0 gap-1.5 rounded-full px-3 text-sm shadow-lift sm:px-5 sm:text-[0.95rem]"
+          >
             <Link to="/what-if">
               <Sparkles className="size-4" />
-              What If?
+              <span className="hidden xs:inline sm:inline">What If?</span>
+              <span className="xs:hidden sm:hidden">What If</span>
             </Link>
           </Button>
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="ml-1 rounded-full" aria-label="Profile and settings">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="ml-0.5 shrink-0 rounded-full sm:ml-1"
+                aria-label="Menu, profile and settings"
+              >
                 <span className="grid size-8 place-items-center rounded-full bg-muted font-medium">
                   {(profile?.name ?? "?").slice(0, 1)}
                 </span>
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-52">
+            <DropdownMenuContent align="end" className="w-56">
               <DropdownMenuLabel className="font-normal text-muted-foreground">
                 {profile?.name ?? "No student loaded"}
                 {signedIn && (
@@ -77,6 +90,14 @@ export function ForkNav() {
                 )}
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
+              <div className="sm:hidden">
+                {PRIMARY_NAV.map((item) => (
+                  <DropdownMenuItem key={item.to} asChild>
+                    <Link to={item.to}>{item.label}</Link>
+                  </DropdownMenuItem>
+                ))}
+                <DropdownMenuSeparator />
+              </div>
               <DropdownMenuItem asChild>
                 <Link to="/profile">Profile</Link>
               </DropdownMenuItem>
@@ -101,6 +122,7 @@ export function ForkNav() {
       </div>
     </header>
   );
+
 }
 
 export function PlanningEstimateNote({ className }: { className?: string }) {
