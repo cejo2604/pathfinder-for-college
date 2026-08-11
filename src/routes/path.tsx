@@ -83,15 +83,6 @@ function PathBreakdownPage() {
         <p className="mt-2 text-sm text-muted-foreground">
           {path.program} · aiming at {career?.title ?? "your career goal"}
         </p>
-        {!chosenPathId && (
-          <p className="mt-4 rounded-xl bg-muted px-3 py-2 text-sm">
-            You have not chosen a path yet — this is the breakdown for the CS minor path.{" "}
-            <button className="font-medium underline" onClick={() => void navigate({ to: "/what-if" })}>
-              Run a what-if
-            </button>{" "}
-            to choose your own.
-          </p>
-        )}
         <div className="mt-6 flex flex-wrap items-center gap-3">
           <RiskTag risk={path.risk} factors={path.riskFactors} />
           <EstimateBadge />
