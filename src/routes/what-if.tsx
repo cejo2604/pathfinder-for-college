@@ -1,6 +1,10 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
 import { ArrowRight, Loader2, Sparkles } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
+
+import { classifyScenario } from "@/lib/fork/ai.functions";
+
 
 import { BranchTree } from "@/components/fork/BranchTree";
 import { CostOfDecision, PriorityPanel } from "@/components/fork/Decision";
