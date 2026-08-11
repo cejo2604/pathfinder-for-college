@@ -572,9 +572,14 @@ export function priorityCareerPlan(
   }));
 
   const top = priorities.slice(0, 2).map((p) => PRIORITY_LABELS[p].toLowerCase());
-  const summary = `Because you ranked ${top.join(" above ")}, Fork builds this plan around ${recommended.name} — ${recommended.scores.overallFit}/100 overall fit${
-    runnerUp ? `, ahead of ${runnerUp.name} at ${runnerUp.scores.overallFit}/100` : ""
-  }.`;
+  const comparison = !runnerUp
+    ? ""
+    : runnerUp.scores.overallFit === recommended.scores.overallFit
+      ? `, tied with ${runnerUp.name}`
+      : runnerUp.scores.overallFit > recommended.scores.overallFit
+        ? `, while ${runnerUp.name} scores ${runnerUp.scores.overallFit}/100 under the same order`
+        : `, ahead of ${runnerUp.name} at ${runnerUp.scores.overallFit}/100`;
+  const summary = `Because you ranked ${top.join(" above ")}, Fork builds this plan around ${recommended.name} — ${recommended.scores.overallFit}/100 overall fit${comparison}.`;
 
   return { recommended, runnerUp, ranked, steps, summary };
 }
