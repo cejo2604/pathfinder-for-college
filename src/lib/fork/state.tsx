@@ -1,8 +1,19 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import type { Session } from "@supabase/supabase-js";
 
+import { supabase } from "@/integrations/supabase/client";
 import { DEFAULT_CAREER_ID, DEMO_STUDENT, PRIORITY_ORDER, type Priority, type StudentProfile } from "./data";
+import { loadForkData, savePath, saveForkProfile, setPlanAction, type SavedPathRow } from "./user-data.functions";
 
 const STORAGE_KEY = "fork:state:v1";
+
+export interface ChosenPathDetails {
+  scenarioId: string;
+  question: string;
+  pathName: string;
+  program: string;
+  snapshot?: unknown;
+}
 
 export interface ForkState {
   profile: StudentProfile | null;
@@ -13,6 +24,7 @@ export interface ForkState {
   comparison: string[];
   chosenPathId: string | null;
   doneActions: string[];
+  savedPaths: SavedPathRow[];
 }
 
 const initialState: ForkState = {
@@ -24,10 +36,15 @@ const initialState: ForkState = {
   comparison: [],
   chosenPathId: null,
   doneActions: [],
+  savedPaths: [],
 };
 
 interface ForkContextValue extends ForkState {
   hydrated: boolean;
+  session: Session | null;
+  authLoading: boolean;
+  signedIn: boolean;
+  signOut: () => Promise<void>;
   loadDemoStudent: () => void;
   setProfile: (patch: Partial<StudentProfile>) => void;
   setPriorities: (priorities: Priority[]) => void;
@@ -35,7 +52,7 @@ interface ForkContextValue extends ForkState {
   runScenario: (scenarioId: string, question: string) => void;
   toggleComparison: (pathId: string) => void;
   setComparison: (ids: string[]) => void;
-  choosePath: (pathId: string) => void;
+  choosePath: (pathId: string, details?: ChosenPathDetails) => void;
   toggleAction: (key: string) => void;
   reset: () => void;
 }
@@ -45,7 +62,13 @@ const ForkContext = createContext<ForkContextValue | null>(null);
 export function ForkProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<ForkState>(initialState);
   const [hydrated, setHydrated] = useState(false);
+  const [session, setSession] = useState<Session | null>(null);
+  const [authLoading, setAuthLoading] = useState(true);
+  const signedIn = Boolean(session);
+  const stateRef = useRef(state);
+  stateRef.current = state;
 
+  // Local hydration keeps the demo instant for visitors who never sign in.
   useEffect(() => {
     try {
       const raw = window.localStorage.getItem(STORAGE_KEY);
@@ -65,12 +88,71 @@ export function ForkProvider({ children }: { children: ReactNode }) {
     }
   }, [state, hydrated]);
 
+  useEffect(() => {
+    const { data } = supabase.auth.onAuthStateChange((_event, next) => {
+      setSession(next);
+      setAuthLoading(false);
+    });
+    void supabase.auth.getSession().then(({ data: s }) => {
+      setSession(s.session);
+      setAuthLoading(false);
+    });
+    return () => data.subscription.unsubscribe();
+  }, []);
+
+  // Pull saved work for the signed-in student.
+  useEffect(() => {
+    if (!session) return;
+    let cancelled = false;
+    void loadForkData()
+      .then((remote) => {
+        if (cancelled) return;
+        setState((s) => ({
+          ...s,
+          profile: remote.profile ?? s.profile,
+          priorities: remote.profile?.priorities.length ? remote.profile.priorities : s.priorities,
+          careerId: remote.careerId ?? s.careerId,
+          doneActions: remote.doneActions,
+          savedPaths: remote.savedPaths,
+          chosenPathId: remote.savedPaths.find((p) => p.isChosen)?.pathId ?? s.chosenPathId,
+        }));
+      })
+      .catch((error) => console.error("Could not load saved plan", error));
+    return () => {
+      cancelled = true;
+    };
+  }, [session]);
+
+  // Debounced profile persistence.
+  const profileTimer = useRef<number | undefined>(undefined);
+  const queueProfileSave = useCallback(() => {
+    if (!stateRef.current.profile) return;
+    window.clearTimeout(profileTimer.current);
+    profileTimer.current = window.setTimeout(() => {
+      const { profile, priorities, careerId } = stateRef.current;
+      if (!profile) return;
+      void saveForkProfile({ data: { profile: { ...profile, priorities }, careerId } }).catch((error) =>
+        console.error("Could not save profile", error),
+      );
+    }, 600);
+  }, []);
+
   const value = useMemo<ForkContextValue>(() => {
     const patch = (p: Partial<ForkState>) => setState((s) => ({ ...s, ...p }));
+    const persistProfile = () => {
+      if (signedIn) queueProfileSave();
+    };
     return {
       ...state,
       hydrated,
-      loadDemoStudent: () =>
+      session,
+      authLoading,
+      signedIn,
+      signOut: async () => {
+        await supabase.auth.signOut();
+        setState(initialState);
+      },
+      loadDemoStudent: () => {
         patch({
           profile: DEMO_STUDENT,
           priorities: DEMO_STUDENT.priorities,
@@ -80,11 +162,21 @@ export function ForkProvider({ children }: { children: ReactNode }) {
           comparison: [],
           chosenPathId: null,
           doneActions: [],
-        }),
-      setProfile: (p) =>
-        setState((s) => ({ ...s, profile: { ...(s.profile ?? DEMO_STUDENT), ...p } })),
-      setPriorities: (priorities) => patch({ priorities }),
-      setCareerId: (careerId) => patch({ careerId }),
+        });
+        persistProfile();
+      },
+      setProfile: (p) => {
+        setState((s) => ({ ...s, profile: { ...(s.profile ?? DEMO_STUDENT), ...p } }));
+        persistProfile();
+      },
+      setPriorities: (priorities) => {
+        patch({ priorities });
+        persistProfile();
+      },
+      setCareerId: (careerId) => {
+        patch({ careerId });
+        persistProfile();
+      },
       runScenario: (scenarioId, scenarioQuestion) => patch({ scenarioId, scenarioQuestion, comparison: [] }),
       toggleComparison: (pathId) =>
         setState((s) => {
@@ -94,17 +186,38 @@ export function ForkProvider({ children }: { children: ReactNode }) {
           return { ...s, comparison: [...s.comparison, pathId] };
         }),
       setComparison: (ids) => patch({ comparison: ids.slice(0, 4) }),
-      choosePath: (chosenPathId) => patch({ chosenPathId }),
-      toggleAction: (key) =>
+      choosePath: (chosenPathId, details) => {
+        patch({ chosenPathId });
+        if (!signedIn || !details) return;
+        void savePath({
+          data: {
+            scenarioId: details.scenarioId,
+            question: details.question,
+            pathId: chosenPathId,
+            pathName: details.pathName,
+            program: details.program,
+            snapshot: details.snapshot ?? {},
+          },
+        })
+          .then(() => loadForkData())
+          .then((remote) => setState((s) => ({ ...s, savedPaths: remote.savedPaths })))
+          .catch((error) => console.error("Could not save this path", error));
+      },
+      toggleAction: (key) => {
+        const done = !stateRef.current.doneActions.includes(key);
         setState((s) => ({
           ...s,
-          doneActions: s.doneActions.includes(key)
-            ? s.doneActions.filter((k) => k !== key)
-            : [...s.doneActions, key],
-        })),
+          doneActions: done ? [...s.doneActions, key] : s.doneActions.filter((k) => k !== key),
+        }));
+        if (signedIn) {
+          void setPlanAction({ data: { key, done } }).catch((error) =>
+            console.error("Could not save plan progress", error),
+          );
+        }
+      },
       reset: () => setState(initialState),
     };
-  }, [state, hydrated]);
+  }, [state, hydrated, session, authLoading, signedIn, queueProfileSave]);
 
   return <ForkContext.Provider value={value}>{children}</ForkContext.Provider>;
 }
