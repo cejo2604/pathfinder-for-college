@@ -211,6 +211,7 @@ export function ForkProvider({ children }: { children: ReactNode }) {
       loadSampleStudent: () => {
         patch({
           profile: SAMPLE_STUDENT,
+          isDemoProfile: true,
           priorities: SAMPLE_STUDENT.priorities,
           careerId: DEFAULT_CAREER_ID,
           scenarioId: null,
@@ -219,7 +220,6 @@ export function ForkProvider({ children }: { children: ReactNode }) {
           chosenPathId: null,
           doneActions: [],
         });
-        persistProfile();
       },
       startBlank: () => {
         patch({
@@ -241,6 +241,7 @@ export function ForkProvider({ children }: { children: ReactNode }) {
             goalCategory: "",
             courses: [],
           },
+          isDemoProfile: false,
           priorities: PRIORITY_ORDER,
           careerId: DEFAULT_CAREER_ID,
           scenarioId: null,
@@ -254,6 +255,7 @@ export function ForkProvider({ children }: { children: ReactNode }) {
       loadDemoStudent: () => {
         patch({
           profile: DEMO_STUDENT,
+          isDemoProfile: true,
           priorities: DEMO_STUDENT.priorities,
           careerId: DEFAULT_CAREER_ID,
           scenarioId: null,
@@ -262,10 +264,14 @@ export function ForkProvider({ children }: { children: ReactNode }) {
           chosenPathId: null,
           doneActions: [],
         });
-        persistProfile();
       },
       setProfile: (p) => {
-        setState((s) => ({ ...s, profile: { ...(s.profile ?? DEMO_STUDENT), ...p } }));
+        setState((s) => ({
+          ...s,
+          profile: { ...(s.profile ?? DEMO_STUDENT), ...p },
+          // Editing demo data makes it the student's own profile.
+          isDemoProfile: false,
+        }));
         persistProfile();
       },
       setPriorities: (priorities) => {
@@ -287,7 +293,7 @@ export function ForkProvider({ children }: { children: ReactNode }) {
       setComparison: (ids) => patch({ comparison: ids.slice(0, 4) }),
       choosePath: (chosenPathId, details) => {
         patch({ chosenPathId });
-        if (!signedIn || !details) return;
+        if (!signedIn || !details || state.isDemoProfile) return;
         void savePath({
           data: {
             scenarioId: details.scenarioId,
@@ -308,12 +314,13 @@ export function ForkProvider({ children }: { children: ReactNode }) {
           ...s,
           doneActions: done ? [...s.doneActions, key] : s.doneActions.filter((k) => k !== key),
         }));
-        if (signedIn) {
+        if (signedIn && !stateRef.current.isDemoProfile) {
           void setPlanAction({ data: { key, done } }).catch((error) =>
             console.error("Could not save plan progress", error),
           );
         }
       },
+
       reset: () => setState(initialState),
     };
   }, [state, hydrated, session, authLoading, signedIn, queueProfileSave, flushProfileSave]);
