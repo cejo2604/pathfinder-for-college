@@ -32,6 +32,8 @@ export interface ForkState {
   chosenPathId: string | null;
   doneActions: string[];
   savedPaths: SavedPathRow[];
+  /** True while the loaded profile is demo/sample data — never persisted to an account. */
+  isDemoProfile: boolean;
 }
 
 const initialState: ForkState = {
@@ -44,7 +46,9 @@ const initialState: ForkState = {
   chosenPathId: null,
   doneActions: [],
   savedPaths: [],
+  isDemoProfile: false,
 };
+
 
 interface ForkContextValue extends ForkState {
   hydrated: boolean;
