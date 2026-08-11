@@ -54,7 +54,9 @@ function WhatIfPage() {
     hydrated,
   } = useFork();
 
+  const classify = useServerFn(classifyScenario);
   const [input, setInput] = useState("");
+
   const [phase, setPhase] = useState<Phase>("idle");
   const [activeScenarioId, setActiveScenarioId] = useState<string | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
