@@ -29,7 +29,7 @@ export const Route = createFileRoute("/")({
 const PREVIEW = simulatePaths(["stay_biology", "switch_cs", "cs_minor"], { profile: DEMO_STUDENT });
 
 function Landing() {
-  const { loadDemoStudent, loadSampleStudent, startBlank } = useFork();
+  const { loadDemoStudent, startBlank } = useFork();
   const navigate = useNavigate();
 
   const startDemo = (to: "/home" | "/what-if") => {
