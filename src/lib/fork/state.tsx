@@ -117,11 +117,12 @@ export function ForkProvider({ children }: { children: ReactNode }) {
       .then((remote) => {
         if (cancelled) return;
         // Returning student: the account is the source of truth.
-        if (remote.profile) {
+        const savedProfile = remote.profile;
+        if (savedProfile) {
           setState((s) => ({
             ...s,
-            profile: remote.profile,
-            priorities: remote.profile.priorities.length ? remote.profile.priorities : s.priorities,
+            profile: savedProfile,
+            priorities: savedProfile.priorities.length ? savedProfile.priorities : s.priorities,
             careerId: remote.careerId ?? s.careerId,
             doneActions: remote.doneActions,
             savedPaths: remote.savedPaths,
@@ -129,6 +130,7 @@ export function ForkProvider({ children }: { children: ReactNode }) {
           }));
           return;
         }
+
         // First sign-in: keep whatever they already filled in locally and store it.
         setState((s) => ({
           ...s,
