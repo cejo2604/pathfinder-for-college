@@ -1,6 +1,10 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
 import { ArrowRight, Loader2, Sparkles } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
+
+import { classifyScenario } from "@/lib/fork/ai.functions";
+
 
 import { BranchTree } from "@/components/fork/BranchTree";
 import { CostOfDecision, PriorityPanel } from "@/components/fork/Decision";
@@ -50,7 +54,9 @@ function WhatIfPage() {
     hydrated,
   } = useFork();
 
+  const classify = useServerFn(classifyScenario);
   const [input, setInput] = useState("");
+
   const [phase, setPhase] = useState<Phase>("idle");
   const [activeScenarioId, setActiveScenarioId] = useState<string | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -100,12 +106,21 @@ function WhatIfPage() {
   );
   const alternative = selected && cheapest && selected.id !== cheapest.id ? cheapest : (ranked[1] ?? null);
 
+  // AI only routes the sentence to a scenario; the engine owns every number.
+  // If it is slow or unavailable, the deterministic keyword parse still runs.
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!input.trim()) return;
-    const parsed = parseScenario(input);
-    start(parsed.id, input.trim());
+    const text = input.trim();
+    if (!text) return;
+    const fallback = parseScenario(text);
+    start(fallback.id, text);
+    void classify({ data: { text } })
+      .then((result) => {
+        if (result.scenarioId !== fallback.id) start(result.scenarioId, text);
+      })
+      .catch(() => undefined);
   };
+
 
   return (
     <ForkShell>

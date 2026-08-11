@@ -1,3 +1,7 @@
+import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
+import { Loader2, Sparkles } from "lucide-react";
+
 import { PlanningEstimateNote } from "@/components/fork/ForkShell";
 import { ScorePanel } from "@/components/fork/Scores";
 import {
@@ -8,9 +12,11 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
-import type { StudentProfile } from "@/lib/fork/data";
-import { evidenceFor, whyThisPath, type SimulatedPath } from "@/lib/fork/engine";
-import { useFork } from "@/lib/fork/state";
+import type { Priority, StudentProfile } from "@/lib/fork/data";
+import { interpretPath } from "@/lib/fork/ai.functions";
+import { evidenceFor, pathFactSheet, whyThisPath, type SimulatedPath } from "@/lib/fork/engine";
+import { useFork, useForkProfile } from "@/lib/fork/state";
+
 
 const KIND_META = {
   verified: {
@@ -94,12 +100,13 @@ export function WhyPathSheet({
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
-  const { profile, priorities } = useFork();
+  const { priorities } = useFork();
+  const profile = useForkProfile();
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent className="w-full overflow-y-auto sm:max-w-xl">
-        {path && profile && (
+        {path && (
           <>
             <SheetHeader className="text-left">
               <SheetTitle className="font-display text-2xl">Why Fork surfaces {path.name}</SheetTitle>
@@ -115,12 +122,80 @@ export function WhyPathSheet({
                 ))}
               </div>
 
+              <AiReading path={path} profile={profile} priorities={priorities} open={open} />
+
               <ScorePanel scores={path.scores} />
               <AssumptionsPanel path={path} profile={profile} compact />
             </div>
+
           </>
         )}
       </SheetContent>
     </Sheet>
+  );
+}
+
+/**
+ * The only AI surface in the reasoning drawer: it interprets figures the
+ * deterministic engine already produced. Failures degrade silently — the
+ * engine's own explanation above is always present.
+ */
+function AiReading({
+  path,
+  profile,
+  priorities,
+  open,
+}: {
+  path: SimulatedPath;
+  profile: StudentProfile;
+  priorities: Priority[];
+  open: boolean;
+}) {
+  const interpret = useServerFn(interpretPath);
+  const facts = pathFactSheet(path, profile, priorities);
+
+  const { data, isPending, isError } = useQuery({
+    queryKey: ["interpret-path", path.id, facts],
+    enabled: open,
+    staleTime: Infinity,
+    retry: false,
+    queryFn: () =>
+      interpret({ data: { facts, question: `Should I consider ${path.name}?` } }),
+  });
+
+  const paragraphs = data?.paragraphs ?? [];
+  const failed = isError || Boolean(data?.error) || (!isPending && paragraphs.length === 0);
+
+  return (
+    <section className="rounded-2xl border border-primary/25 bg-primary/5 p-5">
+      <div className="flex items-center gap-2">
+        <Sparkles className="size-4 text-primary" />
+        <h4 className="font-display text-lg">In plain language</h4>
+      </div>
+      <p className="mt-1 text-xs text-muted-foreground">
+        Fork&apos;s AI reads the numbers above — it never calculates them.
+      </p>
+
+      {isPending && (
+        <p className="mt-3 flex items-center gap-2 text-sm text-muted-foreground">
+          <Loader2 className="size-4 animate-spin text-primary" /> Interpreting the tradeoffs…
+        </p>
+      )}
+
+      {failed && !isPending && (
+        <p className="mt-3 text-sm text-muted-foreground">
+          The written summary is unavailable right now. Every figure and the reasoning above still comes straight from
+          the simulation engine.
+        </p>
+      )}
+
+      {!isPending && paragraphs.length > 0 && (
+        <div className="mt-3 space-y-2.5 text-sm leading-relaxed">
+          {paragraphs.map((p) => (
+            <p key={p}>{p}</p>
+          ))}
+        </div>
+      )}
+    </section>
   );
 }
