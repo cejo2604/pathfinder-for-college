@@ -68,7 +68,12 @@ function ProfilePage() {
         <section className="rounded-2xl border border-border bg-card p-5">
           <h2 className="font-display text-xl">Academic</h2>
           <div className="mt-4 grid gap-4 sm:grid-cols-2">
-            <Field label="Name" value={profile.name} onChange={(name) => setProfile({ name })} />
+            <Field
+              label="Name"
+              value={profile.name}
+              placeholder="Your full name"
+              onChange={(name) => setProfile({ name })}
+            />
             <SchoolField value={profile.school} onChange={(school) => setProfile({ school })} />
             <AutofillField
               label="Degree"
@@ -104,6 +109,7 @@ function ProfilePage() {
             <Field
               label="Expected graduation"
               value={profile.graduationTarget}
+              placeholder="May 2028"
               onChange={(graduationTarget) => setProfile({ graduationTarget })}
             />
             <NumberField
@@ -111,6 +117,7 @@ function ProfilePage() {
               value={profile.creditsCompleted}
               step={1}
               max={300}
+              placeholder="e.g. 58"
               onCommit={(creditsCompleted) => setProfile({ creditsCompleted })}
             />
             <NumberField
@@ -119,8 +126,10 @@ function ProfilePage() {
               step={0.01}
               max={4.5}
               decimals={2}
+              placeholder="e.g. 3.60"
               onCommit={(gpa) => setProfile({ gpa })}
             />
+
 
           </div>
         </section>
