@@ -270,10 +270,10 @@ function WhatIfPage() {
                             program: selected.program,
                             snapshot: selected,
                           });
-                          void navigate({ to: "/plan" });
+                          void navigate({ to: "/path" });
                         }}
                       >
-                        Build my plan <ArrowRight className="size-4" />
+                        See my full path <ArrowRight className="size-4" />
                       </Button>
                       <Button variant="outline" onClick={() => setWhyId(selected.id)}>
                         Why this path?
