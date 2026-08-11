@@ -417,6 +417,24 @@ export function whyThisPath(path: SimulatedPath, profile: StudentProfile, priori
   return lines;
 }
 
+/** Engine-computed figures, flattened for the AI interpretation layer. */
+export function pathFactSheet(path: SimulatedPath, profile: StudentProfile, priorities: Priority[]): string {
+  return [
+    `Student: ${profile.year}, current major ${profile.major}, ${profile.creditsCompleted} credits completed, graduation target ${profile.graduationTarget}, stated goal ${profile.goalCategory}.`,
+    `Ranked priorities: ${priorities.map((p) => p.replace(/_/g, " ")).join(" > ")}.`,
+    `Path: ${path.name} (${path.program}).`,
+    `Graduation date: ${path.graduationDate}. Semesters remaining: ${path.semesters}. Average load: ${path.averageLoad} credits.`,
+    `Credits remaining: ${path.creditsRemaining}. Additional credits vs current plan: ${path.additionalCredits}.`,
+    `Completed credits applied: ${path.appliedCredits}. Credits becoming electives: ${path.unappliedCredits}.`,
+    `Estimated remaining tuition: ${currency(path.estimatedCost)}. Change vs current plan: ${formatDelta(path.additionalCost)}. Semester change: ${path.additionalSemesters}.`,
+    `Prerequisites to sequence: ${path.prerequisiteCount}${path.prerequisiteCourses.length ? ` (${path.prerequisiteCourses.join(", ")})` : ""}.`,
+    `Risk: ${path.risk} — ${path.riskFactors.join("; ")}.`,
+    `Scores out of 100 — career fit ${path.scores.careerFit}, cost efficiency ${path.scores.costEfficiency}, graduation efficiency ${path.scores.graduationEfficiency}, flexibility ${path.scores.flexibility}, overall fit ${path.scores.overallFit}.`,
+    `Advantages: ${path.advantages.join("; ")}.`,
+    `Tradeoffs: ${path.tradeoffs.join("; ")}.`,
+  ].join("\n");
+}
+
 export const prerequisiteChain = (code: string): string[] => {
   const course = courseByCode(code);
   if (!course) return [];
