@@ -64,8 +64,7 @@ export function ForkNav() {
           >
             <Link to="/what-if">
               <Sparkles className="size-4" />
-              <span className="hidden xs:inline sm:inline">What If?</span>
-              <span className="xs:hidden sm:hidden">What If</span>
+              What If?
             </Link>
           </Button>
 
