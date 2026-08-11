@@ -32,6 +32,8 @@ export interface ForkState {
   chosenPathId: string | null;
   doneActions: string[];
   savedPaths: SavedPathRow[];
+  /** True while the loaded profile is demo/sample data — never persisted to an account. */
+  isDemoProfile: boolean;
 }
 
 const initialState: ForkState = {
@@ -44,7 +46,9 @@ const initialState: ForkState = {
   chosenPathId: null,
   doneActions: [],
   savedPaths: [],
+  isDemoProfile: false,
 };
+
 
 interface ForkContextValue extends ForkState {
   hydrated: boolean;
@@ -122,6 +126,7 @@ export function ForkProvider({ children }: { children: ReactNode }) {
           setState((s) => ({
             ...s,
             profile: savedProfile,
+            isDemoProfile: false,
             priorities: savedProfile.priorities.length ? savedProfile.priorities : s.priorities,
             careerId: remote.careerId ?? s.careerId,
             doneActions: remote.doneActions,
@@ -138,7 +143,8 @@ export function ForkProvider({ children }: { children: ReactNode }) {
           savedPaths: remote.savedPaths,
         }));
         const local = stateRef.current;
-        if (local.profile) {
+        // Demo/sample data is never written to a real account.
+        if (local.profile && !local.isDemoProfile) {
           void saveForkProfile({
             data: { profile: { ...local.profile, priorities: local.priorities }, careerId: local.careerId },
           }).catch((error) => console.error("Could not save profile", error));
@@ -154,17 +160,18 @@ export function ForkProvider({ children }: { children: ReactNode }) {
   // Debounced profile persistence.
   const profileTimer = useRef<number | undefined>(undefined);
   const writeProfile = useCallback(() => {
-    const { profile, priorities, careerId } = stateRef.current;
-    if (!profile) return;
+    const { profile, priorities, careerId, isDemoProfile } = stateRef.current;
+    if (!profile || isDemoProfile) return;
     void saveForkProfile({ data: { profile: { ...profile, priorities }, careerId } }).catch((error) =>
       console.error("Could not save profile", error),
     );
   }, []);
   const queueProfileSave = useCallback(() => {
-    if (!stateRef.current.profile) return;
+    if (!stateRef.current.profile || stateRef.current.isDemoProfile) return;
     window.clearTimeout(profileTimer.current);
     profileTimer.current = window.setTimeout(writeProfile, 600);
   }, [writeProfile]);
+
   const flushProfileSave = useCallback(() => {
     if (profileTimer.current === undefined) return;
     window.clearTimeout(profileTimer.current);
@@ -204,6 +211,7 @@ export function ForkProvider({ children }: { children: ReactNode }) {
       loadSampleStudent: () => {
         patch({
           profile: SAMPLE_STUDENT,
+          isDemoProfile: true,
           priorities: SAMPLE_STUDENT.priorities,
           careerId: DEFAULT_CAREER_ID,
           scenarioId: null,
@@ -212,7 +220,6 @@ export function ForkProvider({ children }: { children: ReactNode }) {
           chosenPathId: null,
           doneActions: [],
         });
-        persistProfile();
       },
       startBlank: () => {
         patch({
@@ -234,6 +241,7 @@ export function ForkProvider({ children }: { children: ReactNode }) {
             goalCategory: "",
             courses: [],
           },
+          isDemoProfile: false,
           priorities: PRIORITY_ORDER,
           careerId: DEFAULT_CAREER_ID,
           scenarioId: null,
@@ -247,6 +255,7 @@ export function ForkProvider({ children }: { children: ReactNode }) {
       loadDemoStudent: () => {
         patch({
           profile: DEMO_STUDENT,
+          isDemoProfile: true,
           priorities: DEMO_STUDENT.priorities,
           careerId: DEFAULT_CAREER_ID,
           scenarioId: null,
@@ -255,10 +264,14 @@ export function ForkProvider({ children }: { children: ReactNode }) {
           chosenPathId: null,
           doneActions: [],
         });
-        persistProfile();
       },
       setProfile: (p) => {
-        setState((s) => ({ ...s, profile: { ...(s.profile ?? DEMO_STUDENT), ...p } }));
+        setState((s) => ({
+          ...s,
+          profile: { ...(s.profile ?? DEMO_STUDENT), ...p },
+          // Editing demo data makes it the student's own profile.
+          isDemoProfile: false,
+        }));
         persistProfile();
       },
       setPriorities: (priorities) => {
@@ -280,7 +293,7 @@ export function ForkProvider({ children }: { children: ReactNode }) {
       setComparison: (ids) => patch({ comparison: ids.slice(0, 4) }),
       choosePath: (chosenPathId, details) => {
         patch({ chosenPathId });
-        if (!signedIn || !details) return;
+        if (!signedIn || !details || state.isDemoProfile) return;
         void savePath({
           data: {
             scenarioId: details.scenarioId,
@@ -301,12 +314,13 @@ export function ForkProvider({ children }: { children: ReactNode }) {
           ...s,
           doneActions: done ? [...s.doneActions, key] : s.doneActions.filter((k) => k !== key),
         }));
-        if (signedIn) {
+        if (signedIn && !stateRef.current.isDemoProfile) {
           void setPlanAction({ data: { key, done } }).catch((error) =>
             console.error("Could not save plan progress", error),
           );
         }
       },
+
       reset: () => setState(initialState),
     };
   }, [state, hydrated, session, authLoading, signedIn, queueProfileSave, flushProfileSave]);
