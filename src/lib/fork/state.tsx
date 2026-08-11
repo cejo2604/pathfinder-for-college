@@ -2,7 +2,14 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, use
 import type { Session } from "@supabase/supabase-js";
 
 import { supabase } from "@/integrations/supabase/client";
-import { DEFAULT_CAREER_ID, DEMO_STUDENT, PRIORITY_ORDER, type Priority, type StudentProfile } from "./data";
+import {
+  DEFAULT_CAREER_ID,
+  DEMO_STUDENT,
+  PRIORITY_ORDER,
+  SAMPLE_STUDENT,
+  type Priority,
+  type StudentProfile,
+} from "./data";
 import { loadForkData, savePath, saveForkProfile, setPlanAction, type SavedPathRow } from "./user-data.functions";
 
 const STORAGE_KEY = "fork:state:v1";
@@ -46,6 +53,8 @@ interface ForkContextValue extends ForkState {
   signedIn: boolean;
   signOut: () => Promise<void>;
   loadDemoStudent: () => void;
+  loadSampleStudent: () => void;
+  startBlank: () => void;
   setProfile: (patch: Partial<StudentProfile>) => void;
   setPriorities: (priorities: Priority[]) => void;
   setCareerId: (id: string) => void;
@@ -151,6 +160,41 @@ export function ForkProvider({ children }: { children: ReactNode }) {
       signOut: async () => {
         await supabase.auth.signOut();
         setState(initialState);
+      },
+      loadSampleStudent: () => {
+        patch({
+          profile: SAMPLE_STUDENT,
+          priorities: SAMPLE_STUDENT.priorities,
+          careerId: DEFAULT_CAREER_ID,
+          scenarioId: null,
+          scenarioQuestion: null,
+          comparison: [],
+          chosenPathId: null,
+          doneActions: [],
+        });
+        persistProfile();
+      },
+      startBlank: () => {
+        patch({
+          profile: {
+            ...SAMPLE_STUDENT,
+            name: "",
+            school: "",
+            major: "",
+            minor: null,
+            goal: "",
+            creditsCompleted: 0,
+            courses: [],
+          },
+          priorities: PRIORITY_ORDER,
+          careerId: DEFAULT_CAREER_ID,
+          scenarioId: null,
+          scenarioQuestion: null,
+          comparison: [],
+          chosenPathId: null,
+          doneActions: [],
+        });
+        persistProfile();
       },
       loadDemoStudent: () => {
         patch({

@@ -184,6 +184,17 @@ export const DEMO_STUDENT: StudentProfile = {
   ],
 };
 
+/**
+ * Anonymized sample profile for demos where the named demo student should not appear.
+ * Same shape and credit math as the demo record so the deterministic engine behaves identically.
+ */
+export const SAMPLE_STUDENT: StudentProfile = {
+  ...DEMO_STUDENT,
+  name: "Sample Student",
+  school: "Sample State University",
+  goal: "I want to work in healthcare technology.",
+};
+
 export const CURRENT_TERM = "Spring 2026";
 export const FIRST_PLANNED_TERM = "Fall 2026";
 
