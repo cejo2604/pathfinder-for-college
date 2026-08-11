@@ -13,6 +13,13 @@ import { PathCard } from "@/components/fork/PathCard";
 import { AssumptionsPanel, WhyPathSheet } from "@/components/fork/WhyPath";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { SCENARIOS, parseScenario, rankPaths, scenarioById, simulatePaths, type SimulatedPath } from "@/lib/fork/engine";
 import { useFork, useForkProfile } from "@/lib/fork/state";
 
