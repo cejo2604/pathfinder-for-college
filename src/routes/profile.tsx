@@ -64,10 +64,37 @@ function ProfilePage() {
           <div className="mt-4 grid gap-4 sm:grid-cols-2">
             <Field label="Name" value={profile.name} onChange={(name) => setProfile({ name })} />
             <SchoolField value={profile.school} onChange={(school) => setProfile({ school })} />
-            <Field label="Degree" value={profile.degree} onChange={(degree) => setProfile({ degree })} />
-            <Field label="Major" value={profile.major} onChange={(major) => setProfile({ major })} />
-            <Field label="Minor" value={profile.minor ?? ""} onChange={(minor) => setProfile({ minor: minor || null })} />
-            <Field label="Year" value={profile.year} onChange={(year) => setProfile({ year })} />
+            <AutofillField
+              label="Degree"
+              value={profile.degree}
+              options={DEGREES}
+              placeholder="Bachelor of Science (BS)"
+              onChange={(degree) => setProfile({ degree })}
+            />
+            <AutofillField
+              label="Major"
+              value={profile.major}
+              options={FIELDS_OF_STUDY}
+              placeholder="Start typing a field of study"
+              onChange={(major) => setProfile({ major })}
+            />
+            <AutofillField
+              label="Minor"
+              value={profile.minor ?? ""}
+              options={MINORS}
+              placeholder="Optional"
+              onChange={(minor) => setProfile({ minor: minor || null })}
+            />
+            <AutofillField
+              label="Year"
+              value={profile.year}
+              options={YEARS}
+              showAllOnFocus
+              maxSuggestions={9}
+              placeholder="Sophomore"
+              onChange={(year) => setProfile({ year })}
+            />
+
             <Field
               label="Expected graduation"
               value={profile.graduationTarget}
