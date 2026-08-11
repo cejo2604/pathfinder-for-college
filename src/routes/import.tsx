@@ -559,8 +559,8 @@ function ImportPage() {
                     Confirm My Academic History
                   </Button>
                   {activeDoc.processingStatus === "confirmed" && (
-                    <Button variant="outline" className="gap-1.5" onClick={() => void navigate({ to: "/what-if" })}>
-                      Run a What If? <ArrowRight className="size-4" />
+                    <Button variant="outline" className="gap-1.5" onClick={() => void navigate({ to: "/home" })}>
+                      Go to My Path <ArrowRight className="size-4" />
                     </Button>
                   )}
                 </div>
