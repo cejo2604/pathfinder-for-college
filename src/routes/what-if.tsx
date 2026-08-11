@@ -93,9 +93,9 @@ function WhatIfPage() {
   }, [hydrated, prefilled]);
 
   // A scenario chosen elsewhere (My Path quick chips) runs on arrival.
-
   useEffect(() => {
-    if (!hydrated || activeScenarioId || phase !== "idle" || !scenarioId) return;
+    if (!hydrated || activeScenarioId || phase !== "idle" || !scenarioId || prefilled) return;
+
     const scenario = scenarioById(scenarioId);
     if (scenario) start(scenario.id, scenarioQuestion ?? scenario.question);
     // eslint-disable-next-line react-hooks/exhaustive-deps
