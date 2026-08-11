@@ -2,6 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { CalendarCheck, Check, GraduationCap } from "lucide-react";
 
 import { ForkShell } from "@/components/fork/ForkShell";
+import { RelevantCourses } from "@/components/fork/RelevantCourses";
 import { AssumptionsPanel } from "@/components/fork/WhyPath";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -150,6 +151,8 @@ function PlanPage() {
           </li>
         </ol>
       </section>
+
+      <RelevantCourses className="mt-12" careerId={careerId} profile={profile} />
 
       <div className="mt-12 grid gap-6 lg:grid-cols-2">
         <AssumptionsPanel path={path} profile={profile} />
