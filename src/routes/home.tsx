@@ -37,6 +37,16 @@ function MyPath() {
 
   const options = simulatePaths(DECISION_PATHS, { profile, careerId, priorities });
 
+  // Once a student has created their own profile, only their own entries show —
+  // empty fields fall back to a neutral example hint, never to demo-student data.
+  const own = Boolean(loaded);
+  const show = (value: string | number | null | undefined, example: string) => {
+    const text = typeof value === "number" ? (value ? String(value) : "") : (value ?? "").trim();
+    if (text) return text;
+    return own ? example : String(value ?? "");
+  };
+  const firstName = show(profile.name.split(" ")[0], "Your");
+
   return (
     <ForkShell>
       {!loaded && (
@@ -52,20 +62,22 @@ function MyPath() {
 
       <header>
         <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-          {profile.school} · {profile.year}
+          {show(profile.school, "Add your school")} · {show(profile.year, "Add your year")}
         </p>
         <h1 className="mt-3 font-display text-4xl leading-tight sm:text-5xl">
-          {profile.name.split(" ")[0]}&apos;s future
+          {firstName === "Your" ? "Your future" : `${firstName}\u2019s future`}
         </h1>
         <p className="mt-2 font-display text-2xl text-muted-foreground">
-          {profile.major} <span className="text-primary">→</span> {profile.goalCategory}
+          {show(profile.major, "Add your major")} <span className="text-primary">→</span>{" "}
+          {show(profile.goalCategory, "Set your goal")}
         </p>
         <p className="mt-4 max-w-2xl text-lg">
           You&apos;re currently on track to graduate in{" "}
-          <span className="font-medium">{profile.graduationTarget}</span> with {profile.creditsCompleted} credits
-          completed and a {profile.gpa} GPA.
+          <span className="font-medium">{show(profile.graduationTarget, "your target term")}</span> with{" "}
+          {show(profile.creditsCompleted, "0")} credits completed and a {show(profile.gpa, "—")} GPA.
         </p>
       </header>
+
 
       <section className="mt-12 rounded-3xl border border-border bg-card p-6 shadow-lift sm:p-8">
         <h2 className="font-display text-2xl">Your biggest decision</h2>
