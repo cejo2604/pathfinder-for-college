@@ -106,6 +106,7 @@ export function WhyPathSheet({
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent className="w-full overflow-y-auto sm:max-w-xl">
+        {!path && <p data-debug="nopath">DEBUG no path</p>}
         {path && (
           <>
             <SheetHeader className="text-left">
