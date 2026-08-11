@@ -29,12 +29,22 @@ export const Route = createFileRoute("/")({
 const PREVIEW = simulatePaths(["stay_biology", "switch_cs", "cs_minor"], { profile: DEMO_STUDENT });
 
 function Landing() {
-  const { loadDemoStudent } = useFork();
+  const { loadDemoStudent, loadSampleStudent, startBlank } = useFork();
   const navigate = useNavigate();
 
   const startDemo = (to: "/home" | "/what-if") => {
     loadDemoStudent();
     void navigate({ to });
+  };
+
+  const startSample = () => {
+    loadSampleStudent();
+    void navigate({ to: "/what-if", search: {} });
+  };
+
+  const startFresh = () => {
+    startBlank();
+    void navigate({ to: "/profile" });
   };
 
   return (
@@ -71,6 +81,12 @@ function Landing() {
                 onClick={() => startDemo("/what-if")}
               >
                 See an example <ArrowRight className="size-4" />
+              </Button>
+              <Button size="lg" variant="outline" className="gap-2 rounded-full px-6" onClick={startSample}>
+                Sample profile (no demo student) <ArrowRight className="size-4" />
+              </Button>
+              <Button size="lg" variant="ghost" className="rounded-full px-4" onClick={startFresh}>
+                Start blank
               </Button>
               <Button asChild size="lg" variant="ghost" className="rounded-full px-4">
                 <Link to="/import">Import my academic history</Link>
