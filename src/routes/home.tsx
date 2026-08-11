@@ -101,23 +101,6 @@ function MyPath() {
         </div>
       </section>
 
-      <section className="mt-10">
-        <h2 className="font-display text-2xl">Quick What If?</h2>
-        <div className="mt-4 flex flex-wrap gap-2">
-          {QUICK.map((id) => {
-            const scenario = scenarioById(id);
-            if (!scenario) return null;
-            return (
-              <Button key={id} variant="outline" className="rounded-full" onClick={() => go(id)}>
-                {scenario.chip}
-              </Button>
-            );
-          })}
-          <Button className="gap-1.5 rounded-full" onClick={() => void navigate({ to: "/what-if" })}>
-            <Sparkles className="size-4" /> Ask my own question
-          </Button>
-        </div>
-      </section>
 
       <section className="mt-10 grid gap-4 sm:grid-cols-3">
         <Fact label="Current courses" value={profile.courses.filter((c) => c.status === "in_progress").length} sub="in progress this term" />
