@@ -400,7 +400,7 @@ export function whyThisPath(path: SimulatedPath, profile: StudentProfile, priori
     );
   } else {
     lines.push(
-      `It holds the ${path.graduationDate} graduation date for ${formatDelta(path.additionalCost)} and ${path.additionalCredits > 0 ? `${path.additionalCredits} additional credits` : "no additional credits"}.`,
+      `It holds the ${path.graduationDate} graduation date, ${path.additionalCost === 0 ? "with no change in estimated tuition" : `for ${formatDelta(path.additionalCost)} in estimated tuition`}, and ${path.additionalCredits > 0 ? `${path.additionalCredits} additional credits` : "no additional credits"}.`,
     );
   }
 
