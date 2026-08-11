@@ -76,14 +76,9 @@ function PlanPage() {
           </p>
           <Button
             className="mt-4 gap-1.5"
-            onClick={() =>
-              void navigate({
-                to: "/what-if",
-                search: { q: `What if I don't get ${waitlisted[0]?.code ?? "my waitlisted course"}?` },
-              })
-            }
+            onClick={() => void navigate({ to: "/path" })}
           >
-            Explore the Fork <ArrowRight className="size-4" />
+            Review your path <ArrowRight className="size-4" />
           </Button>
         </section>
       )}
