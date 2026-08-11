@@ -40,7 +40,7 @@ function Landing() {
 
   const startFresh = () => {
     startBlank();
-    void navigate({ to: "/profile" });
+    void navigate({ to: "/auth" });
   };
 
   return (
