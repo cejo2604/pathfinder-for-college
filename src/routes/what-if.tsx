@@ -151,46 +151,11 @@ function WhatIfPage() {
         <p className="mt-3 text-muted-foreground">
           Ask about a decision you are actually weighing. Fork branches your future and computes what each option costs.
         </p>
-
-        <form onSubmit={submit} className="mt-6 flex flex-col gap-2 sm:flex-row">
-          <Input
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            placeholder="What if I switch to Computer Science?"
-            aria-label="Describe your what-if scenario"
-            className="h-14 rounded-full border-border bg-card px-6 text-base shadow-lift"
-          />
-          <Button type="submit" size="lg" className="h-14 gap-2 rounded-full px-7">
-            <Sparkles className="size-4" /> Simulate
-          </Button>
-        </form>
-
-        <div className="mt-4 flex flex-col items-center gap-2">
-          <Select
-            value={activeScenarioId ?? ""}
-            onValueChange={(value) => {
-              const s = SCENARIOS.find((x) => x.id === value);
-              if (s) start(s.id, s.question);
-            }}
-          >
-            <SelectTrigger className="w-full max-w-sm rounded-full border-border bg-card px-4 text-sm shadow-sm">
-              <SelectValue placeholder="Choose a quick scenario" />
-            </SelectTrigger>
-            <SelectContent className="rounded-xl border-border bg-card">
-              {SCENARIOS.map((s) => (
-                <SelectItem key={s.id} value={s.id} className="rounded-lg text-sm">
-                  {s.chip}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <p className="text-xs text-muted-foreground">Or type your own question above and press Simulate.</p>
-        </div>
       </div>
 
       {phase === "idle" && (
         <p className="mx-auto mt-16 max-w-md text-center text-sm text-muted-foreground">
-          Pick a scenario above to branch {profile.name.split(" ")[0]}&apos;s future.
+          Pick a scenario below to branch {profile.name.split(" ")[0]}&apos;s future.
         </p>
       )}
 
@@ -303,6 +268,49 @@ function WhatIfPage() {
           )}
         </div>
       )}
+
+      {phase === "results" && (
+        <p className="text-center text-sm text-muted-foreground">
+          Ask another question below or pick a quick scenario to keep exploring.
+        </p>
+      )}
+
+      <div className="mx-auto mt-8 max-w-3xl">
+        <form onSubmit={submit} className="flex flex-col gap-2 sm:flex-row">
+          <Input
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            placeholder="What if I switch to Computer Science?"
+            aria-label="Describe your what-if scenario"
+            className="h-14 rounded-full border-border bg-card px-6 text-base shadow-lift"
+          />
+          <Button type="submit" size="lg" className="h-14 gap-2 rounded-full px-7">
+            <Sparkles className="size-4" /> Simulate
+          </Button>
+        </form>
+
+        <div className="mt-4 flex flex-col items-center gap-2">
+          <Select
+            value={activeScenarioId ?? ""}
+            onValueChange={(value) => {
+              const s = SCENARIOS.find((x) => x.id === value);
+              if (s) start(s.id, s.question);
+            }}
+          >
+            <SelectTrigger className="w-full max-w-sm rounded-full border-border bg-card px-4 text-sm shadow-sm">
+              <SelectValue placeholder="Choose a quick scenario" />
+            </SelectTrigger>
+            <SelectContent className="rounded-xl border-border bg-card">
+              {SCENARIOS.map((s) => (
+                <SelectItem key={s.id} value={s.id} className="rounded-lg text-sm">
+                  {s.chip}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <p className="text-xs text-muted-foreground">Or type your own question above and press Simulate.</p>
+        </div>
+      </div>
 
       <WhyPathSheet path={whyPath} open={Boolean(whyId)} onOpenChange={(open) => !open && setWhyId(null)} />
     </ForkShell>
