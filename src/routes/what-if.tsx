@@ -21,8 +21,9 @@ export const Route = createFileRoute("/what-if")({
   validateSearch: (search: Record<string, unknown>) => ({
     q: typeof search["q"] === "string" ? (search["q"] as string) : undefined,
   }),
-
+  head: () => ({
     meta: [
+
       { title: "What If? — Fork" },
       {
         name: "description",
