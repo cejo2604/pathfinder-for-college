@@ -100,12 +100,21 @@ function WhatIfPage() {
   );
   const alternative = selected && cheapest && selected.id !== cheapest.id ? cheapest : (ranked[1] ?? null);
 
+  // AI only routes the sentence to a scenario; the engine owns every number.
+  // If it is slow or unavailable, the deterministic keyword parse still runs.
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!input.trim()) return;
-    const parsed = parseScenario(input);
-    start(parsed.id, input.trim());
+    const text = input.trim();
+    if (!text) return;
+    const fallback = parseScenario(text);
+    start(fallback.id, text);
+    void classify({ data: { text } })
+      .then((result) => {
+        if (result.scenarioId !== fallback.id) start(result.scenarioId, text);
+      })
+      .catch(() => undefined);
   };
+
 
   return (
     <ForkShell>
