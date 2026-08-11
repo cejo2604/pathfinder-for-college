@@ -197,6 +197,7 @@ export function ForkProvider({ children }: { children: ReactNode }) {
       authLoading,
       signedIn,
       signOut: async () => {
+        if (signedIn) flushProfileSave();
         await supabase.auth.signOut();
         setState(initialState);
       },
