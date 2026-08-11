@@ -22,21 +22,12 @@ export const Route = createFileRoute("/home")({
 });
 
 const DECISION_PATHS = ["stay_biology", "switch_cs", "cs_minor"];
-const QUICK = ["switch_major", "add_minor", "graduate_early", "minimize_cost"];
 
 function MyPath() {
   const profile = useForkProfile();
-  const { profile: loaded, loadDemoStudent, careerId, priorities, runScenario } = useFork();
-  const navigate = useNavigate();
+  const { profile: loaded, loadDemoStudent, careerId, priorities } = useFork();
 
   const options = simulatePaths(DECISION_PATHS, { profile, careerId, priorities });
-
-  const go = (scenarioId: string) => {
-    const scenario = scenarioById(scenarioId);
-    if (!scenario) return;
-    runScenario(scenario.id, scenario.question);
-    void navigate({ to: "/what-if" });
-  };
 
   return (
     <ForkShell>
