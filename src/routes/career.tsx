@@ -1,9 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 
 import { ForkShell } from "@/components/fork/ForkShell";
+import { RelevantCourses } from "@/components/fork/RelevantCourses";
 import { cn } from "@/lib/utils";
 import { CAREERS, SKILL_LABELS, courseByCode } from "@/lib/fork/data";
-import { useFork } from "@/lib/fork/state";
+import { useFork, useForkProfile } from "@/lib/fork/state";
 
 export const Route = createFileRoute("/career")({
   head: () => ({
@@ -26,6 +27,7 @@ export const Route = createFileRoute("/career")({
 
 function CareerPage() {
   const { careerId, setCareerId } = useFork();
+  const profile = useForkProfile();
 
   return (
     <ForkShell>
@@ -110,6 +112,8 @@ function CareerPage() {
           </article>
         ))}
       </div>
+
+      <RelevantCourses className="mt-8" careerId={careerId} profile={profile} defaultOpen />
     </ForkShell>
   );
 }
