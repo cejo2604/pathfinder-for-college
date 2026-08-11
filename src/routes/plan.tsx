@@ -7,7 +7,7 @@ import { AssumptionsPanel } from "@/components/fork/WhyPath";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
-import { formatCurrency, simulatePath } from "@/lib/fork/engine";
+import { formatCurrency, simulatePath, waitlistedCourses } from "@/lib/fork/engine";
 import { useFork, useForkProfile } from "@/lib/fork/state";
 
 export const Route = createFileRoute("/plan")({
