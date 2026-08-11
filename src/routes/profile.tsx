@@ -3,7 +3,9 @@ import { Sparkles, Upload } from "lucide-react";
 import { useState } from "react";
 
 
+import { AutofillField } from "@/components/fork/AutofillField";
 import { PriorityPanel } from "@/components/fork/Decision";
+
 import { ForkShell } from "@/components/fork/ForkShell";
 import { SchoolField } from "@/components/fork/SchoolField";
 import { Button } from "@/components/ui/button";
