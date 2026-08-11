@@ -47,9 +47,6 @@ function Landing() {
     <div className="min-h-screen bg-background">
       <header className="mx-auto flex h-20 max-w-6xl items-center justify-between px-4 sm:px-6">
         <ForkLogo />
-        <Link to="/what-if" className="text-sm font-medium text-muted-foreground hover:text-foreground">
-          What If?
-        </Link>
       </header>
 
       <section className="mx-auto max-w-6xl px-4 pb-8 pt-8 sm:px-6 sm:pt-16">
