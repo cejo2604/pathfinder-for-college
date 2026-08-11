@@ -71,7 +71,7 @@ function MyPath() {
           {options.map((path) => (
             <div
               key={path.id}
-              className="rounded-2xl border border-border bg-background p-4 text-left"
+              className="flex flex-col rounded-2xl border border-border bg-background p-4 text-left"
             >
               <p className="font-display text-lg leading-tight">
                 {path.id === "stay_biology"
@@ -96,9 +96,18 @@ function MyPath() {
                   <dd className="font-medium tabular-nums">{path.scores.careerFit} / 100</dd>
                 </div>
               </dl>
+              <Button
+                size="sm"
+                variant="outline"
+                className="mt-4 w-full gap-1.5"
+                onClick={() => navigate({ to: "/what-if", search: { q: SIMULATE_QUESTIONS[path.id] ?? path.label } })}
+              >
+                <Sparkles className="size-3.5" /> Simulate this
+              </Button>
             </div>
           ))}
         </div>
+
       </section>
 
 
