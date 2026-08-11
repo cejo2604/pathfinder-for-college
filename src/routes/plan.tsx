@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { CalendarCheck, Check, GraduationCap } from "lucide-react";
+import { ArrowRight, CalendarCheck, Check, GraduationCap } from "lucide-react";
 
 import { ForkShell } from "@/components/fork/ForkShell";
 import { RelevantCourses } from "@/components/fork/RelevantCourses";
