@@ -18,9 +18,8 @@ import { useFork, useForkProfile } from "@/lib/fork/state";
 
 export const Route = createFileRoute("/what-if")({
   // `?q=` lets other screens (like a waitlist warning) pre-fill the question.
-  validateSearch: (search: Record<string, unknown>) => ({
-    q: typeof search["q"] === "string" ? (search["q"] as string) : undefined,
-  }),
+  validateSearch: (search: Record<string, unknown>): { q?: string } =>
+    typeof search["q"] === "string" ? { q: search["q"] as string } : {},
   head: () => ({
     meta: [
 
@@ -270,10 +269,10 @@ function WhatIfPage() {
                             program: selected.program,
                             snapshot: selected,
                           });
-                          void navigate({ to: "/plan" });
+                          void navigate({ to: "/path" });
                         }}
                       >
-                        Build my plan <ArrowRight className="size-4" />
+                        See my full path <ArrowRight className="size-4" />
                       </Button>
                       <Button variant="outline" onClick={() => setWhyId(selected.id)}>
                         Why this path?

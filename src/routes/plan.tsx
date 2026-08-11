@@ -52,6 +52,10 @@ function PlanPage() {
           {path.program} · {path.creditsRemaining} credits remaining ·{" "}
           {formatCurrency(path.estimatedCost)} estimated tuition · graduating {path.graduationDate}
         </p>
+        <Button variant="outline" className="mt-4 gap-1.5" onClick={() => void navigate({ to: "/path" })}>
+          See the full path breakdown <ArrowRight className="size-4" />
+        </Button>
+
         {!chosenPathId && (
           <p className="mt-4 rounded-xl bg-muted px-3 py-2 text-sm">
             No path chosen yet — this is the plan for the CS minor path.{" "}

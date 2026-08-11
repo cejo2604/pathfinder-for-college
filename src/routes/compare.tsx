@@ -167,10 +167,10 @@ function ComparePage() {
                     program: path.program,
                     snapshot: path,
                   });
-                  void navigate({ to: "/plan" });
+                  void navigate({ to: "/path" });
                 }}
               >
-                Build my plan <ArrowRight className="size-4" />
+                See my full path <ArrowRight className="size-4" />
               </Button>
               <Button variant="outline" onClick={() => setWhyId(path.id)}>
                 Why this path?
