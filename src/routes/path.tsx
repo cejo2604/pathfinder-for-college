@@ -273,9 +273,6 @@ function PathBreakdownPage() {
             <Button variant="outline" onClick={() => void navigate({ to: "/compare" })}>
               Compare against other paths
             </Button>
-            <Button variant="ghost" className="gap-1.5" onClick={() => void navigate({ to: "/what-if" })}>
-              <CalendarCheck className="size-4" /> Run another what-if
-            </Button>
           </div>
           <PlanningEstimateNote className="mt-4" />
         </section>
