@@ -11,7 +11,9 @@ import { SchoolField } from "@/components/fork/SchoolField";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { DEGREES, FIELDS_OF_STUDY, MINORS, YEARS } from "@/lib/fork/academics";
 import { courseByCode } from "@/lib/fork/data";
+
 import { useFork, useForkProfile } from "@/lib/fork/state";
 
 export const Route = createFileRoute("/profile")({
