@@ -1,3 +1,7 @@
+import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
+import { Loader2, Sparkles } from "lucide-react";
+
 import { PlanningEstimateNote } from "@/components/fork/ForkShell";
 import { ScorePanel } from "@/components/fork/Scores";
 import {
@@ -8,9 +12,11 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
-import type { StudentProfile } from "@/lib/fork/data";
-import { evidenceFor, whyThisPath, type SimulatedPath } from "@/lib/fork/engine";
+import type { Priority, StudentProfile } from "@/lib/fork/data";
+import { interpretPath } from "@/lib/fork/ai.functions";
+import { evidenceFor, pathFactSheet, whyThisPath, type SimulatedPath } from "@/lib/fork/engine";
 import { useFork } from "@/lib/fork/state";
+
 
 const KIND_META = {
   verified: {
