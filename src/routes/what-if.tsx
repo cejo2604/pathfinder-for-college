@@ -85,7 +85,15 @@ function WhatIfPage() {
     timers.current.push(setTimeout(() => setRevealBest(true), 2400));
   };
 
+  // A pre-filled question (e.g. a waitlist warning on the Plan screen) runs first.
+  useEffect(() => {
+    if (!hydrated || activeScenarioId || phase !== "idle" || !prefilled) return;
+    start(parseScenario(prefilled).id, prefilled);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hydrated, prefilled]);
+
   // A scenario chosen elsewhere (My Path quick chips) runs on arrival.
+
   useEffect(() => {
     if (!hydrated || activeScenarioId || phase !== "idle" || !scenarioId) return;
     const scenario = scenarioById(scenarioId);
