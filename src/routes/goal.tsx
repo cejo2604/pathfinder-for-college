@@ -70,7 +70,7 @@ function GoalPage() {
 
   const pick = (category: string) => {
     setProfile({ goalCategory: category, goal: `I want to work in ${category.toLowerCase()}.` });
-    void navigate({ to: "/what-if" });
+    void navigate({ to: "/home" });
   };
 
   const suggestion = answers.length === DISCOVERY.length ? DISCOVERY_RESULT[answers[0] ?? 0] : null;
@@ -123,7 +123,7 @@ function GoalPage() {
             e.preventDefault();
             if (!freeText.trim()) return;
             setProfile({ goal: freeText.trim(), goalCategory: freeText.trim().replace(/^i want to\s*/i, "") });
-            void navigate({ to: "/what-if" });
+            void navigate({ to: "/home" });
           }}
         >
           <Input
@@ -193,7 +193,7 @@ function GoalPage() {
                     onClick={() => {
                       setCareerId(career.id);
                       setProfile({ goal: `I want to work as a ${career.title.toLowerCase()}.`, goalCategory: career.industry });
-                      void navigate({ to: "/what-if" });
+                      void navigate({ to: "/home" });
                     }}
                   >
                     {career.title}
