@@ -11,13 +11,13 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
 import { careerById, PRIORITY_LABELS } from "@/lib/fork/data";
 import {
-  BASELINE_PATH_ID,
   formatCurrency,
   formatDelta,
   priorityCareerPlan,
   simulatePath,
   whyThisPath,
 } from "@/lib/fork/engine";
+import { BASELINE_PATH_ID } from "@/lib/fork/paths";
 import { useFork, useForkProfile } from "@/lib/fork/state";
 
 export const Route = createFileRoute("/path")({
