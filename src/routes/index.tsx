@@ -154,7 +154,7 @@ function Landing() {
           {[
             {
               title: "Ask a real question",
-              body: "What if I switch majors? Add a minor? Graduate early? Type it, or pick a suggested scenario.",
+              body: "Explore different paths: switch majors, add a minor, graduate early, or minimize cost. Type your own scenario or pick a suggested one.",
             },
             {
               title: "Watch the futures branch",
