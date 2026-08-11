@@ -8,11 +8,13 @@ import { PriorityPanel } from "@/components/fork/Decision";
 
 import { ForkShell } from "@/components/fork/ForkShell";
 import { SchoolField } from "@/components/fork/SchoolField";
+import { TagField } from "@/components/fork/TagField";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { DEGREES, FIELDS_OF_STUDY, MINORS, YEARS } from "@/lib/fork/academics";
 import { courseByCode } from "@/lib/fork/data";
+import { CAREER_INTEREST_OPTIONS, INTEREST_OPTIONS, SKILL_OPTIONS } from "@/lib/fork/interests";
 
 import { useFork, useForkProfile } from "@/lib/fork/state";
 
@@ -181,10 +183,28 @@ function ProfilePage() {
 
         <section className="rounded-2xl border border-border bg-card p-5">
           <h2 className="font-display text-xl">Interests & strengths</h2>
-          <div className="mt-4 space-y-4 text-sm">
-            <TagList title="Interests" items={profile.interests} />
-            <TagList title="Career interests" items={profile.careerInterests} />
-            <TagList title="Skills" items={profile.skills} />
+          <p className="mt-1 text-sm text-muted-foreground">
+            Search a section to add what fits you — suggestions autofill, and anything you type is kept.
+          </p>
+          <div className="mt-4 space-y-5 text-sm">
+            <TagField
+              label="Interests"
+              items={profile.interests}
+              options={INTEREST_OPTIONS}
+              onChange={(interests) => setProfile({ interests })}
+            />
+            <TagField
+              label="Career interests"
+              items={profile.careerInterests}
+              options={CAREER_INTEREST_OPTIONS}
+              onChange={(careerInterests) => setProfile({ careerInterests })}
+            />
+            <TagField
+              label="Skills"
+              items={profile.skills}
+              options={SKILL_OPTIONS}
+              onChange={(skills) => setProfile({ skills })}
+            />
           </div>
           <Button variant="outline" className="mt-5" onClick={() => void navigate({ to: "/goal" })}>
             Change my goal
@@ -267,17 +287,3 @@ function NumberField({
 
 
 
-function TagList({ title, items }: { title: string; items: string[] }) {
-  return (
-    <div>
-      <h3 className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">{title}</h3>
-      <ul className="mt-2 flex flex-wrap gap-2">
-        {items.map((item) => (
-          <li key={item} className="rounded-full bg-muted px-3 py-1">
-            {item}
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-}
