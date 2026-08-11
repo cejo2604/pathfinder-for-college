@@ -744,4 +744,3 @@ function ConflictPanel({
   );
 }
 
-export { Upload };
