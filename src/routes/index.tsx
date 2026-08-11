@@ -71,7 +71,15 @@ function Landing() {
             </p>
 
             <div className="mt-8 flex flex-wrap items-center gap-3">
-              <Button size="lg" className="gap-2 rounded-full px-6 shadow-lift" onClick={() => startDemo("/home")}>
+              <Button size="lg" className="gap-2 rounded-full px-8 shadow-lift" onClick={startFresh}>
+                Start here <ArrowRight className="size-4" />
+              </Button>
+              <Button
+                size="lg"
+                variant="outline"
+                className="gap-2 rounded-full px-6"
+                onClick={() => startDemo("/home")}
+              >
                 <Sparkles className="size-4" /> Try a demo student
               </Button>
               <Button
@@ -82,11 +90,8 @@ function Landing() {
               >
                 See an example <ArrowRight className="size-4" />
               </Button>
-              <Button size="lg" variant="outline" className="gap-2 rounded-full px-6" onClick={startSample}>
-                Sample profile (no demo student) <ArrowRight className="size-4" />
-              </Button>
-              <Button size="lg" variant="ghost" className="rounded-full px-4" onClick={startFresh}>
-                Start blank
+              <Button size="lg" variant="ghost" className="rounded-full px-4" onClick={startSample}>
+                Sample profile
               </Button>
               <Button asChild size="lg" variant="ghost" className="rounded-full px-4">
                 <Link to="/import">Import my academic history</Link>
