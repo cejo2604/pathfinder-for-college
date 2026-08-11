@@ -16,6 +16,7 @@ import { Route as CompareRouteImport } from './routes/compare'
 import { Route as GoalRouteImport } from './routes/goal'
 import { Route as HomeRouteImport } from './routes/home'
 import { Route as ImportRouteImport } from './routes/import'
+import { Route as PathRouteImport } from './routes/path'
 import { Route as PlanRouteImport } from './routes/plan'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as WhatIfRouteImport } from './routes/what-if'
@@ -55,6 +56,11 @@ const ImportRoute = ImportRouteImport.update({
   path: '/import',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PathRoute = PathRouteImport.update({
+  id: '/path',
+  path: '/path',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PlanRoute = PlanRouteImport.update({
   id: '/plan',
   path: '/plan',
@@ -79,6 +85,7 @@ export interface FileRoutesByFullPath {
   '/goal': typeof GoalRoute
   '/home': typeof HomeRoute
   '/import': typeof ImportRoute
+  '/path': typeof PathRoute
   '/plan': typeof PlanRoute
   '/profile': typeof ProfileRoute
   '/what-if': typeof WhatIfRoute
@@ -91,6 +98,7 @@ export interface FileRoutesByTo {
   '/goal': typeof GoalRoute
   '/home': typeof HomeRoute
   '/import': typeof ImportRoute
+  '/path': typeof PathRoute
   '/plan': typeof PlanRoute
   '/profile': typeof ProfileRoute
   '/what-if': typeof WhatIfRoute
@@ -104,6 +112,7 @@ export interface FileRoutesById {
   '/goal': typeof GoalRoute
   '/home': typeof HomeRoute
   '/import': typeof ImportRoute
+  '/path': typeof PathRoute
   '/plan': typeof PlanRoute
   '/profile': typeof ProfileRoute
   '/what-if': typeof WhatIfRoute
@@ -118,6 +127,7 @@ export interface FileRouteTypes {
     | '/goal'
     | '/home'
     | '/import'
+    | '/path'
     | '/plan'
     | '/profile'
     | '/what-if'
@@ -130,6 +140,7 @@ export interface FileRouteTypes {
     | '/goal'
     | '/home'
     | '/import'
+    | '/path'
     | '/plan'
     | '/profile'
     | '/what-if'
@@ -142,6 +153,7 @@ export interface FileRouteTypes {
     | '/goal'
     | '/home'
     | '/import'
+    | '/path'
     | '/plan'
     | '/profile'
     | '/what-if'
@@ -155,6 +167,7 @@ export interface RootRouteChildren {
   GoalRoute: typeof GoalRoute
   HomeRoute: typeof HomeRoute
   ImportRoute: typeof ImportRoute
+  PathRoute: typeof PathRoute
   PlanRoute: typeof PlanRoute
   ProfileRoute: typeof ProfileRoute
   WhatIfRoute: typeof WhatIfRoute
@@ -211,6 +224,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ImportRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/path': {
+      id: '/path'
+      path: '/path'
+      fullPath: '/path'
+      preLoaderRoute: typeof PathRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/plan': {
       id: '/plan'
       path: '/plan'
@@ -243,6 +263,7 @@ const rootRouteChildren: RootRouteChildren = {
   GoalRoute: GoalRoute,
   HomeRoute: HomeRoute,
   ImportRoute: ImportRoute,
+  PathRoute: PathRoute,
   PlanRoute: PlanRoute,
   ProfileRoute: ProfileRoute,
   WhatIfRoute: WhatIfRoute,
@@ -250,3 +271,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
