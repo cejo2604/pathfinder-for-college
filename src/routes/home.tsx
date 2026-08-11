@@ -1,9 +1,9 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { ArrowRight, Sparkles } from "lucide-react";
+import { createFileRoute } from "@tanstack/react-router";
+import { Sparkles } from "lucide-react";
 
 import { ForkShell } from "@/components/fork/ForkShell";
 import { Button } from "@/components/ui/button";
-import { formatCurrency, formatDelta, scenarioById, simulatePaths } from "@/lib/fork/engine";
+import { formatCurrency, formatDelta, simulatePaths } from "@/lib/fork/engine";
 import { useFork, useForkProfile } from "@/lib/fork/state";
 
 export const Route = createFileRoute("/home")({
