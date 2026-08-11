@@ -45,6 +45,8 @@ type Phase = "idle" | "analyzing" | "results";
 function WhatIfPage() {
   const profile = useForkProfile();
   const navigate = useNavigate();
+  const { q: prefilled } = Route.useSearch();
+
   const {
     careerId,
     priorities,
