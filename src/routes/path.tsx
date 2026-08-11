@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { ArrowRight, CalendarCheck, GraduationCap, ListChecks, Lightbulb, TriangleAlert } from "lucide-react";
+import { ArrowRight, GraduationCap, ListChecks, Lightbulb, TriangleAlert } from "lucide-react";
 
 import { ForkShell, PlanningEstimateNote } from "@/components/fork/ForkShell";
 import { PriorityPlan } from "@/components/fork/PriorityPlan";
