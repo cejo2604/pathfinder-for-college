@@ -1,6 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { Sparkles, Upload } from "lucide-react";
+import { ArrowRight, Sparkles, Upload } from "lucide-react";
 import { useState } from "react";
+
 
 
 import { AutofillField } from "@/components/fork/AutofillField";
@@ -220,8 +221,14 @@ function ProfilePage() {
           </Button>
         </section>
 
-        <PriorityPanel priorities={priorities} onChange={setPriorities} />
+        <div className="flex flex-col gap-4">
+          <PriorityPanel priorities={priorities} onChange={setPriorities} />
+          <Button className="w-full gap-1.5" size="lg" onClick={() => void navigate({ to: "/home" })}>
+            Create my profile <ArrowRight className="size-4" />
+          </Button>
+        </div>
       </div>
+
     </ForkShell>
   );
 }
