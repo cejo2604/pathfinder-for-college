@@ -248,7 +248,13 @@ function WhatIfPage() {
                       <Button
                         className="gap-2"
                         onClick={() => {
-                          choosePath(selected.id);
+                          choosePath(selected.id, {
+                            scenarioId: scenarioId ?? selected.id,
+                            question: scenarioQuestion ?? selected.name,
+                            pathName: selected.name,
+                            program: selected.program,
+                            snapshot: selected,
+                          });
                           void navigate({ to: "/plan" });
                         }}
                       >

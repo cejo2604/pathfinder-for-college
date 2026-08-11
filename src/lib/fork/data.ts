@@ -58,7 +58,7 @@ export interface Course {
 }
 
 /** Verified institutional catalog subset (demo dataset). */
-export const COURSES: Course[] = [
+export let COURSES: Course[] = [
   { code: "BIOL 101", title: "Principles of Biology I", credits: 4, prerequisites: [] },
   { code: "BIOL 102", title: "Principles of Biology II", credits: 4, prerequisites: ["BIOL 101"] },
   { code: "BIOL 201", title: "Genetics", credits: 4, prerequisites: ["BIOL 102"] },
@@ -96,7 +96,7 @@ export interface DegreeProgram {
   requiredCredits: number;
 }
 
-export const PROGRAMS: DegreeProgram[] = [
+export let PROGRAMS: DegreeProgram[] = [
   { id: "bio_bs", name: "Biology, B.S.", kind: "major", requiredCredits: 120 },
   { id: "cs_bs", name: "Computer Science, B.S.", kind: "major", requiredCredits: 120 },
   { id: "cs_minor", name: "Computer Science minor", kind: "minor", requiredCredits: 18 },
@@ -202,7 +202,7 @@ export interface Career {
   adjacentCareers: string[];
 }
 
-export const CAREERS: Career[] = [
+export let CAREERS: Career[] = [
   {
     id: "healthcare_data_scientist",
     title: "Healthcare data scientist",
@@ -287,3 +287,14 @@ export const CAREERS: Career[] = [
 
 export const careerById = (id: string) => CAREERS.find((c) => c.id === id);
 export const DEFAULT_CAREER_ID = "healthcare_data_scientist";
+
+/** Catalog loaded from the database replaces the bundled defaults in place. */
+export function applyCatalog(catalog: {
+  courses?: Course[];
+  programs?: DegreeProgram[];
+  careers?: Career[];
+}) {
+  if (catalog.courses?.length) COURSES = catalog.courses;
+  if (catalog.programs?.length) PROGRAMS = catalog.programs;
+  if (catalog.careers?.length) CAREERS = catalog.careers;
+}

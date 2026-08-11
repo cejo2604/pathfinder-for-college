@@ -11,6 +11,8 @@ import { useEffect, type ReactNode } from "react";
 
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ForkProvider } from "@/lib/fork/state";
+import { applyCatalog } from "@/lib/fork/data";
+import { getCatalog } from "@/lib/fork/catalog.functions";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 
@@ -73,6 +75,18 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
 }
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
+  // Institutional catalog is loaded from the database, then handed to the
+  // deterministic engine before any screen renders.
+  loader: async () => {
+    try {
+      const catalog = await getCatalog();
+      applyCatalog(catalog);
+      return catalog;
+    } catch (error) {
+      console.error("Could not load catalog from the database", error);
+      return null;
+    }
+  },
   head: () => ({
     meta: [
       { charSet: "utf-8" },
@@ -124,6 +138,8 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const catalog = Route.useLoaderData();
+  if (catalog) applyCatalog(catalog);
 
   return (
     <QueryClientProvider client={queryClient}>

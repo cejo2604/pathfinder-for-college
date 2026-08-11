@@ -31,7 +31,17 @@ export const Route = createFileRoute("/compare")({
 function ComparePage() {
   const profile = useForkProfile();
   const navigate = useNavigate();
-  const { comparison, toggleComparison, setComparison, careerId, priorities, setPriorities, choosePath } = useFork();
+  const {
+    comparison,
+    toggleComparison,
+    setComparison,
+    careerId,
+    priorities,
+    setPriorities,
+    choosePath,
+    scenarioId,
+    scenarioQuestion,
+  } = useFork();
   const [whyId, setWhyId] = useState<string | null>(null);
 
   const selectedIds = comparison.length ? comparison : ["stay_biology", "switch_cs", "cs_minor"];
@@ -150,7 +160,13 @@ function ComparePage() {
               <Button
                 className="gap-1.5"
                 onClick={() => {
-                  choosePath(path.id);
+                  choosePath(path.id, {
+                    scenarioId: scenarioId ?? path.id,
+                    question: scenarioQuestion ?? path.name,
+                    pathName: path.name,
+                    program: path.program,
+                    snapshot: path,
+                  });
                   void navigate({ to: "/plan" });
                 }}
               >

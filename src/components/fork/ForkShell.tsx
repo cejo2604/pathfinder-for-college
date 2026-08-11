@@ -33,7 +33,7 @@ export function ForkLogo({ className }: { className?: string }) {
 
 export function ForkNav() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const { profile, reset } = useFork();
+  const { profile, reset, signedIn, signOut, session } = useFork();
 
   return (
     <header className="sticky top-0 z-40 border-b border-border/70 bg-background/85 backdrop-blur">
@@ -72,6 +72,9 @@ export function ForkNav() {
             <DropdownMenuContent align="end" className="w-52">
               <DropdownMenuLabel className="font-normal text-muted-foreground">
                 {profile?.name ?? "No student loaded"}
+                {signedIn && (
+                  <span className="mt-0.5 block truncate text-xs">{session?.user.email ?? "Signed in"}</span>
+                )}
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem asChild>
@@ -84,6 +87,13 @@ export function ForkNav() {
                 <Link to="/career">Career reference</Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
+              {signedIn ? (
+                <DropdownMenuItem onSelect={() => void signOut()}>Sign out</DropdownMenuItem>
+              ) : (
+                <DropdownMenuItem asChild>
+                  <Link to="/auth">Sign in to save your paths</Link>
+                </DropdownMenuItem>
+              )}
               <DropdownMenuItem onSelect={() => reset()}>Clear demo data</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

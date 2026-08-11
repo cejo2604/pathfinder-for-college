@@ -14,7 +14,246 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      careers: {
+        Row: {
+          adjacent_careers: string[]
+          coursework: string[]
+          created_at: string
+          description: string
+          entry_roles: string[]
+          id: string
+          industry: string
+          internship_ideas: string[]
+          portfolio_ideas: string[]
+          relevant_majors: string[]
+          relevant_minors: string[]
+          skill_weights: Json
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          adjacent_careers?: string[]
+          coursework?: string[]
+          created_at?: string
+          description: string
+          entry_roles?: string[]
+          id: string
+          industry: string
+          internship_ideas?: string[]
+          portfolio_ideas?: string[]
+          relevant_majors?: string[]
+          relevant_minors?: string[]
+          skill_weights?: Json
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          adjacent_careers?: string[]
+          coursework?: string[]
+          created_at?: string
+          description?: string
+          entry_roles?: string[]
+          id?: string
+          industry?: string
+          internship_ideas?: string[]
+          portfolio_ideas?: string[]
+          relevant_majors?: string[]
+          relevant_minors?: string[]
+          skill_weights?: Json
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      courses: {
+        Row: {
+          code: string
+          created_at: string
+          credits: number
+          prerequisites: string[]
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          credits: number
+          prerequisites?: string[]
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          credits?: number
+          prerequisites?: string[]
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      plan_actions: {
+        Row: {
+          action_key: string
+          created_at: string
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          action_key: string
+          created_at?: string
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          action_key?: string
+          created_at?: string
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          career_id: string | null
+          career_interests: string[]
+          courses: Json
+          created_at: string
+          credits_completed: number
+          degree: string
+          goal: string
+          goal_category: string
+          gpa: number
+          graduation_target: string
+          id: string
+          interests: string[]
+          major: string
+          minor: string | null
+          name: string
+          priorities: string[]
+          school: string
+          skills: string[]
+          updated_at: string
+          year: string
+        }
+        Insert: {
+          career_id?: string | null
+          career_interests?: string[]
+          courses?: Json
+          created_at?: string
+          credits_completed?: number
+          degree?: string
+          goal?: string
+          goal_category?: string
+          gpa?: number
+          graduation_target?: string
+          id: string
+          interests?: string[]
+          major?: string
+          minor?: string | null
+          name?: string
+          priorities?: string[]
+          school?: string
+          skills?: string[]
+          updated_at?: string
+          year?: string
+        }
+        Update: {
+          career_id?: string | null
+          career_interests?: string[]
+          courses?: Json
+          created_at?: string
+          credits_completed?: number
+          degree?: string
+          goal?: string
+          goal_category?: string
+          gpa?: number
+          graduation_target?: string
+          id?: string
+          interests?: string[]
+          major?: string
+          minor?: string | null
+          name?: string
+          priorities?: string[]
+          school?: string
+          skills?: string[]
+          updated_at?: string
+          year?: string
+        }
+        Relationships: []
+      }
+      programs: {
+        Row: {
+          created_at: string
+          id: string
+          kind: string
+          name: string
+          required_credits: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id: string
+          kind: string
+          name: string
+          required_credits: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          kind?: string
+          name?: string
+          required_credits?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      saved_paths: {
+        Row: {
+          created_at: string
+          id: string
+          is_chosen: boolean
+          path_id: string
+          path_name: string
+          program: string
+          question: string
+          scenario_id: string
+          snapshot: Json
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_chosen?: boolean
+          path_id: string
+          path_name: string
+          program?: string
+          question?: string
+          scenario_id: string
+          snapshot?: Json
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_chosen?: boolean
+          path_id?: string
+          path_name?: string
+          program?: string
+          question?: string
+          scenario_id?: string
+          snapshot?: Json
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
