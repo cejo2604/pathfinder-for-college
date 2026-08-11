@@ -31,6 +31,9 @@ function PlanPage() {
   const { chosenPathId, careerId, priorities, doneActions, toggleAction } = useFork();
 
   const path = simulatePath(chosenPathId ?? "cs_minor", { profile, careerId, priorities });
+  // Waitlisted seats come from the verified academic history, never predicted.
+  const waitlisted = waitlistedCourses(profile);
+
 
   return (
     <ForkShell>
