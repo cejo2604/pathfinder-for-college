@@ -56,15 +56,6 @@ function PlanPage() {
           See the full path breakdown <ArrowRight className="size-4" />
         </Button>
 
-        {!chosenPathId && (
-          <p className="mt-4 rounded-xl bg-muted px-3 py-2 text-sm">
-            No path chosen yet — this is the plan for the CS minor path.{" "}
-            <button className="font-medium underline" onClick={() => void navigate({ to: "/what-if" })}>
-              Run a what-if
-            </button>{" "}
-            to pick your own.
-          </p>
-        )}
       </header>
 
       {waitlisted.length > 0 && (
