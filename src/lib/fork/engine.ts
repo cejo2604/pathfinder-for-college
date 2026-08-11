@@ -9,6 +9,7 @@
 import {
   CAREERS,
   DEFAULT_CAREER_ID,
+  PRIORITY_LABELS,
   PRIORITY_ORDER,
   type Career,
   type Priority,
