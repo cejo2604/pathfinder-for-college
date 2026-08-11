@@ -133,3 +133,68 @@ export function WhyPathSheet({
     </Sheet>
   );
 }
+
+/**
+ * The only AI surface in the reasoning drawer: it interprets figures the
+ * deterministic engine already produced. Failures degrade silently — the
+ * engine's own explanation above is always present.
+ */
+function AiReading({
+  path,
+  profile,
+  priorities,
+  open,
+}: {
+  path: SimulatedPath;
+  profile: StudentProfile;
+  priorities: Priority[];
+  open: boolean;
+}) {
+  const interpret = useServerFn(interpretPath);
+  const facts = pathFactSheet(path, profile, priorities);
+
+  const { data, isPending, isError } = useQuery({
+    queryKey: ["interpret-path", path.id, facts],
+    enabled: open,
+    staleTime: Infinity,
+    retry: false,
+    queryFn: () =>
+      interpret({ data: { facts, question: `Should I consider ${path.name}?` } }),
+  });
+
+  const paragraphs = data?.paragraphs ?? [];
+  const failed = isError || Boolean(data?.error) || (!isPending && paragraphs.length === 0);
+
+  return (
+    <section className="rounded-2xl border border-primary/25 bg-primary/5 p-5">
+      <div className="flex items-center gap-2">
+        <Sparkles className="size-4 text-primary" />
+        <h4 className="font-display text-lg">In plain language</h4>
+      </div>
+      <p className="mt-1 text-xs text-muted-foreground">
+        Fork&apos;s AI reads the numbers above — it never calculates them.
+      </p>
+
+      {isPending && (
+        <p className="mt-3 flex items-center gap-2 text-sm text-muted-foreground">
+          <Loader2 className="size-4 animate-spin text-primary" /> Interpreting the tradeoffs…
+        </p>
+      )}
+
+      {failed && !isPending && (
+        <p className="mt-3 text-sm text-muted-foreground">
+          The written summary is unavailable right now. Every figure and the reasoning above still comes straight from
+          the simulation engine.
+        </p>
+      )}
+
+      {!isPending && paragraphs.length > 0 && (
+        <div className="mt-3 space-y-2.5 text-sm leading-relaxed">
+          {paragraphs.map((p) => (
+            <p key={p}>{p}</p>
+          ))}
+        </div>
+      )}
+    </section>
+  );
+}
