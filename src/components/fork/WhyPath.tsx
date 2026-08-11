@@ -15,7 +15,7 @@ import { cn } from "@/lib/utils";
 import type { Priority, StudentProfile } from "@/lib/fork/data";
 import { interpretPath } from "@/lib/fork/ai.functions";
 import { evidenceFor, pathFactSheet, whyThisPath, type SimulatedPath } from "@/lib/fork/engine";
-import { useFork } from "@/lib/fork/state";
+import { useFork, useForkProfile } from "@/lib/fork/state";
 
 
 const KIND_META = {
@@ -100,12 +100,13 @@ export function WhyPathSheet({
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
-  const { profile, priorities } = useFork();
+  const { priorities } = useFork();
+  const profile = useForkProfile();
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent className="w-full overflow-y-auto sm:max-w-xl">
-        {path && profile && (
+        {path && (
           <>
             <SheetHeader className="text-left">
               <SheetTitle className="font-display text-2xl">Why Fork surfaces {path.name}</SheetTitle>
