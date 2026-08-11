@@ -32,9 +32,9 @@ function Landing() {
   const { loadDemoStudent, startBlank } = useFork();
   const navigate = useNavigate();
 
-  const startDemo = (to: "/home" | "/what-if") => {
+  const startDemo = () => {
     loadDemoStudent();
-    void navigate({ to });
+    void navigate({ to: "/home" });
   };
 
 
