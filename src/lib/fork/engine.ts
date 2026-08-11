@@ -312,9 +312,23 @@ export const SCENARIOS: Scenario[] = [
     keywords: ["semester off", "gap", "break", "leave of absence", "pause", "time off"],
     framing: "The delay a break creates, next to the opposite choice.",
   },
+  {
+    id: "missed_prerequisite",
+    question: "What if I don't get a course I'm waitlisted for?",
+    chip: "Miss a waitlisted course",
+    pathIds: ["cs_minor", "stay_biology", "bio_health_informatics"],
+    keywords: ["waitlist", "waitlisted", "don't get", "do not get", "no seat", "seat", "closed section", "miss a course"],
+    framing: "What losing one seat does to the plan that depends on it.",
+  },
 ];
 
 export const scenarioById = (id: string) => SCENARIOS.find((s) => s.id === id);
+
+/** Waitlisted rows in the verified academic history, ordered by term. */
+export function waitlistedCourses(profile: StudentProfile) {
+  return profile.courses.filter((c) => c.status === "waitlisted");
+}
+
 
 /** Deterministic free-text parsing: keyword match, no model, no invented scenarios. */
 export function parseScenario(input: string): Scenario {
