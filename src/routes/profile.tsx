@@ -68,7 +68,12 @@ function ProfilePage() {
         <section className="rounded-2xl border border-border bg-card p-5">
           <h2 className="font-display text-xl">Academic</h2>
           <div className="mt-4 grid gap-4 sm:grid-cols-2">
-            <Field label="Name" value={profile.name} onChange={(name) => setProfile({ name })} />
+            <Field
+              label="Name"
+              value={profile.name}
+              placeholder="Your full name"
+              onChange={(name) => setProfile({ name })}
+            />
             <SchoolField value={profile.school} onChange={(school) => setProfile({ school })} />
             <AutofillField
               label="Degree"
@@ -104,6 +109,7 @@ function ProfilePage() {
             <Field
               label="Expected graduation"
               value={profile.graduationTarget}
+              placeholder="May 2028"
               onChange={(graduationTarget) => setProfile({ graduationTarget })}
             />
             <NumberField
@@ -111,6 +117,7 @@ function ProfilePage() {
               value={profile.creditsCompleted}
               step={1}
               max={300}
+              placeholder="e.g. 58"
               onCommit={(creditsCompleted) => setProfile({ creditsCompleted })}
             />
             <NumberField
@@ -119,8 +126,10 @@ function ProfilePage() {
               step={0.01}
               max={4.5}
               decimals={2}
+              placeholder="e.g. 3.60"
               onCommit={(gpa) => setProfile({ gpa })}
             />
+
 
           </div>
         </section>
@@ -217,17 +226,34 @@ function ProfilePage() {
   );
 }
 
-function Field({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
+function Field({
+  label,
+  value,
+  onChange,
+  placeholder,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  placeholder?: string;
+}) {
   const id = label.toLowerCase().replace(/\s+/g, "-");
   return (
     <div>
       <Label htmlFor={id} className="text-xs uppercase tracking-[0.1em] text-muted-foreground">
         {label}
       </Label>
-      <Input id={id} value={value} onChange={(e) => onChange(e.target.value)} className="mt-1.5" />
+      <Input
+        id={id}
+        value={value}
+        placeholder={placeholder}
+        onChange={(e) => onChange(e.target.value)}
+        className="mt-1.5"
+      />
     </div>
   );
 }
+
 
 /**
  * Numeric field that keeps the student's raw keystrokes while they type, so
@@ -241,6 +267,7 @@ function NumberField({
   min = 0,
   max,
   decimals = 0,
+  placeholder,
 }: {
   label: string;
   value: number;
@@ -249,6 +276,7 @@ function NumberField({
   min?: number;
   max?: number;
   decimals?: number;
+  placeholder?: string;
 }) {
   const id = label.toLowerCase().replace(/\s+/g, "-");
   const [draft, setDraft] = useState<string | null>(null);
@@ -257,6 +285,9 @@ function NumberField({
     const bounded = Math.min(max ?? Number.MAX_SAFE_INTEGER, Math.max(min, n));
     return decimals > 0 ? Number(bounded.toFixed(decimals)) : Math.round(bounded);
   };
+
+  // A zero here means "not entered yet", so the input stays visually empty.
+  const display = draft ?? (value === 0 ? "" : String(value));
 
   return (
     <div>
@@ -269,14 +300,16 @@ function NumberField({
         inputMode="decimal"
         step={step}
         min={min}
+        placeholder={placeholder}
         {...(max === undefined ? {} : { max })}
-        value={draft ?? String(value)}
+        value={display}
         onChange={(e) => {
           const raw = e.target.value;
           setDraft(raw);
           const parsed = Number(raw);
           // Only commit a complete number; "3." or "" stays in the draft.
-          if (raw !== "" && Number.isFinite(parsed)) onCommit(clamp(parsed));
+          if (raw === "") onCommit(0);
+          else if (Number.isFinite(parsed)) onCommit(clamp(parsed));
         }}
         onBlur={() => setDraft(null)}
         className="mt-1.5"
@@ -284,6 +317,7 @@ function NumberField({
     </div>
   );
 }
+
 
 
 
