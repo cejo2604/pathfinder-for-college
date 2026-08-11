@@ -71,7 +71,7 @@ function Landing() {
                 size="lg"
                 variant="outline"
                 className="gap-2 rounded-full px-6"
-                onClick={() => startDemo("/home")}
+                onClick={startDemo}
               >
                 <Sparkles className="size-4" /> Try a demo student
               </Button>
