@@ -258,6 +258,7 @@ function NumberField({
   min = 0,
   max,
   decimals = 0,
+  placeholder,
 }: {
   label: string;
   value: number;
@@ -266,6 +267,7 @@ function NumberField({
   min?: number;
   max?: number;
   decimals?: number;
+  placeholder?: string;
 }) {
   const id = label.toLowerCase().replace(/\s+/g, "-");
   const [draft, setDraft] = useState<string | null>(null);
@@ -274,6 +276,9 @@ function NumberField({
     const bounded = Math.min(max ?? Number.MAX_SAFE_INTEGER, Math.max(min, n));
     return decimals > 0 ? Number(bounded.toFixed(decimals)) : Math.round(bounded);
   };
+
+  // A zero here means "not entered yet", so the input stays visually empty.
+  const display = draft ?? (value === 0 ? "" : String(value));
 
   return (
     <div>
@@ -286,14 +291,16 @@ function NumberField({
         inputMode="decimal"
         step={step}
         min={min}
+        placeholder={placeholder}
         {...(max === undefined ? {} : { max })}
-        value={draft ?? String(value)}
+        value={display}
         onChange={(e) => {
           const raw = e.target.value;
           setDraft(raw);
           const parsed = Number(raw);
           // Only commit a complete number; "3." or "" stays in the draft.
-          if (raw !== "" && Number.isFinite(parsed)) onCommit(clamp(parsed));
+          if (raw === "") onCommit(0);
+          else if (Number.isFinite(parsed)) onCommit(clamp(parsed));
         }}
         onBlur={() => setDraft(null)}
         className="mt-1.5"
@@ -301,6 +308,7 @@ function NumberField({
     </div>
   );
 }
+
 
 
 
