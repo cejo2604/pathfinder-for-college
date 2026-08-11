@@ -13,6 +13,13 @@ import { PathCard } from "@/components/fork/PathCard";
 import { AssumptionsPanel, WhyPathSheet } from "@/components/fork/WhyPath";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { SCENARIOS, parseScenario, rankPaths, scenarioById, simulatePaths, type SimulatedPath } from "@/lib/fork/engine";
 import { useFork, useForkProfile } from "@/lib/fork/state";
 
@@ -158,21 +165,26 @@ function WhatIfPage() {
           </Button>
         </form>
 
-        <div className="mt-4 flex flex-wrap justify-center gap-2">
-          {SCENARIOS.map((s) => (
-            <button
-              key={s.id}
-              type="button"
-              onClick={() => start(s.id, s.question)}
-              className={
-                activeScenarioId === s.id
-                  ? "rounded-full border border-primary bg-primary/10 px-3.5 py-1.5 text-sm font-medium text-foreground"
-                  : "rounded-full border border-border bg-card px-3.5 py-1.5 text-sm text-muted-foreground transition-colors hover:border-primary/40 hover:text-foreground"
-              }
-            >
-              {s.chip}
-            </button>
-          ))}
+        <div className="mt-4 flex flex-col items-center gap-2">
+          <Select
+            value={activeScenarioId ?? ""}
+            onValueChange={(value) => {
+              const s = SCENARIOS.find((x) => x.id === value);
+              if (s) start(s.id, s.question);
+            }}
+          >
+            <SelectTrigger className="w-full max-w-sm rounded-full border-border bg-card px-4 text-sm shadow-sm">
+              <SelectValue placeholder="Choose a quick scenario" />
+            </SelectTrigger>
+            <SelectContent className="rounded-xl border-border bg-card">
+              {SCENARIOS.map((s) => (
+                <SelectItem key={s.id} value={s.id} className="rounded-lg text-sm">
+                  {s.chip}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <p className="text-xs text-muted-foreground">Or type your own question above and press Simulate.</p>
         </div>
       </div>
 
