@@ -3,6 +3,7 @@ import { Sparkles } from "lucide-react";
 
 import { PriorityPanel } from "@/components/fork/Decision";
 import { ForkShell } from "@/components/fork/ForkShell";
+import { SchoolField } from "@/components/fork/SchoolField";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -53,7 +54,7 @@ function ProfilePage() {
           <h2 className="font-display text-xl">Academic</h2>
           <div className="mt-4 grid gap-4 sm:grid-cols-2">
             <Field label="Name" value={profile.name} onChange={(name) => setProfile({ name })} />
-            <Field label="School" value={profile.school} onChange={(school) => setProfile({ school })} />
+            <SchoolField value={profile.school} onChange={(school) => setProfile({ school })} />
             <Field label="Degree" value={profile.degree} onChange={(degree) => setProfile({ degree })} />
             <Field label="Major" value={profile.major} onChange={(major) => setProfile({ major })} />
             <Field label="Minor" value={profile.minor ?? ""} onChange={(minor) => setProfile({ minor: minor || null })} />
