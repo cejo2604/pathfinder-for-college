@@ -51,9 +51,6 @@ function PlanPage() {
         <p className="mt-3 text-muted-foreground">
           {path.program} · {path.creditsRemaining} credits remaining ·{" "}
           {formatCurrency(path.estimatedCost)} estimated tuition · graduating {path.graduationDate}
-        <p className="mt-3 text-muted-foreground">
-          {path.program} · {path.creditsRemaining} credits remaining ·{" "}
-          {formatCurrency(path.estimatedCost)} estimated tuition · graduating {path.graduationDate}
         </p>
         <Button variant="outline" className="mt-4 gap-1.5" onClick={() => void navigate({ to: "/path" })}>
           See the full path breakdown <ArrowRight className="size-4" />
