@@ -126,6 +126,7 @@ export function ForkProvider({ children }: { children: ReactNode }) {
           setState((s) => ({
             ...s,
             profile: savedProfile,
+            isDemoProfile: false,
             priorities: savedProfile.priorities.length ? savedProfile.priorities : s.priorities,
             careerId: remote.careerId ?? s.careerId,
             doneActions: remote.doneActions,
@@ -142,7 +143,8 @@ export function ForkProvider({ children }: { children: ReactNode }) {
           savedPaths: remote.savedPaths,
         }));
         const local = stateRef.current;
-        if (local.profile) {
+        // Demo/sample data is never written to a real account.
+        if (local.profile && !local.isDemoProfile) {
           void saveForkProfile({
             data: { profile: { ...local.profile, priorities: local.priorities }, careerId: local.careerId },
           }).catch((error) => console.error("Could not save profile", error));
@@ -158,17 +160,18 @@ export function ForkProvider({ children }: { children: ReactNode }) {
   // Debounced profile persistence.
   const profileTimer = useRef<number | undefined>(undefined);
   const writeProfile = useCallback(() => {
-    const { profile, priorities, careerId } = stateRef.current;
-    if (!profile) return;
+    const { profile, priorities, careerId, isDemoProfile } = stateRef.current;
+    if (!profile || isDemoProfile) return;
     void saveForkProfile({ data: { profile: { ...profile, priorities }, careerId } }).catch((error) =>
       console.error("Could not save profile", error),
     );
   }, []);
   const queueProfileSave = useCallback(() => {
-    if (!stateRef.current.profile) return;
+    if (!stateRef.current.profile || stateRef.current.isDemoProfile) return;
     window.clearTimeout(profileTimer.current);
     profileTimer.current = window.setTimeout(writeProfile, 600);
   }, [writeProfile]);
+
   const flushProfileSave = useCallback(() => {
     if (profileTimer.current === undefined) return;
     window.clearTimeout(profileTimer.current);
