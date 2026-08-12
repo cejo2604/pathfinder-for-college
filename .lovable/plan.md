@@ -41,5 +41,5 @@ Amend the v2 doc's engine-contract, trust-model, scope, and verification section
 
 - Baseline facts are computed from the baseline spec + profile in one place and passed into every per-path simulation, so no scenario can mutate them.
 - Renamed engine fields require touching `PathCard`, `Scores`, `WhyPath`, `BranchTree`, `compare`, `path`, `plan`, `home`, `index`, `what-if`.
-- Hand-authored `skillCoverage` on `PathSpec` is deleted once course-level skill maps replace it; expect some fixture numbers to shift, which is why goldens are written after the change lands.
-- Final step: full `vitest` run plus a pass over the What-If → Compare → Why → Plan flow at 390px and 1440px.
+- Hand-authored `skillCoverage` on `PathSpec` is deleted once course-level skill maps replace it. Course skill contributions are chosen so the resulting numbers stay close to today's scores, and the golden fixtures are hand-computed from those contributions.
+- Final step: full `vitest` run plus a pass over the What-If → Compare → Why → Plan flow at 390px and 1440px. No new product functionality.
