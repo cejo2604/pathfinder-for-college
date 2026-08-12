@@ -20,7 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { SCENARIOS, parseScenario, rankPaths, scenarioById, simulatePaths, type SimulatedPath } from "@/lib/fork/engine";
+import { SCENARIOS, matchScenario, parseScenario, rankPaths, scenarioById, simulatePaths, type SimulatedPath } from "@/lib/fork/engine";
 import { useFork, useForkProfile } from "@/lib/fork/state";
 
 export const Route = createFileRoute("/what-if")({
