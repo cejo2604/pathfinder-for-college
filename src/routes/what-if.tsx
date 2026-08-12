@@ -75,6 +75,7 @@ function WhatIfPage() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [revealBest, setRevealBest] = useState(false);
   const [whyId, setWhyId] = useState<string | null>(null);
+  const [unresolved, setUnresolved] = useState(false);
   const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
 
   const start = (id: string, question: string) => {
