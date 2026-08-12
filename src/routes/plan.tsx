@@ -52,6 +52,9 @@ function PlanPage() {
           {path.program} · {path.creditsRemaining} credits remaining ·{" "}
           {formatCurrency(path.estimatedCost)} estimated tuition · graduating {path.graduationDate}
         </p>
+        <p className="mt-2 text-xs text-muted-foreground">
+          Planning estimate — confirm course availability and requirements with your academic advisor.
+        </p>
         <Button variant="outline" className="mt-4 gap-1.5" onClick={() => void navigate({ to: "/path" })}>
           See the full path breakdown <ArrowRight className="size-4" />
         </Button>
