@@ -29,8 +29,11 @@ import {
   scenarioById,
   simulate,
   validateInstitution,
+  type Scenario,
   type SimulatedPath,
 } from "@/lib/fork/engine";
+import { programById } from "@/lib/fork/data";
+import { programPathId, selectableMajors, selectableMinors } from "@/lib/fork/program-paths";
 import { useFork, useForkProfile } from "@/lib/fork/state";
 
 export const Route = createFileRoute("/what-if")({
@@ -145,7 +148,7 @@ function WhatIfPage() {
 
   useEffect(() => () => timers.current.forEach(clearTimeout), []);
 
-  const scenario = activeScenarioId ? scenarioById(activeScenarioId) : null;
+  const scenario = customScenario ?? (activeScenarioId ? scenarioById(activeScenarioId) : null);
 
   // Institution support is checked before any path is generated.
   const institution = useMemo(() => validateInstitution(profile), [profile]);
