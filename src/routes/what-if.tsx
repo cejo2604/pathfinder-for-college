@@ -20,7 +20,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { SCENARIOS, matchScenario, parseScenario, rankPaths, scenarioById, simulatePaths, type SimulatedPath } from "@/lib/fork/engine";
+import {
+  SCENARIOS,
+  UNSUPPORTED_INSTITUTION_MESSAGE,
+  matchScenario,
+  parseScenario,
+  rankPaths,
+  scenarioById,
+  simulate,
+  validateInstitution,
+  type SimulatedPath,
+} from "@/lib/fork/engine";
 import { useFork, useForkProfile } from "@/lib/fork/state";
 
 export const Route = createFileRoute("/what-if")({
@@ -113,10 +123,14 @@ function WhatIfPage() {
 
   const scenario = activeScenarioId ? scenarioById(activeScenarioId) : null;
 
-  const paths = useMemo<SimulatedPath[]>(
-    () => (scenario ? simulatePaths(scenario.pathIds, { profile, careerId, priorities }) : []),
-    [scenario, profile, careerId, priorities],
-  );
+  // Institution support is checked before any path is generated.
+  const institution = useMemo(() => validateInstitution(profile), [profile]);
+
+  const paths = useMemo<SimulatedPath[]>(() => {
+    if (!scenario) return [];
+    const result = simulate(scenario.pathIds, { profile, careerId, priorities });
+    return result.status === "ok" ? result.paths : [];
+  }, [scenario, profile, careerId, priorities]);
 
   const ranked = useMemo(() => rankPaths(paths), [paths]);
   const best = ranked[0] ?? null;
