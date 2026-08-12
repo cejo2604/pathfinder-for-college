@@ -363,7 +363,7 @@ export function ForkProvider({ children }: { children: ReactNode }) {
 
       reset: () => setState(initialState),
     };
-  }, [state, hydrated, session, authLoading, signedIn, queueProfileSave, flushProfileSave]);
+  }, [state, hydrated, remoteReady, session, authLoading, signedIn, queueProfileSave, flushProfileSave]);
 
   return <ForkContext.Provider value={value}>{children}</ForkContext.Provider>;
 }
