@@ -81,11 +81,14 @@ const ForkContext = createContext<ForkContextValue | null>(null);
 export function ForkProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<ForkState>(initialState);
   const [hydrated, setHydrated] = useState(false);
+  const [remoteReady, setRemoteReady] = useState(false);
   const [session, setSession] = useState<Session | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
   const signedIn = Boolean(session);
   const stateRef = useRef(state);
   stateRef.current = state;
+  /** Set when the student typed profile entries in this tab. */
+  const typedThisSession = useRef(false);
 
   useEffect(() => {
     const { data } = supabase.auth.onAuthStateChange((_event, next) => {
