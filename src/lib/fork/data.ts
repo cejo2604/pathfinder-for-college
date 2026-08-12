@@ -327,31 +327,32 @@ export const DEMO_STUDENT_CS: StudentProfile = {
     { code: "MATH 152", status: "completed", term: "Fall 2024", grade: "B" },
     { code: "MATH 233", status: "completed", term: "Fall 2025", grade: "A-" },
     { code: "STAT 155", status: "completed", term: "Spring 2025", grade: "B+" },
-    // Remaining 28 completed credits are general-education requirements.
+    { code: "DATA 110", status: "completed", term: "Fall 2025", grade: "A" },
+    // Remaining 25 completed credits are general-education requirements.
     { code: "GEN ED", status: "completed", term: "2024 – 2026", grade: "—" },
     { code: "COMP 301", status: "in_progress", term: "Spring 2026" },
-    { code: "COMP 311", status: "in_progress", term: "Spring 2026" },
+    { code: "DATA 220", status: "in_progress", term: "Spring 2026" },
   ],
 };
 
 /**
- * Third demo record with coursework: a health-informatics-leaning junior.
+ * Third demo record with coursework: a business-analytics junior on a B.B.A. track.
  */
 export const DEMO_STUDENT_HINF: StudentProfile = {
   name: "Priya Raman",
   school: "University of North Carolina",
   institutionId: DEFAULT_INSTITUTION_ID,
-  degree: "Bachelor of Public Health",
-  major: "Biology",
-  minor: "Health Informatics minor",
+  degree: "Bachelor of Business Administration",
+  major: "Business Analytics",
+  minor: "Data Science minor",
 
   year: "Junior",
   graduationTarget: "December 2027",
   creditsCompleted: 30,
   gpa: 3.8,
-  interests: ["Healthcare", "Data", "Public health"],
-  careerInterests: ["Healthcare technology", "Health analytics"],
-  skills: ["Spreadsheet analysis", "Scientific writing"],
+  interests: ["Business", "Data", "Strategy"],
+  careerInterests: ["Data science", "Business analytics"],
+  skills: ["Spreadsheet analysis", "Financial modeling"],
   priorities: [
     "minimize_cost",
     "career_opportunities",
@@ -360,18 +361,18 @@ export const DEMO_STUDENT_HINF: StudentProfile = {
     "flexibility",
     "minimize_coursework",
   ],
-  goal: "I want to work with clinical data.",
-  goalCategory: "Healthcare technology",
+  goal: "I want to work with business and product data.",
+  goalCategory: "Data science",
   courses: [
-    { code: "BIOL 101", status: "completed", term: "Fall 2024", grade: "A" },
-    { code: "CHEM 101", status: "completed", term: "Fall 2024", grade: "B+" },
-    { code: "STAT 155", status: "completed", term: "Spring 2025", grade: "A" },
-    { code: "PSYC 101", status: "completed", term: "Spring 2025", grade: "A-" },
-    { code: "HINF 210", status: "completed", term: "Fall 2025", grade: "A" },
-    // Remaining 13 completed credits are general-education requirements.
+    { code: "BUSI 101", status: "completed", term: "Fall 2024", grade: "A" },
+    { code: "ECON 101", status: "completed", term: "Fall 2024", grade: "B+" },
+    { code: "BUSI 210", status: "completed", term: "Spring 2025", grade: "A" },
+    { code: "STAT 155", status: "completed", term: "Spring 2025", grade: "A-" },
+    { code: "DATA 110", status: "completed", term: "Fall 2025", grade: "A" },
+    // Remaining 15 completed credits are general-education requirements.
     { code: "GEN ED", status: "completed", term: "2024 – 2026", grade: "—" },
-    { code: "HINF 320", status: "in_progress", term: "Spring 2026" },
-    { code: "STAT 320", status: "in_progress", term: "Spring 2026" },
+    { code: "BUSI 310", status: "in_progress", term: "Spring 2026" },
+    { code: "DATA 220", status: "in_progress", term: "Spring 2026" },
   ],
 };
 
