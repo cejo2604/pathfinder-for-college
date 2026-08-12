@@ -7,6 +7,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { lovable } from "@/integrations/lovable/index";
 import { supabase } from "@/integrations/supabase/client";
+import { DEMO_ACCOUNTS } from "@/lib/fork/demo-accounts";
+import { ensureDemoAccount } from "@/lib/fork/demo-accounts.functions";
 import { useFork } from "@/lib/fork/state";
 
 export const Route = createFileRoute("/auth")({
@@ -62,6 +64,24 @@ function AuthPage() {
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong. Try again.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const signInAsDemo = async (id: string) => {
+    setBusy(true);
+    setError(null);
+    setMessage(null);
+    try {
+      const { email: demoEmail, password: demoPassword } = await ensureDemoAccount({ data: { id } });
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: demoEmail,
+        password: demoPassword,
+      });
+      if (signInError) throw signInError;
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not sign in to that demo account.");
     } finally {
       setBusy(false);
     }
