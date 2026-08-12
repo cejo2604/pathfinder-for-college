@@ -175,11 +175,19 @@ function WhatIfPage() {
         </p>
       </div>
 
-      {phase === "idle" && (
+      {institution.status === "unsupported" && (
+        <div className="mx-auto mt-12 max-w-xl rounded-xl border border-destructive/30 bg-destructive/5 p-5 text-center text-sm">
+          <p className="font-medium text-destructive">Simulation unavailable</p>
+          <p className="mt-2 text-muted-foreground">{UNSUPPORTED_INSTITUTION_MESSAGE}</p>
+        </div>
+      )}
+
+      {institution.status === "supported" && phase === "idle" && (
         <p className="mx-auto mt-16 max-w-md text-center text-sm text-muted-foreground">
           Pick a scenario below to branch {profile.name.split(" ")[0]}&apos;s future.
         </p>
       )}
+
 
       {phase === "analyzing" && (
         <div className="mt-20 flex flex-col items-center gap-3 text-muted-foreground">
