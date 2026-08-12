@@ -69,14 +69,26 @@ function Landing() {
               <Button size="lg" className="gap-2 rounded-full px-8 shadow-lift" onClick={startFresh}>
                 Start here <ArrowRight className="size-4" />
               </Button>
-              <Button
-                size="lg"
-                variant="outline"
-                className="gap-2 rounded-full px-6"
-                onClick={startDemo}
-              >
-                <Sparkles className="size-4" /> Try a demo student
-              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button size="lg" variant="outline" className="gap-2 rounded-full px-6">
+                    <Sparkles className="size-4" /> Try a demo student
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start" className="w-80">
+                  {DEMO_STUDENTS.map((student) => (
+                    <DropdownMenuItem
+                      key={student.id}
+                      className="flex-col items-start gap-0.5"
+                      onSelect={() => startDemo(student.id)}
+                    >
+                      <span className="text-sm font-medium">{student.label}</span>
+                      <span className="text-xs text-muted-foreground">{student.description}</span>
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+
               <Button asChild size="lg" variant="ghost" className="rounded-full px-4">
                 <Link to="/import">Import my academic history</Link>
               </Button>
