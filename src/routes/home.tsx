@@ -138,7 +138,7 @@ function MyPath() {
                 size="sm"
                 variant="outline"
                 className="mt-4 w-full gap-1.5"
-                onClick={() => navigate({ to: "/what-if", search: { q: SIMULATE_QUESTIONS[path.id] ?? "What if I change my plan?" } })}
+                onClick={() => navigate({ to: "/what-if", search: { q: path.isBaseline ? baselineQuestion : (SIMULATE_QUESTIONS[path.id] ?? "What if I change my plan?") } })}
               >
                 <Sparkles className="size-3.5" /> Simulate this
               </Button>
