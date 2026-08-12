@@ -353,7 +353,10 @@ export function useFork() {
 /** Profile with a safe fallback so every screen renders even before demo load. */
 export function useForkProfile(): StudentProfile {
   const { profile } = useFork();
-  return profile ?? DEMO_STUDENT;
+  const resolved = profile ?? DEMO_STUDENT;
+  // Legacy stored profiles predate the institution id; default them to the
+  // catalog Fork can verify rather than leaving simulation blocked.
+  return resolved.institutionId ? resolved : { ...resolved, institutionId: DEFAULT_INSTITUTION_ID };
 }
 
 export function useCountUp(target: number, active = true, duration = 750) {
