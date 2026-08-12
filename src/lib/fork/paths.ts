@@ -1,5 +1,4 @@
 
-import { TRANSFER_TUITION_PER_CREDIT, TUITION_PER_CREDIT } from "./data";
 
 export type TermKind = "academic" | "summer" | "break";
 
