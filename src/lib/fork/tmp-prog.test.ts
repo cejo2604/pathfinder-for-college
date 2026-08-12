@@ -5,7 +5,7 @@ import { programPathId } from "./program-paths";
 
 describe("program paths", () => {
   it("builds a switch path", () => {
-    const p = DEMO_STUDENTS[2]!;
+    const p = { ...DEMO_STUDENTS[2]!, institutionId: DEMO_STUDENTS[0]!.institutionId };
     const paths = simulatePaths(["baseline", programPathId("switch", "ds_bs"), programPathId("minor", "cs_minor")], { profile: p });
     console.log(p.name, p.major, paths.map((x) => [x.name, x.program, x.creditsRemaining, x.additionalCost, x.scores.careerFit, x.risk]));
     expect(paths.length).toBe(3);
