@@ -340,7 +340,7 @@ export const DEMO_STUDENT_HINF: StudentProfile = {
  * Demo record with no degree plan yet: undecided first-year, no coursework on file.
  */
 export const DEMO_STUDENT_UNDECIDED: StudentProfile = {
-  ...createEmptyProfileBase(),
+  ...createEmptyProfile(),
   name: "Jordan Blake",
   school: "University of North Carolina",
   degree: "Bachelor of Science",
@@ -355,7 +355,7 @@ export const DEMO_STUDENT_UNDECIDED: StudentProfile = {
  * Second demo record with no degree plan: transfer student still deciding.
  */
 export const DEMO_STUDENT_EXPLORING: StudentProfile = {
-  ...createEmptyProfileBase(),
+  ...createEmptyProfile(),
   name: "Alex Nguyen",
   school: "University of North Carolina",
   degree: "Bachelor of Arts",
