@@ -361,7 +361,7 @@ export const DEMO_STUDENT_EXPLORING: StudentProfile = {
   ...createEmptyProfile(),
   name: "Alex Nguyen",
   school: "University of North Carolina",
-  degree: "Bachelor of Arts",
+  degree: "Bachelor of Business Administration",
   year: "Sophomore",
   gpa: 3.0,
   interests: ["Business", "Design"],
