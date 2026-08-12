@@ -24,6 +24,8 @@ import {
   courseSkillContributions,
 } from "./data";
 import { BASELINE_PATH_ID, PATHS, type PathSpec, type PlannedTerm, pathSpecById } from "./paths";
+import { generatedPathSpec } from "./program-paths";
+
 
 export type RiskLevel = "Low" | "Moderate" | "Medium" | "High";
 
