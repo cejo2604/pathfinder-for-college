@@ -85,6 +85,23 @@ export let COURSES: Course[] = [
   { code: "HINF 320", title: "Clinical Data Systems", credits: 3, prerequisites: ["HINF 210"] },
   { code: "HINF 410", title: "Health Data Analytics", credits: 3, prerequisites: ["HINF 320", "STAT 155"] },
   { code: "HINF 450", title: "Health Technology Ethics & Policy", credits: 3, prerequisites: ["HINF 210"] },
+  // Business (B.B.A.) core.
+  { code: "BUSI 101", title: "Financial Accounting", credits: 3, prerequisites: [] },
+  { code: "BUSI 202", title: "Managerial Accounting", credits: 3, prerequisites: ["BUSI 101"] },
+  { code: "ECON 101", title: "Principles of Microeconomics", credits: 3, prerequisites: [] },
+  { code: "ECON 102", title: "Principles of Macroeconomics", credits: 3, prerequisites: ["ECON 101"] },
+  { code: "BUSI 210", title: "Business Statistics", credits: 3, prerequisites: [] },
+  { code: "BUSI 310", title: "Corporate Finance", credits: 3, prerequisites: ["BUSI 101", "ECON 101"] },
+  { code: "BUSI 330", title: "Principles of Marketing", credits: 3, prerequisites: [] },
+  { code: "BUSI 350", title: "Business Law", credits: 3, prerequisites: [] },
+  { code: "BUSI 370", title: "Management & Organizations", credits: 3, prerequisites: [] },
+  { code: "BUSI 410", title: "Business Analytics", credits: 3, prerequisites: ["BUSI 210"] },
+  { code: "BUSI 495", title: "Business Strategy Capstone", credits: 3, prerequisites: ["BUSI 370"] },
+  // Data Science.
+  { code: "DATA 110", title: "Foundations of Data Science", credits: 3, prerequisites: [] },
+  { code: "DATA 220", title: "Data Wrangling & Visualization", credits: 3, prerequisites: ["DATA 110"] },
+  { code: "DATA 310", title: "Applied Machine Learning", credits: 3, prerequisites: ["DATA 220", "STAT 155"] },
+  { code: "DATA 495", title: "Data Science Capstone", credits: 3, prerequisites: ["DATA 310"] },
 ];
 
 export const courseByCode = (code: string) => COURSES.find((c) => c.code === code);
