@@ -116,7 +116,17 @@ export function PathCard({
   );
 }
 
-function Metric({ label, value, tone = "flat" }: { label: string; value: string; tone?: "good" | "warn" | "flat" }) {
+function Metric({
+  label,
+  value,
+  note,
+  tone = "flat",
+}: {
+  label: string;
+  value: string;
+  note?: string;
+  tone?: "good" | "warn" | "flat";
+}) {
   return (
     <div>
       <dt className="text-xs uppercase tracking-[0.1em] text-muted-foreground">{label}</dt>
@@ -129,8 +139,10 @@ function Metric({ label, value, tone = "flat" }: { label: string; value: string;
       >
         {value}
       </dd>
+      {note && <p className="mt-0.5 text-[0.65rem] text-muted-foreground">{note}</p>}
     </div>
   );
+
 }
 
 function List({ title, items, tone }: { title: string; items: string[]; tone: "good" | "warn" }) {
