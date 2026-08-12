@@ -86,12 +86,15 @@ function WhatIfPage() {
   const [revealBest, setRevealBest] = useState(false);
   const [whyId, setWhyId] = useState<string | null>(null);
   const [unresolved, setUnresolved] = useState(false);
+  // A program chosen from the catalog dropdowns becomes an ad-hoc scenario.
+  const [customScenario, setCustomScenario] = useState<Scenario | null>(null);
   const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
 
-  const start = (id: string, question: string) => {
+  const start = (id: string, question: string, custom?: Scenario | null) => {
     timers.current.forEach(clearTimeout);
     timers.current = [];
     setUnresolved(false);
+    setCustomScenario(custom ?? null);
     setActiveScenarioId(id);
     setInput(question);
     setPhase("analyzing");
@@ -102,6 +105,27 @@ function WhatIfPage() {
     // Alternatives are shown before Fork highlights a best fit.
     timers.current.push(setTimeout(() => setRevealBest(true), 2400));
   };
+
+  // Program dropdowns: any catalog major to switch into, any minor to add.
+  const startProgram = (mode: "switch" | "minor", programId: string) => {
+    const program = programById(programId);
+    if (!program) return;
+    const pathId = programPathId(mode, programId);
+    const question =
+      mode === "switch" ? `What if I switch to ${program.name}?` : `What if I add the ${program.name}?`;
+    start(`program:${mode}:${programId}`, question, {
+      id: `program:${mode}:${programId}`,
+      question,
+      chip: mode === "switch" ? `Switch to ${program.name}` : `Add ${program.name}`,
+      pathIds: ["baseline", pathId],
+      keywords: [],
+      framing:
+        mode === "switch"
+          ? "Your current program next to a full switch, priced from your own record."
+          : "Your current program next to the same degree with the minor added.",
+    });
+  };
+
 
   // A pre-filled question (e.g. a waitlist warning on the Plan screen) runs first.
   useEffect(() => {
