@@ -185,6 +185,24 @@ export let PROGRAMS: DegreeProgram[] = [
 
 export const programById = (id: string) => PROGRAMS.find((p) => p.id === id);
 
+/**
+ * Catalog course sequence for each program, in prerequisite order.
+ * Used to generate a path for any program the student picks (see program-paths.ts).
+ */
+export const PROGRAM_COURSES: Record<string, string[]> = {
+  bio_bs: ["BIOL 101", "BIOL 102", "BIOL 201", "BIOL 301", "BIOL 302", "BIOL 410", "BIOL 495", "CHEM 101", "CHEM 102", "CHEM 261"],
+  cs_bs: ["COMP 110", "COMP 210", "COMP 301", "COMP 311", "MATH 152", "MATH 233", "COMP 410", "COMP 480", "COMP 495"],
+  ba_bba: ["BUSI 101", "BUSI 202", "ECON 101", "ECON 102", "BUSI 210", "BUSI 310", "BUSI 330", "BUSI 370", "BUSI 410", "BUSI 495"],
+  ds_bs: ["DATA 110", "DATA 220", "STAT 155", "STAT 320", "COMP 110", "COMP 210", "DATA 310", "DATA 495"],
+  cs_minor: ["COMP 110", "COMP 210", "COMP 301", "COMP 410", "COMP 480"],
+  hinf_minor: ["HINF 210", "HINF 320", "HINF 410", "HINF 450"],
+  ds_minor: ["DATA 110", "DATA 220", "STAT 155", "DATA 310"],
+  busi_minor: ["BUSI 101", "ECON 101", "BUSI 210", "BUSI 330"],
+};
+
+export const programCourses = (id: string): string[] => PROGRAM_COURSES[id] ?? [];
+
+
 export interface StudentCourse {
   code: string;
   /** `waitlisted` rows are seats the student does not hold yet. */

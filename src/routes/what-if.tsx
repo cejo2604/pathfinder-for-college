@@ -29,8 +29,11 @@ import {
   scenarioById,
   simulate,
   validateInstitution,
+  type Scenario,
   type SimulatedPath,
 } from "@/lib/fork/engine";
+import { programById } from "@/lib/fork/data";
+import { programPathId, selectableMajors, selectableMinors } from "@/lib/fork/program-paths";
 import { useFork, useForkProfile } from "@/lib/fork/state";
 
 export const Route = createFileRoute("/what-if")({
@@ -86,12 +89,15 @@ function WhatIfPage() {
   const [revealBest, setRevealBest] = useState(false);
   const [whyId, setWhyId] = useState<string | null>(null);
   const [unresolved, setUnresolved] = useState(false);
+  // A program chosen from the catalog dropdowns becomes an ad-hoc scenario.
+  const [customScenario, setCustomScenario] = useState<Scenario | null>(null);
   const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
 
-  const start = (id: string, question: string) => {
+  const start = (id: string, question: string, custom?: Scenario | null) => {
     timers.current.forEach(clearTimeout);
     timers.current = [];
     setUnresolved(false);
+    setCustomScenario(custom ?? null);
     setActiveScenarioId(id);
     setInput(question);
     setPhase("analyzing");
@@ -102,6 +108,27 @@ function WhatIfPage() {
     // Alternatives are shown before Fork highlights a best fit.
     timers.current.push(setTimeout(() => setRevealBest(true), 2400));
   };
+
+  // Program dropdowns: any catalog major to switch into, any minor to add.
+  const startProgram = (mode: "switch" | "minor", programId: string) => {
+    const program = programById(programId);
+    if (!program) return;
+    const pathId = programPathId(mode, programId);
+    const question =
+      mode === "switch" ? `What if I switch to ${program.name}?` : `What if I add the ${program.name}?`;
+    start(`program:${mode}:${programId}`, question, {
+      id: `program:${mode}:${programId}`,
+      question,
+      chip: mode === "switch" ? `Switch to ${program.name}` : `Add ${program.name}`,
+      pathIds: ["baseline", pathId],
+      keywords: [],
+      framing:
+        mode === "switch"
+          ? "Your current program next to a full switch, priced from your own record."
+          : "Your current program next to the same degree with the minor added.",
+    });
+  };
+
 
   // A pre-filled question (e.g. a waitlist warning on the Plan screen) runs first.
   useEffect(() => {
@@ -121,7 +148,7 @@ function WhatIfPage() {
 
   useEffect(() => () => timers.current.forEach(clearTimeout), []);
 
-  const scenario = activeScenarioId ? scenarioById(activeScenarioId) : null;
+  const scenario = customScenario ?? (activeScenarioId ? scenarioById(activeScenarioId) : null);
 
   // Institution support is checked before any path is generated.
   const institution = useMemo(() => validateInstitution(profile), [profile]);
@@ -342,26 +369,57 @@ function WhatIfPage() {
           </form>
 
           <div className="mt-4 flex flex-col items-center gap-2">
-            <Select
-              value={activeScenarioId ?? ""}
-              onValueChange={(value) => {
-                const s = SCENARIOS.find((x) => x.id === value);
-                if (s) start(s.id, s.question);
-              }}
-            >
-              <SelectTrigger className="w-full max-w-sm rounded-full border-border bg-card px-4 text-sm shadow-sm">
-                <SelectValue placeholder="Choose a quick scenario" />
-              </SelectTrigger>
-              <SelectContent className="rounded-xl border-border bg-card">
-                {SCENARIOS.map((s) => (
-                  <SelectItem key={s.id} value={s.id} className="rounded-lg text-sm">
-                    {s.chip}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <p className="text-xs text-muted-foreground">Or type your own question above and press Simulate.</p>
+            <div className="grid w-full gap-2 sm:grid-cols-3">
+              <Select
+                value={customScenario ? "" : (activeScenarioId ?? "")}
+                onValueChange={(value) => {
+                  const s = SCENARIOS.find((x) => x.id === value);
+                  if (s) start(s.id, s.question);
+                }}
+              >
+                <SelectTrigger className="rounded-full border-border bg-card px-4 text-sm shadow-sm">
+                  <SelectValue placeholder="Quick scenario" />
+                </SelectTrigger>
+                <SelectContent className="rounded-xl border-border bg-card">
+                  {SCENARIOS.map((s) => (
+                    <SelectItem key={s.id} value={s.id} className="rounded-lg text-sm">
+                      {s.chip}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              <Select value="" onValueChange={(value) => startProgram("switch", value)}>
+                <SelectTrigger className="rounded-full border-border bg-card px-4 text-sm shadow-sm">
+                  <SelectValue placeholder="Switch my major to…" />
+                </SelectTrigger>
+                <SelectContent className="rounded-xl border-border bg-card">
+                  {selectableMajors(profile).map((p) => (
+                    <SelectItem key={p.id} value={p.id} className="rounded-lg text-sm">
+                      {p.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              <Select value="" onValueChange={(value) => startProgram("minor", value)}>
+                <SelectTrigger className="rounded-full border-border bg-card px-4 text-sm shadow-sm">
+                  <SelectValue placeholder="Add a minor…" />
+                </SelectTrigger>
+                <SelectContent className="rounded-xl border-border bg-card">
+                  {selectableMinors(profile).map((p) => (
+                    <SelectItem key={p.id} value={p.id} className="rounded-lg text-sm">
+                      {p.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Major and minor options come from your school&apos;s catalog — Fork prices each one from your own record.
+            </p>
           </div>
+
         </div>
       </div>
 

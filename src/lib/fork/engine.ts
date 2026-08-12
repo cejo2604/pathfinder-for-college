@@ -24,6 +24,8 @@ import {
   courseSkillContributions,
 } from "./data";
 import { BASELINE_PATH_ID, PATHS, type PathSpec, type PlannedTerm, pathSpecById } from "./paths";
+import { generatedPathSpec } from "./program-paths";
+
 
 export type RiskLevel = "Low" | "Moderate" | "Medium" | "High";
 
@@ -374,8 +376,9 @@ export function simulatePath(specId: string, opts: SimulateOptions): SimulatedPa
   const support = validateInstitution(opts.profile);
   if (support.status !== "supported") throw new UnsupportedInstitutionError(support);
 
-  const spec = pathSpecById(specId);
+  const spec = pathSpecById(specId) ?? generatedPathSpec(specId, opts.profile);
   if (!spec) throw new Error(`Unknown path: ${specId}`);
+
   const career = careerById(opts.careerId ?? DEFAULT_CAREER_ID) ?? (CAREERS[0] as Career);
   const base = baselineFacts(opts.profile, career.id);
   const isBaseline = spec.id === BASELINE_PATH_ID;
