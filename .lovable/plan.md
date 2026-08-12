@@ -59,7 +59,9 @@ Bands: 0–1 Low, 2–3 Moderate, 4–6 Medium, 7+ High. Credits are integer-val
 
 `src/lib/fork/engine.test.ts` plus focused spec files, all determinism comparisons via `JSON.stringify(normalizeEngineOutput(...))`:
 
-- **Baseline:** identical baseline values across every path; independent of priority, scenario, and candidate-path order; no path can mutate it; every displayed delta computed from those same values; BaselineFacts carries no risk or uncertainty field.
+- **Baseline:** identical baseline values across every path; independent of priority, scenario, and candidate-path order; every displayed delta computed from those same values; BaselineFacts carries no risk or uncertainty field.
+- **BaselineFacts mutation resistance (dedicated test):** capture the complete baseline payload (credits, cost, academic semesters, estimated completion term, estimated completion date, career-fit score, career-fit evidence) canonically, simulate one or more paths, and assert the baseline is unchanged by canonical value comparison — not `===` reference identity. Deep-freeze the baseline in the test so accidental mutation throws, and assert that an attempted mutation cannot change the values used by subsequent path simulations.
+
 - **Priorities:** two materially different orderings leave candidate set, credits, cost and cost delta, semesters, completion term/date, career-fit score and evidence, risk level, risk drivers, and uncertainty drivers identical — only ranking order differs.
 - **Stable identity / ordering invariance:** reordered courses, skills, candidate paths, and scenario lists leave per-path metrics, evidence, and canonical normalized output unchanged; path identity is asserted to be position-independent.
 - **Purity:** repeated calls with identical inputs give canonically identical output; deep-frozen inputs (profile, catalog, BaselineFacts, path spec, planning assumptions, confirmed records, uncertainty metadata) simulate successfully, proving no mutation; no clock or random dependence.
