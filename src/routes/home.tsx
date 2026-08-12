@@ -48,6 +48,14 @@ function MyPath() {
   };
   const firstName = show(profile.name.split(" ")[0], "Your");
 
+  // Baseline card mirrors the student's own program instead of a hardcoded major.
+  const baselineProgram = (options.find((p) => p.isBaseline)?.program ?? profile.major ?? "").trim();
+  const baselineLabel = baselineProgram ? `Stay in ${baselineProgram}` : "Stay the course";
+  const baselineQuestion = baselineProgram
+    ? `What if I stay in ${baselineProgram}?`
+    : "What if I stay on my current path?";
+
+
   return (
     <ForkShell>
       {!loaded && signedIn && (
