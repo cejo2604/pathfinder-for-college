@@ -134,11 +134,31 @@ export function PlanningEstimateNote({ className }: { className?: string }) {
   );
 }
 
+function ShellSkeleton() {
+  return (
+    <div className="animate-pulse space-y-6" aria-hidden>
+      <div className="h-4 w-32 rounded bg-muted" />
+      <div className="h-10 w-2/3 rounded bg-muted" />
+      <div className="h-4 w-1/2 rounded bg-muted" />
+      <div className="grid gap-4 sm:grid-cols-3">
+        <div className="h-36 rounded-2xl bg-muted" />
+        <div className="h-36 rounded-2xl bg-muted" />
+        <div className="h-36 rounded-2xl bg-muted" />
+      </div>
+    </div>
+  );
+}
+
 export function ForkShell({ children }: { children: ReactNode }) {
+  // Nothing profile-derived renders until the owner's own data is loaded, so
+  // no other account's (or demo) values can flash during loading.
+  const { profileReady } = useFork();
   return (
     <div className="min-h-screen bg-background">
       <ForkNav />
-      <main className="mx-auto max-w-6xl px-4 pb-24 pt-8 sm:px-6 sm:pt-12">{children}</main>
+      <main className="mx-auto max-w-6xl px-4 pb-24 pt-8 sm:px-6 sm:pt-12">
+        {profileReady ? children : <ShellSkeleton />}
+      </main>
       <footer className="mx-auto max-w-6xl px-4 pb-12 sm:px-6">
         <PlanningEstimateNote className="max-w-3xl border-t border-border pt-6" />
       </footer>
