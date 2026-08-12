@@ -144,7 +144,9 @@ export let PROGRAMS: DegreeProgram[] = [
   { id: "cs_bs", name: "Computer Science, B.S.", kind: "major", requiredCredits: 120 },
   { id: "cs_minor", name: "Computer Science minor", kind: "minor", requiredCredits: 18 },
   { id: "hinf_minor", name: "Health Informatics minor", kind: "minor", requiredCredits: 18 },
+  { id: "ds_minor", name: "Data Science minor", kind: "minor", requiredCredits: 18 },
 ];
+
 
 export const programById = (id: string) => PROGRAMS.find((p) => p.id === id);
 
@@ -263,9 +265,10 @@ export const DEMO_STUDENT_CS: StudentProfile = {
   name: "Devon Carter",
   school: "University of North Carolina",
   institutionId: DEFAULT_INSTITUTION_ID,
-  degree: "Bachelor of Science",
+  degree: "Bachelor of Science in Engineering",
   major: "Computer Science",
-  minor: null,
+  minor: "Data Science minor",
+
   year: "Sophomore",
   graduationTarget: "May 2028",
   creditsCompleted: 45,
@@ -303,9 +306,10 @@ export const DEMO_STUDENT_HINF: StudentProfile = {
   name: "Priya Raman",
   school: "University of North Carolina",
   institutionId: DEFAULT_INSTITUTION_ID,
-  degree: "Bachelor of Science",
+  degree: "Bachelor of Public Health",
   major: "Biology",
   minor: "Health Informatics minor",
+
   year: "Junior",
   graduationTarget: "December 2027",
   creditsCompleted: 30,
@@ -343,7 +347,8 @@ export const DEMO_STUDENT_UNDECIDED: StudentProfile = {
   ...createEmptyProfile(),
   name: "Jordan Blake",
   school: "University of North Carolina",
-  degree: "Bachelor of Science",
+  degree: "Associate of Science",
+
   year: "Freshman",
   gpa: 3.2,
   interests: ["Technology", "Healthcare"],
@@ -358,7 +363,7 @@ export const DEMO_STUDENT_EXPLORING: StudentProfile = {
   ...createEmptyProfile(),
   name: "Alex Nguyen",
   school: "University of North Carolina",
-  degree: "Bachelor of Arts",
+  degree: "Bachelor of Business Administration",
   year: "Sophomore",
   gpa: 3.0,
   interests: ["Business", "Design"],
@@ -378,34 +383,35 @@ export const DEMO_STUDENTS: DemoStudentOption[] = [
   {
     id: "maya",
     label: "Maya Rodriguez — Biology sophomore",
-    description: "54 credits of coursework on file, exploring healthcare technology.",
+    description: "B.S. Biology · 54 credits on file, exploring healthcare technology.",
     profile: DEMO_STUDENT,
   },
   {
     id: "devon",
     label: "Devon Carter — CS sophomore",
-    description: "45 credits of coursework on file, aiming at software engineering.",
+    description: "B.S.E. Computer Science with a Data Science minor · 45 credits on file.",
     profile: DEMO_STUDENT_CS,
   },
   {
     id: "priya",
     label: "Priya Raman — Biology junior",
-    description: "30 credits of coursework on file, health informatics minor.",
+    description: "B.P.H. with a Health Informatics minor · 30 credits on file.",
     profile: DEMO_STUDENT_HINF,
   },
   {
     id: "jordan",
     label: "Jordan Blake — undecided freshman",
-    description: "No degree plan and no coursework on file yet.",
+    description: "Associate of Science track · no degree plan or coursework yet.",
     profile: DEMO_STUDENT_UNDECIDED,
   },
   {
     id: "alex",
     label: "Alex Nguyen — exploring sophomore",
-    description: "No degree plan on file, comparing cost-first options.",
+    description: "B.B.A. track · no degree plan on file, comparing cost-first options.",
     profile: DEMO_STUDENT_EXPLORING,
   },
 ];
+
 
 export const demoStudentById = (id: string) => DEMO_STUDENTS.find((s) => s.id === id);
 
