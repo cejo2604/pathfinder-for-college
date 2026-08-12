@@ -89,6 +89,49 @@ export let COURSES: Course[] = [
 
 export const courseByCode = (code: string) => COURSES.find((c) => c.code === code);
 
+/**
+ * Catalog course skill contributions, 0-1 per skill.
+ *
+ * These are the SOLE source of numeric career-fit coverage — path-level
+ * hand-authored coverage is not permitted. Each value states how much of a
+ * skill one course is intended to build; coverage is the capped sum of the
+ * contributions of the courses in scope (see engine.ts). Contributions are
+ * catalog facts and are never tuned to reproduce a historical score.
+ */
+export const COURSE_SKILL_CONTRIBUTIONS: Record<string, Partial<Record<SkillKey, number>>> = {
+  "BIOL 101": { health_domain: 0.2, research: 0.05 },
+  "BIOL 102": { health_domain: 0.2, research: 0.05 },
+  "BIOL 201": { health_domain: 0.2, research: 0.1 },
+  "BIOL 301": { health_domain: 0.2, research: 0.15 },
+  "BIOL 302": { health_domain: 0.2, research: 0.1 },
+  "BIOL 410": { health_domain: 0.2, research: 0.25 },
+  "BIOL 495": { health_domain: 0.15, research: 0.3 },
+  "CHEM 101": { health_domain: 0.1, research: 0.05 },
+  "CHEM 102": { health_domain: 0.1, research: 0.05 },
+  "CHEM 261": { health_domain: 0.15, research: 0.1 },
+  "STAT 155": { statistics: 0.4, data_analysis: 0.2 },
+  "STAT 320": { statistics: 0.45, data_analysis: 0.25 },
+  "PSYC 101": { health_domain: 0.05, research: 0.05 },
+  "MATH 152": { statistics: 0.1 },
+  "MATH 233": { programming: 0.15, statistics: 0.1 },
+  "COMP 110": { programming: 0.3, data_analysis: 0.1 },
+  "COMP 210": { programming: 0.35, data_analysis: 0.15 },
+  "COMP 301": { programming: 0.25 },
+  "COMP 311": { programming: 0.15 },
+  "COMP 410": { programming: 0.25, data_analysis: 0.1 },
+  "COMP 480": { programming: 0.2, data_analysis: 0.35, statistics: 0.25 },
+  "COMP 495": { programming: 0.25, data_analysis: 0.1 },
+  "HINF 210": { informatics: 0.35, health_domain: 0.1 },
+  "HINF 320": { informatics: 0.35, data_analysis: 0.15 },
+  "HINF 410": { informatics: 0.3, data_analysis: 0.35, statistics: 0.2, health_domain: 0.1 },
+  "HINF 450": { informatics: 0.25, health_domain: 0.1 },
+};
+
+/** Contributions for one catalog course code. Unknown codes contribute nothing. */
+export const courseSkillContributions = (code: string): Partial<Record<SkillKey, number>> =>
+  COURSE_SKILL_CONTRIBUTIONS[code] ?? {};
+
+
 export interface DegreeProgram {
   id: string;
   name: string;
