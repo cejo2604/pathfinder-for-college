@@ -345,7 +345,8 @@ export const DEMO_STUDENT_UNDECIDED: StudentProfile = {
   ...createEmptyProfile(),
   name: "Jordan Blake",
   school: "University of North Carolina",
-  degree: "Bachelor of Science",
+  degree: "Associate of Science",
+
   year: "Freshman",
   gpa: 3.2,
   interests: ["Technology", "Healthcare"],
