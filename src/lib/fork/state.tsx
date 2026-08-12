@@ -6,6 +6,7 @@ import {
   DEFAULT_CAREER_ID,
   DEFAULT_INSTITUTION_ID,
   DEMO_STUDENT,
+  demoStudentById,
   PRIORITY_ORDER,
   createEmptyProfile,
   SAMPLE_STUDENT,
@@ -64,7 +65,7 @@ interface ForkContextValue extends ForkState {
   authLoading: boolean;
   signedIn: boolean;
   signOut: () => Promise<void>;
-  loadDemoStudent: () => void;
+  loadDemoStudent: (id?: string) => void;
   loadSampleStudent: () => void;
   startBlank: () => void;
   setProfile: (patch: Partial<StudentProfile>) => void;
