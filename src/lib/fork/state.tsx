@@ -234,6 +234,8 @@ export function ForkProvider({ children }: { children: ReactNode }) {
         }
       },
       loadSampleStudent: () => {
+        // Demo data is for the unauthenticated demo mode only.
+        if (signedIn) return;
         patch({
           profile: SAMPLE_STUDENT,
           isDemoProfile: true,
@@ -261,6 +263,8 @@ export function ForkProvider({ children }: { children: ReactNode }) {
         persistProfile();
       },
       loadDemoStudent: () => {
+        // Demo data is for the unauthenticated demo mode only.
+        if (signedIn) return;
         patch({
           profile: DEMO_STUDENT,
           isDemoProfile: true,
