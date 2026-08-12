@@ -32,7 +32,7 @@ Amend `.lovable/plan/fork-requirements-analysis-v2-2026-08-12.md` in place — n
 
 10. **Career-fit evidence.** Per path the engine returns relevant completed, in-progress, and planned courses plus thin-coverage and prerequisite-blocked skills, each deterministically sorted and independent of source order. Rendered beside the score with the existing Fork-estimate tooltip.
 
-11. **Risk formula — documented verbatim, unchanged.**
+11. **Risk formula — documented exactly, unchanged.** The table below is an exact behavioral specification of the existing implementation, not a literal copy of source wording. No risk behavior changes.
 
 | Driver | Points |
 |---|---|
@@ -59,7 +59,9 @@ Bands: 0–1 Low, 2–3 Moderate, 4–6 Medium, 7+ High. Credits are integer-val
 
 `src/lib/fork/engine.test.ts` plus focused spec files, all determinism comparisons via `JSON.stringify(normalizeEngineOutput(...))`:
 
-- **Baseline:** identical baseline values across every path; independent of priority, scenario, and candidate-path order; no path can mutate it; every displayed delta computed from those same values; BaselineFacts carries no risk or uncertainty field.
+- **Baseline:** identical baseline values across every path; independent of priority, scenario, and candidate-path order; every displayed delta computed from those same values; BaselineFacts carries no risk or uncertainty field.
+- **BaselineFacts mutation resistance (dedicated test):** capture the complete baseline payload (credits, cost, academic semesters, estimated completion term, estimated completion date, career-fit score, career-fit evidence) canonically, simulate one or more paths, and assert the baseline is unchanged by canonical value comparison — not `===` reference identity. Deep-freeze the baseline in the test so accidental mutation throws, and assert that an attempted mutation cannot change the values used by subsequent path simulations.
+
 - **Priorities:** two materially different orderings leave candidate set, credits, cost and cost delta, semesters, completion term/date, career-fit score and evidence, risk level, risk drivers, and uncertainty drivers identical — only ranking order differs.
 - **Stable identity / ordering invariance:** reordered courses, skills, candidate paths, and scenario lists leave per-path metrics, evidence, and canonical normalized output unchanged; path identity is asserted to be position-independent.
 - **Purity:** repeated calls with identical inputs give canonically identical output; deep-frozen inputs (profile, catalog, BaselineFacts, path spec, planning assumptions, confirmed records, uncertainty metadata) simulate successfully, proving no mutation; no clock or random dependence.
@@ -68,13 +70,13 @@ Bands: 0–1 Low, 2–3 Moderate, 4–6 Medium, 7+ High. Credits are integer-val
 - **Uncertainty escalation:** 0, 1, 2, and many drivers; High stays High; risk never numeric.
 - **Import provenance:** confirmed row enters academic records; unconfirmed row does not, and cannot affect credits, career fit, prerequisites, or completion; unconfirmed row may create an uncertainty driver; failed extraction produces no academic record and no usable course data; same confirmed records + same uncertainty metadata → deterministic result. Covered for both PDF and CSV.
 - **Institution:** missing ID → Unsupported; non-string/invalid → Unsupported; unknown → Unsupported; valid canonical ID → normal simulation; changing only the free-text school name does not change authorization; an unsupported institution cannot trigger candidate-path generation (asserted via an instrumented/spied path-generation boundary).
-- **AI boundary:** "switch to Computer Science" → switch-major scenario with CS target; vague input → unresolved; `Object.keys(validated)` equals exactly `["scenarioId", "target"]`; a payload adding `credits`, `tuition`, `graduationDate`, `score`, `risk`, `prerequisiteCount`, `load`, and `institution` validates to an equivalent `{ scenarioId, target }` object and simulates canonically identically to the clean payload.
+- **AI boundary:** "switch to Computer Science" → switch-major scenario with CS target; vague input → unresolved; `expect(Object.keys(validated).sort()).toEqual(["scenarioId", "target"])` — order-independent, proving exactly those two keys survive and no others; a payload adding `credits`, `tuition`, `graduationDate`, `score`, `risk`, `prerequisiteCount`, `load`, and `institution` validates to an equivalent `{ scenarioId, target }` object and simulates canonically identically to the clean payload. The schema itself is unchanged.
 - **Golden fixtures:** one independent fixture per demo scenario (switch to CS, CS minor, graduate early, transfer-priced path, semester off, health informatics) with literal hand-computed credits, credit delta, cost, cost delta, semesters, completion term/date, career fit, risk level, and ranking, derived from catalog contributions and the documented formulas. Fixtures import no production calculation helpers and are never captured from engine output; each shows its arithmetic in comments.
 - **Transfer separation:** the four attributes assert independently.
 
 ## Requirements doc updates
 
-Amend the v2 doc in place so it explicitly records: the canonical normalized serialization rule, stable identity independent of array position, the exact BaselineFacts scope (and that risk/uncertainty are excluded), integer credit boundaries, `additionalSemesters × 2` with the two-semester = 4-point regression, the exact `{ scenarioId, target }` AI schema, institution validation before candidate generation, the no-input-mutation rule, course-level career-fit authority with explicit final rounding, ranking-only priorities, completion terminology and date convention, the two-rate pricing formula, the verbatim risk table and bands, `UNCERTAINTY_ESCALATION_THRESHOLD = 2`, confirmed-records vs `importUncertainty` separation, the typed unsupported-institution contract, transfer attribute separation, and the expanded invariant + golden-fixture suite.
+Amend the v2 doc in place so it explicitly records: the canonical normalized serialization rule, stable identity independent of array position, the exact BaselineFacts scope (risk/uncertainty excluded) and its mutation-resistance test, integer credit boundaries, `additionalSemesters × 2` with the two-semester = 4-point regression, the exact `{ scenarioId, target }` AI schema with its order-independent key assertion, institution validation before candidate generation, the no-input-mutation rule, course-level career-fit authority with explicit final rounding, ranking-only priorities, completion terminology and date convention, the two-rate pricing formula, the exactly-documented risk table and bands, `UNCERTAINTY_ESCALATION_THRESHOLD = 2`, confirmed-records vs `importUncertainty` separation, the typed unsupported-institution contract, transfer attribute separation, and the expanded invariant + golden-fixture suite.
 
 ## Verification
 
