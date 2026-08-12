@@ -11,6 +11,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
 import { careerById, PRIORITY_LABELS } from "@/lib/fork/data";
 import {
+  COMPLETION_DISCLAIMER,
   formatCurrency,
   formatDelta,
   priorityCareerPlan,
