@@ -116,7 +116,10 @@ function ComparePage() {
                 label="Additional credits"
                 value={path.additionalCredits === 0 ? "None" : `${path.additionalCredits > 0 ? "+" : "−"}${Math.abs(path.additionalCredits)}`}
               />
-              <Row label="Estimated tuition" value={formatCurrency(path.estimatedCost)} />
+              <Row
+                label="Estimated tuition"
+                value={`${formatCurrency(path.estimatedCost)} (${formatCurrency(path.tuitionPerCredit)}/credit${path.pricedAtOutOfInstitutionRate ? ", out-of-institution" : ""})`}
+              />
               <Row label="Vs. current plan" value={path.isBaseline ? "Baseline" : formatDelta(path.additionalCost)} />
               <Row label="Prerequisites" value={path.prerequisiteCount ? path.prerequisiteCourses.join(", ") : "None"} />
               <Row label="Avg. term load" value={`${path.averageLoad} credits`} />

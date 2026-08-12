@@ -3,7 +3,7 @@ import { Check, ChevronRight, Plus } from "lucide-react";
 import { RiskTag, ScoreBar, EstimateBadge } from "@/components/fork/Scores";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { formatCurrency, formatDelta, type SimulatedPath } from "@/lib/fork/engine";
+import { COMPLETION_DISCLAIMER, formatCurrency, formatDelta, type SimulatedPath } from "@/lib/fork/engine";
 import { useCountUp } from "@/lib/fork/state";
 
 interface PathCardProps {
@@ -63,7 +63,7 @@ export function PathCard({
       </header>
 
       <dl className="mt-5 grid grid-cols-2 gap-4 border-y border-border py-4">
-        <Metric label="Estimated completion" value={path.estimatedCompletionDate} />
+        <Metric label="Estimated completion" value={path.estimatedCompletionDate} note={COMPLETION_DISCLAIMER} />
         <Metric label="Credits remaining" value={`${credits}`} />
         <Metric label="Estimated remaining tuition" value={formatCurrency(cost)} />
         <Metric

@@ -12,6 +12,7 @@ import { cn } from "@/lib/utils";
 import { careerById, PRIORITY_LABELS } from "@/lib/fork/data";
 import {
   COMPLETION_DISCLAIMER,
+  PLANNING_ASSUMPTION_LABEL,
   formatCurrency,
   formatDelta,
   priorityCareerPlan,
@@ -59,7 +60,7 @@ function PathBreakdownPage() {
     {
       label: "Remaining tuition",
       value: formatCurrency(path.estimatedCost),
-      note: `${formatDelta(path.additionalCost)} vs staying put`,
+      note: `${formatDelta(path.additionalCost)} vs staying put · ${path.creditsRemaining} credits x ${formatCurrency(path.tuitionPerCredit)}${path.pricedAtOutOfInstitutionRate ? " out-of-institution" : ""} (${PLANNING_ASSUMPTION_LABEL})`,
     },
     {
       label: "Credits remaining",
