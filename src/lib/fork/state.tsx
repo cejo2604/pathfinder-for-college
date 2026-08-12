@@ -14,7 +14,8 @@ import {
 } from "./data";
 import { loadForkData, savePath, saveForkProfile, setPlanAction, type SavedPathRow } from "./user-data.functions";
 
-const STORAGE_KEY = "fork:state:v1";
+/** Storage is scoped per owner so one browser never shows another account's work. */
+const storageKeyFor = (userId: string | null) => `fork:state:v1:${userId ?? "anon"}`;
 
 export interface ChosenPathDetails {
   scenarioId: string;
@@ -57,6 +58,8 @@ const initialState: ForkState = {
 
 interface ForkContextValue extends ForkState {
   hydrated: boolean;
+  /** True once the owner's own data is loaded — nothing profile-derived renders before this. */
+  profileReady: boolean;
   session: Session | null;
   authLoading: boolean;
   signedIn: boolean;
@@ -80,31 +83,14 @@ const ForkContext = createContext<ForkContextValue | null>(null);
 export function ForkProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<ForkState>(initialState);
   const [hydrated, setHydrated] = useState(false);
+  const [remoteReady, setRemoteReady] = useState(false);
   const [session, setSession] = useState<Session | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
   const signedIn = Boolean(session);
   const stateRef = useRef(state);
   stateRef.current = state;
-
-  // Local hydration keeps the demo instant for visitors who never sign in.
-  useEffect(() => {
-    try {
-      const raw = window.localStorage.getItem(STORAGE_KEY);
-      if (raw) setState({ ...initialState, ...(JSON.parse(raw) as ForkState) });
-    } catch {
-      /* ignore unreadable storage */
-    }
-    setHydrated(true);
-  }, []);
-
-  useEffect(() => {
-    if (!hydrated) return;
-    try {
-      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-    } catch {
-      /* ignore full storage */
-    }
-  }, [state, hydrated]);
+  /** Set when the student typed profile entries in this tab. */
+  const typedThisSession = useRef(false);
 
   useEffect(() => {
     const { data } = supabase.auth.onAuthStateChange((_event, next) => {
@@ -118,19 +104,47 @@ export function ForkProvider({ children }: { children: ReactNode }) {
     return () => data.subscription.unsubscribe();
   }, []);
 
-  // Pull saved work for the signed-in student.
+  // Hydration waits for the session so no other owner's (or demo) data can
+  // paint, even for a frame.
+  const userId = session?.user.id ?? null;
   useEffect(() => {
-    if (!session) return;
-    const userId = session.user.id;
-    // Another account's (or an anonymous visitor's demo) local state never
-    // becomes this user's profile.
+    if (authLoading) return;
+    setHydrated(false);
+    setRemoteReady(false);
+
+    // Entries typed in this tab before signing in belong to this person, so
+    // they can follow them into their new account. A rehydrated older visit
+    // never can.
     const local = stateRef.current;
-    const localBelongsToUser = local.ownerId === userId;
-    const localIsAdoptable = local.ownerId === null && !local.isDemoProfile && Boolean(local.profile);
-    if (!localBelongsToUser && !localIsAdoptable) {
-      setState({ ...initialState, ownerId: userId });
+    const carry =
+      userId && typedThisSession.current && local.ownerId === null && !local.isDemoProfile && local.profile
+        ? local
+        : null;
+
+    let restored: ForkState = { ...initialState, ownerId: userId };
+    if (carry) {
+      restored = { ...carry, ownerId: userId };
+    } else {
+      try {
+        const raw = window.localStorage.getItem(storageKeyFor(userId));
+        if (raw) {
+          const stored = { ...initialState, ...(JSON.parse(raw) as ForkState) };
+          // Only trust storage that belongs to this owner.
+          if (stored.ownerId === userId) restored = stored;
+        }
+      } catch {
+        /* ignore unreadable storage */
+      }
+    }
+    setState(restored);
+    setHydrated(true);
+
+    if (!userId) {
+      setRemoteReady(true);
+      return;
     }
 
+    const adopted = Boolean(carry);
     let cancelled = false;
     void loadForkData()
       .then((remote) => {
@@ -152,30 +166,39 @@ export function ForkProvider({ children }: { children: ReactNode }) {
           return;
         }
 
-        // No saved profile: start from the empty schema, unless this same
-        // browser session had the user's own pre-sign-in entries.
-        setState((s) => {
-          const adopt = localIsAdoptable && s.profile && !s.isDemoProfile;
-          return {
-            ...(adopt ? s : initialState),
-            ownerId: userId,
-            profile: adopt ? s.profile : createEmptyProfile(),
-            isDemoProfile: false,
-            doneActions: remote.doneActions,
-            savedPaths: remote.savedPaths,
-          };
-        });
-        if (localIsAdoptable && local.profile) {
+        // No saved profile: start from the empty schema, unless this same tab
+        // held the user's own pre-sign-in entries.
+        setState((s) => ({
+          ...(adopted ? s : initialState),
+          ownerId: userId,
+          profile: adopted ? (s.profile ?? createEmptyProfile()) : createEmptyProfile(),
+          isDemoProfile: false,
+          doneActions: remote.doneActions,
+          savedPaths: remote.savedPaths,
+        }));
+        if (adopted && carry?.profile) {
           void saveForkProfile({
-            data: { profile: { ...local.profile, priorities: local.priorities }, careerId: local.careerId },
+            data: { profile: { ...carry.profile, priorities: carry.priorities }, careerId: carry.careerId },
           }).catch((error) => console.error("Could not save profile", error));
         }
       })
-      .catch((error) => console.error("Could not load saved plan", error));
+      .catch((error) => console.error("Could not load saved plan", error))
+      .finally(() => {
+        if (!cancelled) setRemoteReady(true);
+      });
     return () => {
       cancelled = true;
     };
-  }, [session]);
+  }, [authLoading, userId]);
+
+  useEffect(() => {
+    if (!hydrated) return;
+    try {
+      window.localStorage.setItem(storageKeyFor(state.ownerId), JSON.stringify(state));
+    } catch {
+      /* ignore full storage */
+    }
+  }, [state, hydrated]);
 
   // Debounced profile persistence.
   const profileTimer = useRef<number | undefined>(undefined);
@@ -220,15 +243,19 @@ export function ForkProvider({ children }: { children: ReactNode }) {
     return {
       ...state,
       hydrated,
+      profileReady: hydrated && !authLoading && (!signedIn || remoteReady),
       session,
       authLoading,
       signedIn,
       signOut: async () => {
         if (signedIn) flushProfileSave();
+        const ownerKey = storageKeyFor(stateRef.current.ownerId);
+        typedThisSession.current = false;
         await supabase.auth.signOut();
         setState(initialState);
         try {
-          window.localStorage.removeItem(STORAGE_KEY);
+          window.localStorage.removeItem(ownerKey);
+          window.localStorage.removeItem(storageKeyFor(null));
         } catch {
           /* ignore */
         }
@@ -278,6 +305,7 @@ export function ForkProvider({ children }: { children: ReactNode }) {
         });
       },
       setProfile: (p) => {
+        typedThisSession.current = true;
         setState((s) => ({
           ...s,
           profile: { ...(s.profile ?? createEmptyProfile()), ...p },
@@ -335,7 +363,7 @@ export function ForkProvider({ children }: { children: ReactNode }) {
 
       reset: () => setState(initialState),
     };
-  }, [state, hydrated, session, authLoading, signedIn, queueProfileSave, flushProfileSave]);
+  }, [state, hydrated, remoteReady, session, authLoading, signedIn, queueProfileSave, flushProfileSave]);
 
   return <ForkContext.Provider value={value}>{children}</ForkContext.Provider>;
 }
