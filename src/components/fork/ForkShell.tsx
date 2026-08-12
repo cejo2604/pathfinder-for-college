@@ -114,7 +114,7 @@ export function ForkNav() {
                   <Link to="/auth">Sign in to save your paths</Link>
                 </DropdownMenuItem>
               )}
-              <DropdownMenuItem onSelect={() => reset()}>Clear demo data</DropdownMenuItem>
+              {!signedIn && <DropdownMenuItem onSelect={() => reset()}>Clear demo data</DropdownMenuItem>}
             </DropdownMenuContent>
           </DropdownMenu>
         </nav>
