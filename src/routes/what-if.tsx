@@ -81,6 +81,7 @@ function WhatIfPage() {
   const start = (id: string, question: string) => {
     timers.current.forEach(clearTimeout);
     timers.current = [];
+    setUnresolved(false);
     setActiveScenarioId(id);
     setInput(question);
     setPhase("analyzing");
