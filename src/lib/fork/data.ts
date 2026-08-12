@@ -155,14 +155,26 @@ export interface StudentCourse {
   term: string;
   grade?: string;
   waitlistPosition?: number;
-  /** True once the student confirmed this record (imported or hand-entered). */
+  /**
+   * True once the student confirmed this record (imported or hand-entered).
+   * Unconfirmed rows never contribute credits, cost, timeline or career fit —
+   * they only raise uncertainty (see engine.ts).
+   */
   verified?: boolean;
+  /** Where the row came from. Imported rows stay unconfirmed until reviewed. */
+  source?: "manual" | "import";
 }
 
 
 export interface StudentProfile {
   name: string;
   school: string;
+  /**
+   * Canonical institution id. Simulation fails closed when this is missing or
+   * not in SUPPORTED_INSTITUTION_IDS — Fork never simulates against a catalog
+   * it cannot verify.
+   */
+  institutionId?: string;
   degree: string;
   major: string;
   minor: string | null;
@@ -179,15 +191,32 @@ export interface StudentProfile {
   courses: StudentCourse[];
 }
 
-/** Tuition assumptions for the demo institution (estimated values). */
-export const TUITION_PER_CREDIT = 485;
-export const TRANSFER_TUITION_PER_CREDIT = 540;
+/**
+ * Fork planning assumptions — estimated per-credit rates, not billed prices.
+ * These are the only tuition rates in the product; no other file may hardcode
+ * a rate. Cost = credits x rate, where the rate is the out-of-institution rate
+ * only when a path changes institution.
+ */
+export const PLANNING_ASSUMPTIONS = {
+  tuitionPerCredit: 485,
+  outOfInstitutionTuitionPerCredit: 540,
+  label: "Fork planning assumption",
+} as const;
+
+export const TUITION_PER_CREDIT = PLANNING_ASSUMPTIONS.tuitionPerCredit;
+export const TRANSFER_TUITION_PER_CREDIT = PLANNING_ASSUMPTIONS.outOfInstitutionTuitionPerCredit;
+
+/** Institutions whose catalog Fork can verify. Anything else fails closed. */
+export const SUPPORTED_INSTITUTION_IDS = ["fork_demo_institution"] as const;
+export const DEFAULT_INSTITUTION_ID = SUPPORTED_INSTITUTION_IDS[0];
 
 export const DEMO_STUDENT: StudentProfile = {
   name: "Maya Rodriguez",
   school: "University of North Carolina",
+  institutionId: DEFAULT_INSTITUTION_ID,
   degree: "Bachelor of Science",
   major: "Biology",
+
   minor: null,
   year: "Sophomore",
   graduationTarget: "May 2028",
