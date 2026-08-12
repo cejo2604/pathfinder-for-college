@@ -54,7 +54,7 @@ function PathBreakdownPage() {
   const reasons = whyThisPath(path, profile, priorities);
 
   const facts = [
-    { label: "Graduation", value: path.estimatedCompletionDate, note: `${path.estimatedCompletionTerm} · ${path.semesters} semesters` },
+    { label: "Estimated completion", value: path.estimatedCompletionDate, note: `${path.estimatedCompletionTerm} · ${path.semesters} semesters · ${COMPLETION_DISCLAIMER}` },
     {
       label: "Remaining tuition",
       value: formatCurrency(path.estimatedCost),
@@ -250,7 +250,7 @@ function PathBreakdownPage() {
           <li className="rounded-2xl border border-mint/50 bg-mint/10 p-4">
             <div className="flex items-center gap-2">
               <GraduationCap className="size-5 text-mint-foreground" />
-              <h3 className="font-display text-lg">Graduation</h3>
+              <h3 className="font-display text-lg">Estimated completion</h3>
             </div>
             <p className="mt-1 text-sm text-muted-foreground">{path.estimatedCompletionDate}</p>
           </li>

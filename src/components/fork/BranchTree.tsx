@@ -162,7 +162,7 @@ function BranchNode({
 
       <dl className="mt-3 space-y-1 text-sm">
         <div className="flex items-baseline justify-between gap-2">
-          <dt className="text-muted-foreground">Graduation</dt>
+          <dt className="text-muted-foreground">Est. completion</dt>
           <dd className="font-medium">{path.estimatedCompletionDate}</dd>
         </div>
         <div className="flex items-baseline justify-between gap-2">

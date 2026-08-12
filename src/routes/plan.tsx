@@ -50,7 +50,7 @@ function PlanPage() {
         <h1 className="mt-3 font-display text-4xl leading-tight sm:text-5xl">{path.name}</h1>
         <p className="mt-3 text-muted-foreground">
           {path.program} · {path.creditsRemaining} credits remaining ·{" "}
-          {formatCurrency(path.estimatedCost)} estimated tuition · graduating {path.estimatedCompletionDate}
+          {formatCurrency(path.estimatedCost)} estimated tuition · estimated completion {path.estimatedCompletionDate}
         </p>
         <p className="mt-2 text-xs text-muted-foreground">
           Planning estimate — confirm course availability and requirements with your academic advisor.
@@ -191,7 +191,7 @@ function PlanPage() {
             <span className="absolute -left-[2.05rem] top-6 grid size-4 place-items-center rounded-full border-2 border-background bg-mint sm:-left-[2.55rem]" />
             <div className="flex items-center gap-2">
               <GraduationCap className="size-5 text-mint-foreground" />
-              <h3 className="font-display text-xl">Graduation — {path.estimatedCompletionDate}</h3>
+              <h3 className="font-display text-xl">Estimated completion — {path.estimatedCompletionDate}</h3>
             </div>
             <p className="mt-1 text-sm text-muted-foreground">
               {path.semesters} academic semesters from Fall 2026, at an average of {path.averageLoad} credits per term.
