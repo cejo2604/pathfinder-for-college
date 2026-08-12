@@ -58,7 +58,7 @@ function ProfilePage() {
             <Upload className="size-4" /> Import my academic history
           </Button>
           {!loaded && !signedIn && (
-            <Button variant="outline" className="gap-1.5" onClick={loadDemoStudent}>
+            <Button variant="outline" className="gap-1.5" onClick={() => loadDemoStudent()}>
               <Sparkles className="size-4" /> Load demo student
             </Button>
           )}

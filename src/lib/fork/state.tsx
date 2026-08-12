@@ -6,6 +6,7 @@ import {
   DEFAULT_CAREER_ID,
   DEFAULT_INSTITUTION_ID,
   DEMO_STUDENT,
+  demoStudentById,
   PRIORITY_ORDER,
   createEmptyProfile,
   SAMPLE_STUDENT,
@@ -64,7 +65,7 @@ interface ForkContextValue extends ForkState {
   authLoading: boolean;
   signedIn: boolean;
   signOut: () => Promise<void>;
-  loadDemoStudent: () => void;
+  loadDemoStudent: (id?: string) => void;
   loadSampleStudent: () => void;
   startBlank: () => void;
   setProfile: (patch: Partial<StudentProfile>) => void;
@@ -289,13 +290,14 @@ export function ForkProvider({ children }: { children: ReactNode }) {
         });
         persistProfile();
       },
-      loadDemoStudent: () => {
+      loadDemoStudent: (id) => {
         // Demo data is for the unauthenticated demo mode only.
         if (signedIn) return;
+        const chosen = (typeof id === "string" ? demoStudentById(id)?.profile : null) ?? DEMO_STUDENT;
         patch({
-          profile: DEMO_STUDENT,
+          profile: chosen,
           isDemoProfile: true,
-          priorities: DEMO_STUDENT.priorities,
+          priorities: chosen.priorities,
           careerId: DEFAULT_CAREER_ID,
           scenarioId: null,
           scenarioQuestion: null,
@@ -304,6 +306,7 @@ export function ForkProvider({ children }: { children: ReactNode }) {
           doneActions: [],
         });
       },
+
       setProfile: (p) => {
         typedThisSession.current = true;
         setState((s) => ({

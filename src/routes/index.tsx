@@ -3,7 +3,13 @@ import { ArrowRight, GitBranch, Sparkles } from "lucide-react";
 
 import { ForkLogo, PlanningEstimateNote } from "@/components/fork/ForkShell";
 import { Button } from "@/components/ui/button";
-import { DEMO_STUDENT } from "@/lib/fork/data";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { DEMO_STUDENT, DEMO_STUDENTS } from "@/lib/fork/data";
 import { formatCurrency, simulatePaths } from "@/lib/fork/engine";
 import { useFork } from "@/lib/fork/state";
 
@@ -32,8 +38,8 @@ function Landing() {
   const { loadDemoStudent, startBlank, session } = useFork();
   const navigate = useNavigate();
 
-  const startDemo = () => {
-    loadDemoStudent();
+  const startDemo = (id?: string) => {
+    loadDemoStudent(id);
     void navigate({ to: "/home" });
   };
 
@@ -69,14 +75,26 @@ function Landing() {
               <Button size="lg" className="gap-2 rounded-full px-8 shadow-lift" onClick={startFresh}>
                 Start here <ArrowRight className="size-4" />
               </Button>
-              <Button
-                size="lg"
-                variant="outline"
-                className="gap-2 rounded-full px-6"
-                onClick={startDemo}
-              >
-                <Sparkles className="size-4" /> Try a demo student
-              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button size="lg" variant="outline" className="gap-2 rounded-full px-6">
+                    <Sparkles className="size-4" /> Try a demo student
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start" className="w-80">
+                  {DEMO_STUDENTS.map((student) => (
+                    <DropdownMenuItem
+                      key={student.id}
+                      className="flex-col items-start gap-0.5"
+                      onSelect={() => startDemo(student.id)}
+                    >
+                      <span className="text-sm font-medium">{student.label}</span>
+                      <span className="text-xs text-muted-foreground">{student.description}</span>
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+
               <Button asChild size="lg" variant="ghost" className="rounded-full px-4">
                 <Link to="/import">Import my academic history</Link>
               </Button>
