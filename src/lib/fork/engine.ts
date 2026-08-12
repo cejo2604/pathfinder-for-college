@@ -480,9 +480,11 @@ export function simulatePaths(ids: string[], opts: SimulateOptions): SimulatedPa
   return ids.map((id) => simulatePath(id, opts));
 }
 
+export type UnsupportedInstitution = Extract<InstitutionSupport, { status: "unsupported" }>;
+
 export type SimulationResult =
   | { status: "ok"; paths: SimulatedPath[] }
-  | { status: "unsupported"; support: InstitutionSupport; message: string };
+  | { status: "unsupported"; support: UnsupportedInstitution; message: string };
 
 /** Institution-checked entry point: validates before any path is generated. */
 export function simulate(ids: string[], opts: SimulateOptions): SimulationResult {
