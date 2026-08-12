@@ -1,6 +1,20 @@
+import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { formatCurrency, type SimulatedPath } from "@/lib/fork/engine";
 import { useCountUp } from "@/lib/fork/state";
+
+/** Students who ask their OS for less motion get the tree without animation. */
+function usePrefersReducedMotion() {
+  const [reduced, setReduced] = useState(false);
+  useEffect(() => {
+    const query = window.matchMedia("(prefers-reduced-motion: reduce)");
+    setReduced(query.matches);
+    const onChange = () => setReduced(query.matches);
+    query.addEventListener("change", onChange);
+    return () => query.removeEventListener("change", onChange);
+  }, []);
+  return reduced;
+}
 
 interface BranchTreeProps {
   paths: SimulatedPath[];
@@ -18,10 +32,12 @@ export function BranchTree({
   currentSub,
   selectedId,
   bestId,
-  animate = true,
+  animate: animateProp = true,
   onSelect,
 }: BranchTreeProps) {
+  const animate = animateProp && !usePrefersReducedMotion();
   const n = Math.max(paths.length, 1);
+
 
   return (
     <div className="w-full">
