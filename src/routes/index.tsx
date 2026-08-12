@@ -26,7 +26,7 @@ export const Route = createFileRoute("/")({
   component: Landing,
 });
 
-const PREVIEW = simulatePaths(["stay_biology", "switch_cs", "cs_minor"], { profile: DEMO_STUDENT });
+const PREVIEW = simulatePaths(["baseline", "switch_cs", "cs_minor"], { profile: DEMO_STUDENT });
 
 function Landing() {
   const { loadDemoStudent, startBlank, session } = useFork();
@@ -138,7 +138,7 @@ function Landing() {
                   className="animate-fork-rise rounded-xl border border-border bg-background px-3 py-3 text-center"
                 >
                   <p className="font-display text-sm leading-tight">{path.name}</p>
-                  <p className="mt-2 text-xs text-muted-foreground">{path.graduationDate}</p>
+                  <p className="mt-2 text-xs text-muted-foreground">{path.estimatedCompletionDate}</p>
                   <p className="text-xs font-medium tabular-nums">{formatCurrency(path.estimatedCost)}</p>
                 </div>
               ))}

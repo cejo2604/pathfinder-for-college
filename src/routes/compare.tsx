@@ -44,7 +44,7 @@ function ComparePage() {
   } = useFork();
   const [whyId, setWhyId] = useState<string | null>(null);
 
-  const selectedIds = comparison.length ? comparison : ["stay_biology", "switch_cs", "cs_minor"];
+  const selectedIds = comparison.length ? comparison : ["baseline", "switch_cs", "cs_minor"];
   const paths = useMemo(
     () => simulatePaths(selectedIds, { profile, careerId, priorities }),
     [selectedIds, profile, careerId, priorities],
@@ -109,14 +109,17 @@ function ComparePage() {
             <h2 className="mt-1.5 font-display text-xl leading-tight">{path.name}</h2>
 
             <dl className="mt-4 space-y-2 text-sm">
-              <Row label="Graduation" value={path.graduationDate} />
+              <Row label="Estimated completion" value={path.estimatedCompletionDate} />
               <Row label="Semesters remaining" value={`${path.semesters}${path.summerSessions ? ` + ${path.summerSessions} summer` : ""}`} />
               <Row label="Credits remaining" value={`${path.creditsRemaining}`} />
               <Row
                 label="Additional credits"
                 value={path.additionalCredits === 0 ? "None" : `${path.additionalCredits > 0 ? "+" : "−"}${Math.abs(path.additionalCredits)}`}
               />
-              <Row label="Estimated tuition" value={formatCurrency(path.estimatedCost)} />
+              <Row
+                label="Estimated tuition"
+                value={`${formatCurrency(path.estimatedCost)} (${formatCurrency(path.tuitionPerCredit)}/credit${path.pricedAtOutOfInstitutionRate ? ", out-of-institution" : ""})`}
+              />
               <Row label="Vs. current plan" value={path.isBaseline ? "Baseline" : formatDelta(path.additionalCost)} />
               <Row label="Prerequisites" value={path.prerequisiteCount ? path.prerequisiteCourses.join(", ") : "None"} />
               <Row label="Avg. term load" value={`${path.averageLoad} credits`} />

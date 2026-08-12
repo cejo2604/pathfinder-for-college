@@ -4,6 +4,7 @@ import type { Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import {
   DEFAULT_CAREER_ID,
+  DEFAULT_INSTITUTION_ID,
   DEMO_STUDENT,
   PRIORITY_ORDER,
   SAMPLE_STUDENT,
@@ -240,6 +241,7 @@ export function ForkProvider({ children }: { children: ReactNode }) {
           profile: {
             name: "",
             school: "",
+            institutionId: DEFAULT_INSTITUTION_ID,
             degree: "",
             major: "",
             minor: null,
@@ -351,7 +353,10 @@ export function useFork() {
 /** Profile with a safe fallback so every screen renders even before demo load. */
 export function useForkProfile(): StudentProfile {
   const { profile } = useFork();
-  return profile ?? DEMO_STUDENT;
+  const resolved = profile ?? DEMO_STUDENT;
+  // Legacy stored profiles predate the institution id; default them to the
+  // catalog Fork can verify rather than leaving simulation blocked.
+  return resolved.institutionId ? resolved : { ...resolved, institutionId: DEFAULT_INSTITUTION_ID };
 }
 
 export function useCountUp(target: number, active = true, duration = 750) {

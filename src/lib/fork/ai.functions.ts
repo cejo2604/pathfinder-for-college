@@ -1,6 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 
-import { SCENARIOS, matchScenario } from "@/lib/fork/engine";
+import { SCENARIOS, matchScenario, validateAiScenarioSelection } from "@/lib/fork/engine";
 import { askGateway } from "@/lib/fork/ai.server";
 
 /**
@@ -29,13 +29,16 @@ export const classifyScenario = createServerFn({ method: "POST" })
       const id = raw.trim().toLowerCase().replace(/[^a-z_]/g, "");
       const matched = SCENARIOS.find((s) => s.id === id);
       const resolved = matched ?? fallback;
+      // Everything the model returned is stripped down to { scenarioId, target }.
+      const selection = validateAiScenarioSelection({ scenarioId: resolved?.id ?? null });
       return {
-        scenarioId: resolved?.id ?? null,
-        resolved: Boolean(resolved),
+        scenarioId: selection.scenarioId,
+        resolved: Boolean(selection.scenarioId),
         source: matched ? "ai" : "keywords",
       };
     } catch {
-      return { scenarioId: fallback?.id ?? null, resolved: Boolean(fallback), source: "keywords" };
+      const selection = validateAiScenarioSelection({ scenarioId: fallback?.id ?? null });
+      return { scenarioId: selection.scenarioId, resolved: Boolean(selection.scenarioId), source: "keywords" };
     }
   });
 

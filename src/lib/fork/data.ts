@@ -89,6 +89,49 @@ export let COURSES: Course[] = [
 
 export const courseByCode = (code: string) => COURSES.find((c) => c.code === code);
 
+/**
+ * Catalog course skill contributions, 0-1 per skill.
+ *
+ * These are the SOLE source of numeric career-fit coverage — path-level
+ * hand-authored coverage is not permitted. Each value states how much of a
+ * skill one course is intended to build; coverage is the capped sum of the
+ * contributions of the courses in scope (see engine.ts). Contributions are
+ * catalog facts and are never tuned to reproduce a historical score.
+ */
+export const COURSE_SKILL_CONTRIBUTIONS: Record<string, Partial<Record<SkillKey, number>>> = {
+  "BIOL 101": { health_domain: 0.2, research: 0.05 },
+  "BIOL 102": { health_domain: 0.2, research: 0.05 },
+  "BIOL 201": { health_domain: 0.2, research: 0.1 },
+  "BIOL 301": { health_domain: 0.2, research: 0.15 },
+  "BIOL 302": { health_domain: 0.2, research: 0.1 },
+  "BIOL 410": { health_domain: 0.2, research: 0.25 },
+  "BIOL 495": { health_domain: 0.15, research: 0.3 },
+  "CHEM 101": { health_domain: 0.1, research: 0.05 },
+  "CHEM 102": { health_domain: 0.1, research: 0.05 },
+  "CHEM 261": { health_domain: 0.15, research: 0.1 },
+  "STAT 155": { statistics: 0.4, data_analysis: 0.2 },
+  "STAT 320": { statistics: 0.45, data_analysis: 0.25 },
+  "PSYC 101": { health_domain: 0.05, research: 0.05 },
+  "MATH 152": { statistics: 0.1 },
+  "MATH 233": { programming: 0.15, statistics: 0.1 },
+  "COMP 110": { programming: 0.3, data_analysis: 0.1 },
+  "COMP 210": { programming: 0.35, data_analysis: 0.15 },
+  "COMP 301": { programming: 0.25 },
+  "COMP 311": { programming: 0.15 },
+  "COMP 410": { programming: 0.25, data_analysis: 0.1 },
+  "COMP 480": { programming: 0.2, data_analysis: 0.35, statistics: 0.25 },
+  "COMP 495": { programming: 0.25, data_analysis: 0.1 },
+  "HINF 210": { informatics: 0.35, health_domain: 0.1 },
+  "HINF 320": { informatics: 0.35, data_analysis: 0.15 },
+  "HINF 410": { informatics: 0.3, data_analysis: 0.35, statistics: 0.2, health_domain: 0.1 },
+  "HINF 450": { informatics: 0.25, health_domain: 0.1 },
+};
+
+/** Contributions for one catalog course code. Unknown codes contribute nothing. */
+export const courseSkillContributions = (code: string): Partial<Record<SkillKey, number>> =>
+  COURSE_SKILL_CONTRIBUTIONS[code] ?? {};
+
+
 export interface DegreeProgram {
   id: string;
   name: string;
@@ -112,14 +155,26 @@ export interface StudentCourse {
   term: string;
   grade?: string;
   waitlistPosition?: number;
-  /** True once the student confirmed this record (imported or hand-entered). */
+  /**
+   * True once the student confirmed this record (imported or hand-entered).
+   * Unconfirmed rows never contribute credits, cost, timeline or career fit —
+   * they only raise uncertainty (see engine.ts).
+   */
   verified?: boolean;
+  /** Where the row came from. Imported rows stay unconfirmed until reviewed. */
+  source?: "manual" | "import";
 }
 
 
 export interface StudentProfile {
   name: string;
   school: string;
+  /**
+   * Canonical institution id. Simulation fails closed when this is missing or
+   * not in SUPPORTED_INSTITUTION_IDS — Fork never simulates against a catalog
+   * it cannot verify.
+   */
+  institutionId?: string;
   degree: string;
   major: string;
   minor: string | null;
@@ -136,15 +191,32 @@ export interface StudentProfile {
   courses: StudentCourse[];
 }
 
-/** Tuition assumptions for the demo institution (estimated values). */
-export const TUITION_PER_CREDIT = 485;
-export const TRANSFER_TUITION_PER_CREDIT = 540;
+/**
+ * Fork planning assumptions — estimated per-credit rates, not billed prices.
+ * These are the only tuition rates in the product; no other file may hardcode
+ * a rate. Cost = credits x rate, where the rate is the out-of-institution rate
+ * only when a path changes institution.
+ */
+export const PLANNING_ASSUMPTIONS = {
+  tuitionPerCredit: 485,
+  outOfInstitutionTuitionPerCredit: 540,
+  label: "Fork planning assumption",
+} as const;
+
+export const TUITION_PER_CREDIT = PLANNING_ASSUMPTIONS.tuitionPerCredit;
+export const TRANSFER_TUITION_PER_CREDIT = PLANNING_ASSUMPTIONS.outOfInstitutionTuitionPerCredit;
+
+/** Institutions whose catalog Fork can verify. Anything else fails closed. */
+export const SUPPORTED_INSTITUTION_IDS = ["fork_demo_institution"] as const;
+export const DEFAULT_INSTITUTION_ID = SUPPORTED_INSTITUTION_IDS[0];
 
 export const DEMO_STUDENT: StudentProfile = {
   name: "Maya Rodriguez",
   school: "University of North Carolina",
+  institutionId: DEFAULT_INSTITUTION_ID,
   degree: "Bachelor of Science",
   major: "Biology",
+
   minor: null,
   year: "Sophomore",
   graduationTarget: "May 2028",

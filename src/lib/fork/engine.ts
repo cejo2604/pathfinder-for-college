@@ -9,18 +9,23 @@
 import {
   CAREERS,
   DEFAULT_CAREER_ID,
+  PLANNING_ASSUMPTIONS,
   PRIORITY_LABELS,
   PRIORITY_ORDER,
+  SKILL_LABELS,
+  SUPPORTED_INSTITUTION_IDS,
   type Career,
   type Priority,
   type SkillKey,
+  type StudentCourse,
   type StudentProfile,
   careerById,
   courseByCode,
+  courseSkillContributions,
 } from "./data";
 import { BASELINE_PATH_ID, PATHS, type PathSpec, type PlannedTerm, pathSpecById } from "./paths";
 
-export type RiskLevel = "Low" | "Moderate" | "Medium/High" | "High";
+export type RiskLevel = "Low" | "Moderate" | "Medium" | "High";
 
 export interface ScoreBreakdown {
   careerFit: number;
@@ -30,6 +35,37 @@ export interface ScoreBreakdown {
   continuity: number;
   courseworkEfficiency: number;
   overallFit: number;
+}
+
+/** One skill's contribution to career fit, with the courses that produced it. */
+export interface CareerFitSkillEvidence {
+  skill: SkillKey;
+  label: string;
+  /** Career skill weight, 0-1. */
+  weight: number;
+  /** Capped coverage from courses in scope, 0-1. */
+  coverage: number;
+  courses: { code: string; contribution: number }[];
+}
+
+export interface CareerFitResult {
+  score: number;
+  evidence: CareerFitSkillEvidence[];
+}
+
+export interface RiskDriver {
+  label: string;
+  points: number;
+}
+
+export interface RiskAssessment {
+  level: RiskLevel;
+  points: number;
+  drivers: RiskDriver[];
+  /** Named unknowns; they never carry numeric weight. */
+  uncertaintyDrivers: string[];
+  /** True when unknowns pushed the qualitative level up one band. */
+  escalatedForUncertainty: boolean;
 }
 
 export interface SimulatedPath {
@@ -48,15 +84,21 @@ export interface SimulatedPath {
   summerSessions: number;
   breakTerms: number;
   averageLoad: number;
-  graduationTerm: string;
-  graduationDate: string;
+  estimatedCompletionTerm: string;
+  estimatedCompletionDate: string;
   estimatedCost: number;
   additionalCost: number;
   tuitionPerCredit: number;
+  changesInstitution: boolean;
+  pricedAtOutOfInstitutionRate: boolean;
   prerequisiteCourses: string[];
   prerequisiteCount: number;
   scores: ScoreBreakdown;
+  careerFitEvidence: CareerFitSkillEvidence[];
   risk: RiskLevel;
+  riskPoints: number;
+  riskDrivers: RiskDriver[];
+  uncertaintyDrivers: string[];
   riskFactors: string[];
   advantages: string[];
   tradeoffs: string[];
@@ -69,25 +111,103 @@ export interface SimulatedPath {
 
 export const DEGREE_CREDITS = 120;
 
+/** Every timeline label in Fork is an estimate derived from the planned sequence. */
+export const COMPLETION_DISCLAIMER = "Based on planned course sequence";
+export const PLANNING_ASSUMPTION_LABEL = PLANNING_ASSUMPTIONS.label;
+
 const currency = (n: number) => `$${n.toLocaleString("en-US")}`;
 export const formatCurrency = currency;
 export const formatDelta = (n: number) => (n === 0 ? "No change" : `${n > 0 ? "+" : "−"}${currency(Math.abs(n))}`);
 
-const GRADUATION_MONTH: Record<string, string> = { Fall: "December", Spring: "May", Summer: "August" };
+/** Terms end on a fixed calendar day: Fall Dec 31, Spring May 31, Summer Aug 31. */
+const TERM_END: Record<string, { month: string; day: number }> = {
+  Fall: { month: "December", day: 31 },
+  Spring: { month: "May", day: 31 },
+  Summer: { month: "August", day: 31 },
+};
 
-function graduationFromTerm(label: string): string {
+export function completionDateFromTerm(label: string): string {
   const [season, year] = label.split(" ");
-  return `${GRADUATION_MONTH[season ?? "Spring"] ?? "May"} ${year}`;
+  const end = TERM_END[season ?? "Spring"] ?? TERM_END["Spring"]!;
+  return `${end.month} ${end.day}, ${year}`;
 }
 
 const clamp = (n: number, min = 0, max = 100) => Math.max(min, Math.min(max, n));
 
-function careerFitScore(spec: PathSpec, career: Career): number {
-  const raw = career.skillWeights.reduce(
-    (sum, { skill, weight }) => sum + weight * (spec.skillCoverage[skill as SkillKey] ?? 0),
-    0,
-  );
-  return Math.round(raw * 100);
+/* ----------------------------------------------- institution-ID guardrail */
+
+export type InstitutionSupport =
+  | { status: "supported"; institutionId: string }
+  | { status: "unsupported"; reason: "missing" | "unrecognized"; institutionId: string | null };
+
+/** First precondition of any simulation: fail closed on unverifiable catalogs. */
+export function validateInstitution(profile: StudentProfile): InstitutionSupport {
+  const id = profile.institutionId?.trim();
+  if (!id) return { status: "unsupported", reason: "missing", institutionId: null };
+  if (!(SUPPORTED_INSTITUTION_IDS as readonly string[]).includes(id)) {
+    return { status: "unsupported", reason: "unrecognized", institutionId: id };
+  }
+  return { status: "supported", institutionId: id };
+}
+
+export class UnsupportedInstitutionError extends Error {
+  readonly support: InstitutionSupport;
+  constructor(support: InstitutionSupport) {
+    super("Fork cannot simulate against an unverified institution catalog.");
+    this.name = "UnsupportedInstitutionError";
+    this.support = support;
+  }
+}
+
+export const UNSUPPORTED_INSTITUTION_MESSAGE =
+  "Fork can only simulate against a verified institution catalog. Link a supported school to continue.";
+
+/* -------------------------------------------------------------- coursework */
+
+/** Imported rows only count once the student confirms them. */
+export const isConfirmedCourse = (course: StudentCourse) =>
+  course.source !== "import" || course.verified === true;
+
+const unconfirmedCourses = (profile: StudentProfile) => profile.courses.filter((c) => !isConfirmedCourse(c));
+
+/**
+ * Courses in scope for career fit: the student's confirmed completed and
+ * in-progress records first (they have authority), then the path's planned
+ * catalog courses. Deduplicated by course code, first occurrence wins.
+ */
+function coursesInScope(profile: StudentProfile, spec: PathSpec): string[] {
+  const seen = new Set<string>();
+  const out: string[] = [];
+  const add = (code: string) => {
+    if (!courseByCode(code) || seen.has(code)) return;
+    seen.add(code);
+    out.push(code);
+  };
+  for (const c of profile.courses) {
+    if (!isConfirmedCourse(c)) continue;
+    if (c.status !== "completed" && c.status !== "in_progress") continue;
+    add(c.code);
+  }
+  for (const term of spec.terms) for (const code of term.courses) add(code);
+  return out;
+}
+
+/**
+ * Career fit is derived only from catalog course skill contributions — never
+ * from hand-authored path coverage. Coverage per skill is capped at 1 and the
+ * final score is rounded exactly once.
+ */
+export function careerFit(profile: StudentProfile, spec: PathSpec, career: Career): CareerFitResult {
+  const codes = coursesInScope(profile, spec);
+  const evidence: CareerFitSkillEvidence[] = career.skillWeights.map(({ skill, weight }) => {
+    const courses = codes
+      .map((code) => ({ code, contribution: courseSkillContributions(code)[skill as SkillKey] ?? 0 }))
+      .filter((c) => c.contribution > 0);
+    const coverage = Math.min(1, courses.reduce((s, c) => s + c.contribution, 0));
+    return { skill: skill as SkillKey, label: SKILL_LABELS[skill as SkillKey], weight, coverage, courses };
+  });
+  const raw = evidence.reduce((sum, e) => sum + e.weight * e.coverage, 0) * 100;
+  return { score: clamp(Math.round(raw)), evidence };
 }
 
 /** Priority ranking (index 0 = most important) becomes a normalized weight set. */
@@ -102,33 +222,143 @@ export function priorityWeights(priorities: Priority[]): Record<Priority, number
   return out;
 }
 
-function baselineFacts() {
-  const baseline = pathSpecById(BASELINE_PATH_ID) as PathSpec;
-  const credits = baseline.terms.reduce((s, t) => s + t.credits, 0);
-  const semesters = baseline.terms.filter((t) => t.kind === "academic").length;
-  return { credits, semesters, cost: credits * baseline.tuitionPerCredit };
+/* ------------------------------------------------------------ baseline facts */
+
+/** Immutable reference facts for one profile + career. Never recomputed per path. */
+export interface BaselineFacts {
+  readonly pathId: string;
+  readonly programLabel: string;
+  readonly credits: number;
+  readonly cost: number;
+  readonly semesters: number;
+  readonly estimatedCompletionTerm: string;
+  readonly estimatedCompletionDate: string;
+  readonly careerFitScore: number;
+  readonly careerFitEvidence: readonly CareerFitSkillEvidence[];
 }
 
-function riskFor(path: {
-  additionalSemesters: number;
-  additionalCredits: number;
-  prerequisiteCount: number;
-  averageLoad: number;
-  unappliedCredits: number;
-  summerSessions: number;
-}): RiskLevel {
-  let points = 0;
-  points += path.additionalSemesters > 0 ? path.additionalSemesters * 2 : 0;
-  points += path.additionalCredits >= 12 ? 2 : path.additionalCredits > 0 ? 1 : 0;
-  points += path.prerequisiteCount >= 3 ? 2 : path.prerequisiteCount > 0 ? 1 : 0;
-  points += path.averageLoad >= 19 ? 2 : path.averageLoad >= 18 ? 1 : 0;
-  points += path.unappliedCredits >= 12 ? 2 : path.unappliedCredits > 0 ? 1 : 0;
-  points += path.summerSessions > 0 ? 1 : 0;
+export function baselineProgramLabel(profile: StudentProfile): string {
+  const major = profile.major?.trim();
+  if (!major) return "your current program";
+  const degree = profile.degree?.trim();
+  return degree ? `${major} (${degree})` : major;
+}
+
+const baselineCache = new WeakMap<StudentProfile, Map<string, BaselineFacts>>();
+
+export function baselineFacts(profile: StudentProfile, careerId?: string): BaselineFacts {
+  const career = careerById(careerId ?? DEFAULT_CAREER_ID) ?? (CAREERS[0] as Career);
+  const cached = baselineCache.get(profile)?.get(career.id);
+  if (cached) return cached;
+
+  const spec = pathSpecById(BASELINE_PATH_ID) as PathSpec;
+  const credits = spec.terms.reduce((s, t) => s + t.credits, 0);
+  const academic = spec.terms.filter((t) => t.kind === "academic");
+  const term = (academic[academic.length - 1] as PlannedTerm).label;
+  const fit = careerFit(profile, spec, career);
+  const facts: BaselineFacts = Object.freeze({
+    pathId: spec.id,
+    programLabel: baselineProgramLabel(profile),
+    credits,
+    cost: credits * tuitionRate(spec),
+    semesters: academic.length,
+    estimatedCompletionTerm: term,
+    estimatedCompletionDate: completionDateFromTerm(term),
+    careerFitScore: fit.score,
+    careerFitEvidence: Object.freeze(fit.evidence),
+  });
+
+  const byCareer = baselineCache.get(profile) ?? new Map<string, BaselineFacts>();
+  byCareer.set(career.id, facts);
+  baselineCache.set(profile, byCareer);
+  return facts;
+}
+
+/* ------------------------------------------------------------------ pricing */
+
+/** Cost = credits x rate; the out-of-institution rate applies only on transfer. */
+function tuitionRate(spec: PathSpec): number {
+  return spec.changesInstitution
+    ? PLANNING_ASSUMPTIONS.outOfInstitutionTuitionPerCredit
+    : PLANNING_ASSUMPTIONS.tuitionPerCredit;
+}
+
+/* --------------------------------------------------------------------- risk */
+
+/**
+ * Risk points, exactly as documented:
+ *   additional semesters      x2 each
+ *   additional credits        0 / 1-11 -> 1 / 12+ -> 2
+ *   prerequisites             0 / 1-2 -> 1 / 3+ -> 2
+ *   average load              >=19 -> 2, >=18 -> 1
+ *   unapplied credits         0 / 1-11 -> 1 / 12+ -> 2
+ *   summer sessions           any -> 1
+ * Bands: 0-1 Low, 2-3 Moderate, 4-6 Medium, 7+ High.
+ * Unknowns carry no points; two or more escalate the band by one.
+ */
+const UNCERTAINTY_ESCALATION_THRESHOLD = 2;
+const BANDS: RiskLevel[] = ["Low", "Moderate", "Medium", "High"];
+
+function bandFor(points: number): RiskLevel {
   if (points <= 1) return "Low";
   if (points <= 3) return "Moderate";
-  if (points <= 6) return "Medium/High";
+  if (points <= 6) return "Medium";
   return "High";
 }
+
+export function assessRisk(
+  path: {
+    additionalSemesters: number;
+    additionalCredits: number;
+    prerequisiteCount: number;
+    averageLoad: number;
+    unappliedCredits: number;
+    summerSessions: number;
+  },
+  uncertaintyDrivers: string[] = [],
+): RiskAssessment {
+  const drivers: RiskDriver[] = [];
+  const add = (label: string, points: number) => {
+    if (points > 0) drivers.push({ label, points });
+  };
+
+  add(
+    `${path.additionalSemesters} additional semester${path.additionalSemesters === 1 ? "" : "s"}`,
+    Math.max(0, path.additionalSemesters) * 2,
+  );
+  add(
+    `${path.additionalCredits} additional credits`,
+    path.additionalCredits >= 12 ? 2 : path.additionalCredits > 0 ? 1 : 0,
+  );
+  add(
+    `${path.prerequisiteCount} prerequisite course${path.prerequisiteCount === 1 ? "" : "s"}`,
+    path.prerequisiteCount >= 3 ? 2 : path.prerequisiteCount > 0 ? 1 : 0,
+  );
+  add(
+    `Average load ${path.averageLoad} credits per term`,
+    path.averageLoad >= 19 ? 2 : path.averageLoad >= 18 ? 1 : 0,
+  );
+  add(
+    `${path.unappliedCredits} completed credits do not apply`,
+    path.unappliedCredits >= 12 ? 2 : path.unappliedCredits > 0 ? 1 : 0,
+  );
+  add(`${path.summerSessions} summer session${path.summerSessions === 1 ? "" : "s"}`, path.summerSessions > 0 ? 1 : 0);
+
+  const points = drivers.reduce((s, d) => s + d.points, 0);
+  const base = bandFor(points);
+  const escalate = uncertaintyDrivers.length >= UNCERTAINTY_ESCALATION_THRESHOLD;
+  const level = escalate ? (BANDS[Math.min(BANDS.indexOf(base) + 1, BANDS.length - 1)] as RiskLevel) : base;
+
+  return {
+    level,
+    points,
+    drivers,
+    uncertaintyDrivers: [...uncertaintyDrivers],
+    escalatedForUncertainty: escalate && level !== base,
+  };
+}
+
+/* --------------------------------------------------------------- simulation */
 
 export interface SimulateOptions {
   profile: StudentProfile;
@@ -137,11 +367,18 @@ export interface SimulateOptions {
   priorities?: Priority[];
 }
 
+/**
+ * Pure: reads the profile, catalog and baseline facts and mutates none of them.
+ */
 export function simulatePath(specId: string, opts: SimulateOptions): SimulatedPath {
+  const support = validateInstitution(opts.profile);
+  if (support.status !== "supported") throw new UnsupportedInstitutionError(support);
+
   const spec = pathSpecById(specId);
   if (!spec) throw new Error(`Unknown path: ${specId}`);
   const career = careerById(opts.careerId ?? DEFAULT_CAREER_ID) ?? (CAREERS[0] as Career);
-  const base = baselineFacts();
+  const base = baselineFacts(opts.profile, career.id);
+  const isBaseline = spec.id === BASELINE_PATH_ID;
 
   const creditsRemaining = spec.terms.reduce((s, t) => s + t.credits, 0);
   const academicTerms = spec.terms.filter((t) => t.kind === "academic");
@@ -150,17 +387,19 @@ export function simulatePath(specId: string, opts: SimulateOptions): SimulatedPa
   const breakTerms = spec.terms.filter((t) => t.kind === "break").length;
   const averageLoad =
     Math.round((academicTerms.reduce((s, t) => s + t.credits, 0) / Math.max(semesters, 1)) * 10) / 10;
-  const graduationTerm = (academicTerms[academicTerms.length - 1] as PlannedTerm).label;
-  const estimatedCost = creditsRemaining * spec.tuitionPerCredit;
+  const completionTerm = (academicTerms[academicTerms.length - 1] as PlannedTerm).label;
+  const tuitionPerCredit = tuitionRate(spec);
+  const estimatedCost = creditsRemaining * tuitionPerCredit;
   const requiredCredits = DEGREE_CREDITS + spec.extraProgramCredits;
-  const unappliedCredits = Math.max(0, opts.profile.creditsCompleted - spec.appliedCredits);
+  const appliedCredits = isBaseline ? opts.profile.creditsCompleted : spec.appliedCredits;
+  const unappliedCredits = Math.max(0, opts.profile.creditsCompleted - appliedCredits);
 
   const additionalCredits = creditsRemaining - base.credits;
   const additionalSemesters = semesters - base.semesters;
   const additionalCost = estimatedCost - base.cost;
   const prerequisiteCount = spec.prerequisiteCourses.length;
 
-  const careerFit = careerFitScore(spec, career);
+  const fit = careerFit(opts.profile, spec, career);
   const costEfficiency = clamp(Math.round((base.cost / estimatedCost) * 100));
   const loadPenalty = Math.max(0, averageLoad - 16.5) * 2 + (summerSessions > 0 ? 3 : 0);
   const graduationEfficiency = clamp(Math.round((base.semesters / semesters) * 100 - loadPenalty));
@@ -170,46 +409,50 @@ export function simulatePath(specId: string, opts: SimulateOptions): SimulatedPa
   const overallFit = Math.round(
     weights.graduate_on_time * graduationEfficiency +
       weights.minimize_cost * costEfficiency +
-      weights.career_opportunities * careerFit +
+      weights.career_opportunities * fit.score +
       weights.stay_close_to_major * spec.continuity +
       weights.minimize_coursework * courseworkEfficiency +
       weights.flexibility * spec.flexibility,
   );
 
-  const risk = riskFor({
-    additionalSemesters,
-    additionalCredits,
-    prerequisiteCount,
-    averageLoad,
-    unappliedCredits,
-    summerSessions,
-  });
+  const pending = unconfirmedCourses(opts.profile).length;
+  const uncertaintyDrivers = [
+    ...spec.unknowns,
+    ...(pending > 0 ? [`${pending} imported course row${pending === 1 ? "" : "s"} not yet confirmed`] : []),
+  ];
+
+  const risk = assessRisk(
+    { additionalSemesters, additionalCredits, prerequisiteCount, averageLoad, unappliedCredits, summerSessions },
+    uncertaintyDrivers,
+  );
 
   return {
     id: spec.id,
     letter: spec.letter,
     name: spec.name,
-    program: spec.program,
+    program: spec.program || base.programLabel,
     headline: spec.headline,
     creditsRemaining,
     additionalCredits,
     requiredCredits,
-    appliedCredits: spec.appliedCredits,
+    appliedCredits,
     unappliedCredits,
     semesters,
     additionalSemesters,
     summerSessions,
     breakTerms,
     averageLoad,
-    graduationTerm,
-    graduationDate: graduationFromTerm(graduationTerm),
+    estimatedCompletionTerm: completionTerm,
+    estimatedCompletionDate: completionDateFromTerm(completionTerm),
     estimatedCost,
     additionalCost,
-    tuitionPerCredit: spec.tuitionPerCredit,
-    prerequisiteCourses: spec.prerequisiteCourses,
+    tuitionPerCredit,
+    changesInstitution: spec.changesInstitution,
+    pricedAtOutOfInstitutionRate: spec.changesInstitution,
+    prerequisiteCourses: [...spec.prerequisiteCourses],
     prerequisiteCount,
     scores: {
-      careerFit,
+      careerFit: fit.score,
       costEfficiency,
       graduationEfficiency,
       flexibility: spec.flexibility,
@@ -217,21 +460,41 @@ export function simulatePath(specId: string, opts: SimulateOptions): SimulatedPa
       courseworkEfficiency,
       overallFit,
     },
-    risk,
-    riskFactors: spec.riskFactors,
-    advantages: spec.advantages,
-    tradeoffs: spec.tradeoffs,
-    opportunities: spec.opportunities,
-    unknowns: spec.unknowns,
-    terms: spec.terms,
-    nextMoves: spec.nextMoves,
-    isBaseline: spec.id === BASELINE_PATH_ID,
+    careerFitEvidence: fit.evidence,
+    risk: risk.level,
+    riskPoints: risk.points,
+    riskDrivers: risk.drivers,
+    uncertaintyDrivers: risk.uncertaintyDrivers,
+    riskFactors: [...spec.riskFactors],
+    advantages: [...spec.advantages],
+    tradeoffs: [...spec.tradeoffs],
+    opportunities: [...spec.opportunities],
+    unknowns: [...spec.unknowns],
+    terms: spec.terms.map((t) => ({ ...t, courses: [...t.courses], actions: [...t.actions] })),
+    nextMoves: [...spec.nextMoves],
+    isBaseline,
   };
 }
 
 export function simulatePaths(ids: string[], opts: SimulateOptions): SimulatedPath[] {
   return ids.map((id) => simulatePath(id, opts));
 }
+
+export type UnsupportedInstitution = Extract<InstitutionSupport, { status: "unsupported" }>;
+
+export type SimulationResult =
+  | { status: "ok"; paths: SimulatedPath[] }
+  | { status: "unsupported"; support: UnsupportedInstitution; message: string };
+
+/** Institution-checked entry point: validates before any path is generated. */
+export function simulate(ids: string[], opts: SimulateOptions): SimulationResult {
+  const support = validateInstitution(opts.profile);
+  if (support.status !== "supported") {
+    return { status: "unsupported", support, message: UNSUPPORTED_INSTITUTION_MESSAGE };
+  }
+  return { status: "ok", paths: simulatePaths(ids, opts) };
+}
+
 
 export function rankPaths(paths: SimulatedPath[]): SimulatedPath[] {
   return [...paths].sort((a, b) => b.scores.overallFit - a.scores.overallFit);
@@ -253,7 +516,7 @@ export const SCENARIOS: Scenario[] = [
     id: "switch_major",
     question: "What if I switch to Computer Science?",
     chip: "Switch my major",
-    pathIds: ["stay_biology", "switch_cs", "cs_minor"],
+    pathIds: ["baseline", "switch_cs", "cs_minor"],
     keywords: ["switch", "change major", "computer science", "cs major", "different major"],
     framing: "Three ways to get more technical, from no change to a full major switch.",
   },
@@ -261,7 +524,7 @@ export const SCENARIOS: Scenario[] = [
     id: "add_minor",
     question: "What if I add a Computer Science minor?",
     chip: "Add a minor",
-    pathIds: ["stay_biology", "cs_minor", "bio_health_informatics"],
+    pathIds: ["baseline", "cs_minor", "bio_health_informatics"],
     keywords: ["minor", "add a minor", "informatics minor", "second field"],
     framing: "Two ways to add a credential without leaving Biology, next to no change at all.",
   },
@@ -269,7 +532,7 @@ export const SCENARIOS: Scenario[] = [
     id: "graduate_early",
     question: "What if I graduate one semester early?",
     chip: "Graduate early",
-    pathIds: ["stay_biology", "graduate_early", "cs_minor"],
+    pathIds: ["baseline", "graduate_early", "cs_minor"],
     keywords: ["early", "graduate early", "finish sooner", "accelerate", "faster"],
     framing: "What speed costs you, and what the extra semester buys.",
   },
@@ -277,7 +540,7 @@ export const SCENARIOS: Scenario[] = [
     id: "minimize_cost",
     question: "What if I want to minimize additional tuition?",
     chip: "Minimize cost",
-    pathIds: ["stay_biology", "cs_minor", "switch_cs"],
+    pathIds: ["baseline", "cs_minor", "switch_cs"],
     keywords: ["cost", "cheap", "tuition", "money", "afford", "minimize cost", "debt"],
     framing: "Ranked by what each additional credential actually costs.",
   },
@@ -285,7 +548,7 @@ export const SCENARIOS: Scenario[] = [
     id: "career_health_tech",
     question: "What if I want to work in healthcare technology?",
     chip: "Work in healthcare tech",
-    pathIds: ["stay_biology", "cs_minor", "bio_health_informatics", "switch_cs"],
+    pathIds: ["baseline", "cs_minor", "bio_health_informatics", "switch_cs"],
     keywords: ["healthcare technology", "health tech", "data scientist", "career", "informatics", "job"],
     framing: "Four routes to the same destination, with very different costs.",
   },
@@ -301,7 +564,7 @@ export const SCENARIOS: Scenario[] = [
     id: "transfer",
     question: "What if I transfer to another school?",
     chip: "Transfer schools",
-    pathIds: ["stay_biology", "transfer", "cs_minor"],
+    pathIds: ["baseline", "transfer", "cs_minor"],
     keywords: ["transfer", "another school", "different university", "move"],
     framing: "What a transfer costs against staying put.",
   },
@@ -309,7 +572,7 @@ export const SCENARIOS: Scenario[] = [
     id: "semester_off",
     question: "What if I take a semester off?",
     chip: "Take a semester off",
-    pathIds: ["stay_biology", "semester_off", "graduate_early"],
+    pathIds: ["baseline", "semester_off", "graduate_early"],
     keywords: ["semester off", "gap", "break", "leave of absence", "pause", "time off"],
     framing: "The delay a break creates, next to the opposite choice.",
   },
@@ -317,7 +580,7 @@ export const SCENARIOS: Scenario[] = [
     id: "missed_prerequisite",
     question: "What if I don't get a course I'm waitlisted for?",
     chip: "Miss a waitlisted course",
-    pathIds: ["cs_minor", "stay_biology", "bio_health_informatics"],
+    pathIds: ["cs_minor", "baseline", "bio_health_informatics"],
     keywords: ["waitlist", "waitlisted", "don't get", "do not get", "no seat", "seat", "closed section", "miss a course"],
     framing: "What losing one seat does to the plan that depends on it.",
   },
@@ -352,6 +615,26 @@ export function parseScenario(input: string): Scenario {
   return matchScenario(input) ?? (scenarioById("career_health_tech") as Scenario);
 }
 
+/* ------------------------------------------------------------- AI boundary */
+
+/**
+ * The only thing a model may return: a scenario id and an optional target.
+ * Every other key — credits, cost, dates, scores — is stripped, so a model can
+ * never introduce an academic fact into the engine's output.
+ */
+export interface AiScenarioSelection {
+  scenarioId: string | null;
+  target: string | null;
+}
+
+export function validateAiScenarioSelection(raw: unknown): AiScenarioSelection {
+  const input = (raw ?? {}) as Record<string, unknown>;
+  const id = typeof input["scenarioId"] === "string" ? input["scenarioId"].trim() : "";
+  const scenario = scenarioById(id);
+  const target = typeof input["target"] === "string" && input["target"].trim() ? input["target"].trim() : null;
+  return { scenarioId: scenario?.id ?? null, target };
+}
+
 /* -------------------------------------------------------------- explanation */
 
 export interface Evidence {
@@ -379,16 +662,43 @@ export function evidenceFor(path: SimulatedPath, profile: StudentProfile): Evide
       kind: "verified",
     },
     { label: "Credits remaining", value: `${path.creditsRemaining}`, kind: "estimated" },
-    { label: "Tuition per credit", value: `${currency(path.tuitionPerCredit)}`, kind: "estimated" },
-    { label: "Estimated remaining tuition", value: currency(path.estimatedCost), kind: "estimated" },
     {
-      label: "Graduation timeline",
-      value: `${path.semesters} semesters${path.summerSessions ? ` + ${path.summerSessions} summer session` : ""} → ${path.graduationDate}`,
+      label: "Tuition per credit",
+      value: `${currency(path.tuitionPerCredit)}${path.pricedAtOutOfInstitutionRate ? " (out-of-institution rate)" : ""} — ${PLANNING_ASSUMPTION_LABEL}`,
+      kind: "estimated",
+    },
+    {
+      label: "Estimated remaining tuition",
+      value: `${path.creditsRemaining} credits x ${currency(path.tuitionPerCredit)} = ${currency(path.estimatedCost)}`,
+      kind: "estimated",
+    },
+
+    {
+      label: "Estimated completion",
+      value: `${path.semesters} semesters${path.summerSessions ? ` + ${path.summerSessions} summer session` : ""} → ${path.estimatedCompletionDate} (${COMPLETION_DISCLAIMER})`,
       kind: "estimated",
     },
     { label: "Average term load", value: `${path.averageLoad} credits`, kind: "estimated" },
+    ...path.careerFitEvidence
+      .filter((e) => e.courses.length > 0)
+      .map((e) => ({
+        label: `Career fit — ${e.label}`,
+        value: `${Math.round(e.coverage * 100)}% coverage x ${Math.round(e.weight * 100)}% weight, from ${e.courses
+          .map((c) => c.code)
+          .join(", ")}`,
+        kind: "estimated" as const,
+      })),
+    ...path.riskDrivers.map((d) => ({
+      label: `Risk driver — ${d.label}`,
+      value: `${d.points} point${d.points === 1 ? "" : "s"}`,
+      kind: "estimated" as const,
+    })),
     { label: "Fork tradeoff scores", value: "Comparison scores, not predictions", kind: "estimated" },
-    ...path.unknowns.map((u) => ({ label: u, value: "Confirm with your institution", kind: "unknown" as const })),
+    ...path.uncertaintyDrivers.map((u) => ({
+      label: u,
+      value: "No numeric value assigned — confirm with your institution",
+      kind: "unknown" as const,
+    })),
   ];
 }
 
@@ -401,7 +711,7 @@ export function whyThisPath(path: SimulatedPath, profile: StudentProfile, priori
   const lines: string[] = [];
 
   lines.push(
-    `You have completed ${profile.creditsCompleted} credits toward ${profile.major} and are currently tracking a ${profile.graduationTarget} graduation.`,
+    `You have completed ${profile.creditsCompleted} credits toward ${profile.major} and are currently tracking a ${profile.graduationTarget} completion target.`,
   );
 
   if (path.unappliedCredits > 0) {
@@ -416,15 +726,15 @@ export function whyThisPath(path: SimulatedPath, profile: StudentProfile, priori
 
   if (path.additionalSemesters > 0) {
     lines.push(
-      `It adds ${path.additionalSemesters} semester${path.additionalSemesters > 1 ? "s" : ""}, moving graduation to ${path.graduationDate}, and ${formatDelta(path.additionalCost)} in estimated tuition.`,
+      `It adds ${path.additionalSemesters} semester${path.additionalSemesters > 1 ? "s" : ""}, moving estimated completion to ${path.estimatedCompletionDate}, and ${formatDelta(path.additionalCost)} in estimated tuition.`,
     );
   } else if (path.additionalSemesters < 0) {
     lines.push(
-      `It removes ${Math.abs(path.additionalSemesters)} semester, moving graduation to ${path.graduationDate}, at the cost of ${path.averageLoad}-credit terms.`,
+      `It removes ${Math.abs(path.additionalSemesters)} semester, moving estimated completion to ${path.estimatedCompletionDate}, at the cost of ${path.averageLoad}-credit terms.`,
     );
   } else {
     lines.push(
-      `It holds the ${path.graduationDate} graduation date, ${path.additionalCost === 0 ? "with no change in estimated tuition" : `for ${formatDelta(path.additionalCost)} in estimated tuition`}, and ${path.additionalCredits > 0 ? `${path.additionalCredits} additional credits` : "no additional credits"}.`,
+      `It holds the ${path.estimatedCompletionDate} estimated completion date, ${path.additionalCost === 0 ? "with no change in estimated tuition" : `for ${formatDelta(path.additionalCost)} in estimated tuition`}, and ${path.additionalCredits > 0 ? `${path.additionalCredits} additional credits` : "no additional credits"}.`,
     );
   }
 
@@ -444,15 +754,16 @@ export function whyThisPath(path: SimulatedPath, profile: StudentProfile, priori
 /** Engine-computed figures, flattened for the AI interpretation layer. */
 export function pathFactSheet(path: SimulatedPath, profile: StudentProfile, priorities: Priority[]): string {
   return [
-    `Student: ${profile.year}, current major ${profile.major}, ${profile.creditsCompleted} credits completed, graduation target ${profile.graduationTarget}, stated goal ${profile.goalCategory}.`,
+    `Student: ${profile.year}, current major ${profile.major}, ${profile.creditsCompleted} credits completed, completion target ${profile.graduationTarget}, stated goal ${profile.goalCategory}.`,
     `Ranked priorities: ${priorities.map((p) => p.replace(/_/g, " ")).join(" > ")}.`,
     `Path: ${path.name} (${path.program}).`,
-    `Graduation date: ${path.graduationDate}. Semesters remaining: ${path.semesters}. Average load: ${path.averageLoad} credits.`,
+    `Estimated completion (based on planned course sequence): ${path.estimatedCompletionDate}. Semesters remaining: ${path.semesters}. Average load: ${path.averageLoad} credits.`,
     `Credits remaining: ${path.creditsRemaining}. Additional credits vs current plan: ${path.additionalCredits}.`,
     `Completed credits applied: ${path.appliedCredits}. Credits becoming electives: ${path.unappliedCredits}.`,
     `Estimated remaining tuition: ${currency(path.estimatedCost)}. Change vs current plan: ${formatDelta(path.additionalCost)}. Semester change: ${path.additionalSemesters}.`,
     `Prerequisites to sequence: ${path.prerequisiteCount}${path.prerequisiteCourses.length ? ` (${path.prerequisiteCourses.join(", ")})` : ""}.`,
-    `Risk: ${path.risk} — ${path.riskFactors.join("; ")}.`,
+    `Risk: ${path.risk} (${path.riskPoints} points) — ${path.riskDrivers.map((d) => `${d.label} +${d.points}`).join("; ")}.`,
+    `Unknowns (no numeric weight): ${path.uncertaintyDrivers.join("; ") || "none"}.`,
     `Scores out of 100 — career fit ${path.scores.careerFit}, cost efficiency ${path.scores.costEfficiency}, graduation efficiency ${path.scores.graduationEfficiency}, flexibility ${path.scores.flexibility}, overall fit ${path.scores.overallFit}.`,
     `Advantages: ${path.advantages.join("; ")}.`,
     `Tradeoffs: ${path.tradeoffs.join("; ")}.`,
@@ -498,8 +809,8 @@ function movesForPriority(priority: Priority, path: SimulatedPath, career: Caree
     case "graduate_on_time":
       return [
         path.additionalSemesters > 0
-          ? `Plan for ${path.semesters} academic semesters — ${path.additionalSemesters} more than staying put — and confirm the ${path.graduationDate} date with your advisor.`
-          : `Hold ${path.semesters} academic semesters at ~${path.averageLoad} credits to keep ${path.graduationDate} intact.`,
+          ? `Plan for ${path.semesters} academic semesters — ${path.additionalSemesters} more than staying put — and confirm the ${path.estimatedCompletionDate} date with your advisor.`
+          : `Hold ${path.semesters} academic semesters at ~${path.averageLoad} credits to keep ${path.estimatedCompletionDate} intact.`,
         path.summerSessions > 0
           ? `Register for ${path.summerSessions} summer session${path.summerSessions > 1 ? "s" : ""} — the timeline above depends on ${path.summerSessions > 1 ? "them" : "it"}.`
           : `Register on your first enrollment day each term; a missed seat is what usually adds a semester.`,
@@ -546,7 +857,7 @@ function movesForPriority(priority: Priority, path: SimulatedPath, career: Caree
 }
 
 const METRIC_FOR: Record<Priority, (p: SimulatedPath) => string> = {
-  graduate_on_time: (p) => `${p.graduationDate} · ${p.semesters} semesters`,
+  graduate_on_time: (p) => `${p.estimatedCompletionDate} · ${p.semesters} semesters`,
   minimize_cost: (p) => `${formatCurrency(p.estimatedCost)} remaining tuition`,
   career_opportunities: (p) => `${p.scores.careerFit}/100 career fit`,
   stay_close_to_major: (p) => `${p.scores.continuity}/100 continuity`,

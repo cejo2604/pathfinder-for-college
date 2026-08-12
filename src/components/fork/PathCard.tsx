@@ -3,7 +3,7 @@ import { Check, ChevronRight, Plus } from "lucide-react";
 import { RiskTag, ScoreBar, EstimateBadge } from "@/components/fork/Scores";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { formatCurrency, formatDelta, type SimulatedPath } from "@/lib/fork/engine";
+import { COMPLETION_DISCLAIMER, formatCurrency, formatDelta, type SimulatedPath } from "@/lib/fork/engine";
 import { useCountUp } from "@/lib/fork/state";
 
 interface PathCardProps {
@@ -63,7 +63,7 @@ export function PathCard({
       </header>
 
       <dl className="mt-5 grid grid-cols-2 gap-4 border-y border-border py-4">
-        <Metric label="Graduation" value={path.graduationDate} />
+        <Metric label="Estimated completion" value={path.estimatedCompletionDate} note={COMPLETION_DISCLAIMER} />
         <Metric label="Credits remaining" value={`${credits}`} />
         <Metric label="Estimated remaining tuition" value={formatCurrency(cost)} />
         <Metric
@@ -116,7 +116,17 @@ export function PathCard({
   );
 }
 
-function Metric({ label, value, tone = "flat" }: { label: string; value: string; tone?: "good" | "warn" | "flat" }) {
+function Metric({
+  label,
+  value,
+  note,
+  tone = "flat",
+}: {
+  label: string;
+  value: string;
+  note?: string;
+  tone?: "good" | "warn" | "flat";
+}) {
   return (
     <div>
       <dt className="text-xs uppercase tracking-[0.1em] text-muted-foreground">{label}</dt>
@@ -129,8 +139,10 @@ function Metric({ label, value, tone = "flat" }: { label: string; value: string;
       >
         {value}
       </dd>
+      {note && <p className="mt-0.5 text-[0.65rem] text-muted-foreground">{note}</p>}
     </div>
   );
+
 }
 
 function List({ title, items, tone }: { title: string; items: string[]; tone: "good" | "warn" }) {

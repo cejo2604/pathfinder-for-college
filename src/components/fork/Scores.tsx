@@ -76,7 +76,7 @@ export function ScorePanel({ scores }: { scores: ScoreBreakdown }) {
 const RISK_STYLES: Record<RiskLevel, string> = {
   Low: "bg-mint/20 text-mint-foreground",
   Moderate: "bg-gold/20 text-gold-foreground",
-  "Medium/High": "bg-gold/30 text-gold-foreground",
+  Medium: "bg-gold/30 text-gold-foreground",
   High: "bg-destructive/15 text-destructive",
 };
 

@@ -1,5 +1,4 @@
-import type { SkillKey } from "./data";
-import { TRANSFER_TUITION_PER_CREDIT, TUITION_PER_CREDIT } from "./data";
+
 
 export type TermKind = "academic" | "summer" | "break";
 
@@ -22,13 +21,12 @@ export interface PathSpec {
   /** Extra required credits beyond the major (e.g. a minor). */
   extraProgramCredits: number;
   prerequisiteCourses: string[];
-  tuitionPerCredit: number;
+  /** True when the path moves the student to another institution (priced at the out-of-institution rate). */
+  changesInstitution: boolean;
   /** 0-100, how much of the student's current academic direction is preserved. */
   continuity: number;
   /** 0-100, how many different futures stay open after this path. */
   flexibility: number;
-  /** How well this path builds each skill, 0-1. Used with career skill weights. */
-  skillCoverage: Record<SkillKey, number>;
   advantages: string[];
   tradeoffs: string[];
   riskFactors: string[];
@@ -38,40 +36,27 @@ export interface PathSpec {
   nextMoves: string[];
 }
 
-const cov = (
-  health_domain: number,
-  programming: number,
-  data_analysis: number,
-  statistics: number,
-  informatics: number,
-  research: number,
-): Record<SkillKey, number> => ({
-  health_domain,
-  programming,
-  data_analysis,
-  statistics,
-  informatics,
-  research,
-});
 
 export const PATHS: PathSpec[] = [
   {
-    id: "stay_biology",
+    id: "baseline",
     letter: "A",
     name: "Stay the course",
-    program: "Biology, B.S.",
-    headline: "Finish Biology exactly as planned.",
-    appliedCredits: 54,
+    // Generic baseline: the program label and applied credits come from the
+    // student's own record at simulation time, never from a hardcoded major.
+    program: "",
+    headline: "Finish your current program exactly as planned.",
+    appliedCredits: 0,
     extraProgramCredits: 0,
     prerequisiteCourses: [],
-    tuitionPerCredit: TUITION_PER_CREDIT,
+    changesInstitution: false,
     continuity: 100,
     flexibility: 62,
-    skillCoverage: cov(0.95, 0.35, 0.55, 0.7, 0.3, 0.8),
     advantages: [
-      "Graduates on the original May 2028 target",
+      "Completes on the planned course sequence with no added terms",
       "No credits lost, no new prerequisites",
       "Lowest cost of any path",
+
     ],
     tradeoffs: [
       "Fewest technical credentials for healthcare technology roles",
@@ -125,10 +110,9 @@ export const PATHS: PathSpec[] = [
     appliedCredits: 36,
     extraProgramCredits: 0,
     prerequisiteCourses: ["COMP 210", "MATH 233", "COMP 301"],
-    tuitionPerCredit: TUITION_PER_CREDIT,
+    changesInstitution: false,
     continuity: 40,
     flexibility: 84,
-    skillCoverage: cov(0.55, 0.95, 0.85, 0.8, 0.6, 0.5),
     advantages: [
       "Strongest technical preparation of any path",
       "Widest set of software and data roles after graduation",
@@ -205,10 +189,9 @@ export const PATHS: PathSpec[] = [
     appliedCredits: 54,
     extraProgramCredits: 6,
     prerequisiteCourses: ["COMP 210"],
-    tuitionPerCredit: TUITION_PER_CREDIT,
+    changesInstitution: false,
     continuity: 88,
     flexibility: 88,
-    skillCoverage: cov(0.95, 0.75, 0.8, 0.85, 0.7, 0.8),
     advantages: [
       "Keeps the May 2028 graduation date",
       "Preserves every completed Biology credit",
@@ -273,10 +256,9 @@ export const PATHS: PathSpec[] = [
     appliedCredits: 54,
     extraProgramCredits: 12,
     prerequisiteCourses: ["HINF 210", "HINF 320"],
-    tuitionPerCredit: TUITION_PER_CREDIT,
+    changesInstitution: false,
     continuity: 76,
     flexibility: 80,
-    skillCoverage: cov(0.95, 0.6, 0.8, 0.8, 0.95, 0.8),
     advantages: [
       "Most directly aligned with health-system employers",
       "Still graduates May 2028",
@@ -341,10 +323,9 @@ export const PATHS: PathSpec[] = [
     appliedCredits: 54,
     extraProgramCredits: 0,
     prerequisiteCourses: [],
-    tuitionPerCredit: TUITION_PER_CREDIT,
+    changesInstitution: false,
     continuity: 96,
     flexibility: 55,
-    skillCoverage: cov(0.9, 0.3, 0.45, 0.65, 0.25, 0.6),
     advantages: [
       "December 2027 graduation, one semester early",
       "Same total tuition, one less semester of living costs",
@@ -403,10 +384,9 @@ export const PATHS: PathSpec[] = [
     appliedCredits: 42,
     extraProgramCredits: 0,
     prerequisiteCourses: ["Institution-specific core"],
-    tuitionPerCredit: TRANSFER_TUITION_PER_CREDIT,
+    changesInstitution: true,
     continuity: 45,
     flexibility: 78,
-    skillCoverage: cov(0.85, 0.8, 0.8, 0.75, 0.6, 0.5),
     advantages: ["Access to a different program mix", "A fresh set of local employers and labs"],
     tradeoffs: [
       "12 credits are assumed not to transfer",
@@ -468,10 +448,9 @@ export const PATHS: PathSpec[] = [
     appliedCredits: 54,
     extraProgramCredits: 0,
     prerequisiteCourses: [],
-    tuitionPerCredit: TUITION_PER_CREDIT,
+    changesInstitution: false,
     continuity: 90,
     flexibility: 60,
-    skillCoverage: cov(0.95, 0.35, 0.55, 0.7, 0.3, 0.8),
     advantages: [
       "Same total tuition — no extra credits",
       "A full term for work, health, or an internship",
@@ -532,4 +511,4 @@ export const PATHS: PathSpec[] = [
 
 export const pathSpecById = (id: string) => PATHS.find((p) => p.id === id);
 
-export const BASELINE_PATH_ID = "stay_biology";
+export const BASELINE_PATH_ID = "baseline";

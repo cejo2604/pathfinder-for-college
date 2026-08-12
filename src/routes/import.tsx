@@ -248,23 +248,31 @@ function ImportPage() {
     fields: ExtractedProfileFields,
     accepted: Set<keyof ExtractedProfileFields>,
   ) => {
-    const courses: StudentCourse[] = verified
-      .map((r) => {
-        const status = toProfileStatus(r.status);
-        if (!status) return null;
-        const course: StudentCourse = {
-          code: r.extractedCode || r.courseId || "—",
-          status,
-          term: r.term || "—",
-          verified: true,
-        };
-        if (r.grade) course.grade = r.grade;
-        if (r.waitlistPosition) course.waitlistPosition = r.waitlistPosition;
-        return course;
-      })
-      .filter((c): c is StudentCourse => c !== null);
+    const toCourse = (r: StudentCourseRow, isVerified: boolean): StudentCourse | null => {
+      const status = toProfileStatus(r.status);
+      if (!status) return null;
+      const course: StudentCourse = {
+        code: r.extractedCode || r.courseId || "—",
+        status,
+        term: r.term || "—",
+        verified: isVerified,
+        source: "import",
+      };
+      if (r.grade) course.grade = r.grade;
+      if (r.waitlistPosition) course.waitlistPosition = r.waitlistPosition;
+      return course;
+    };
+
+    const verifiedIds = new Set(verified.map((r) => r.id));
+    const courses: StudentCourse[] = [
+      ...verified.map((r) => toCourse(r, true)),
+      // Rows the student has not confirmed stay on the record as uncertainty
+      // only: the engine never counts them toward credits, cost or career fit.
+      ...rows.filter((r) => !verifiedIds.has(r.id)).map((r) => toCourse(r, false)),
+    ].filter((c): c is StudentCourse => c !== null);
 
     const patch: Partial<typeof profile> = { courses, creditsCompleted: credits };
+
     if (accepted.has("school") && fields.school) patch.school = fields.school;
     if (accepted.has("major") && fields.major) patch.major = fields.major;
     if (accepted.has("minor") && fields.minor) patch.minor = fields.minor;

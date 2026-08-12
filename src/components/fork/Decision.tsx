@@ -93,7 +93,7 @@ export function CostOfDecision({ chosen, alternative }: { chosen: SimulatedPath;
       label: "Credits",
       value: path.additionalCredits === 0 ? "No change" : `${path.additionalCredits > 0 ? "+" : "−"}${Math.abs(path.additionalCredits)} credits`,
     },
-    { label: "Graduation", value: path.graduationDate },
+    { label: "Estimated completion", value: path.estimatedCompletionDate },
     { label: "Total remaining tuition", value: formatCurrency(path.estimatedCost) },
   ];
 
