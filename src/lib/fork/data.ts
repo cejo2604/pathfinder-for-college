@@ -196,7 +196,22 @@ export const SAMPLE_STUDENT: StudentProfile = {
 };
 
 export const CURRENT_TERM = "Spring 2026";
-export const FIRST_PLANNED_TERM = "Fall 2026";
+
+/**
+ * The next academic term after `term`. Fall → Spring of the next year,
+ * Spring/Summer → Fall of the same year. Unrecognized input falls back to Fall.
+ */
+export function nextAcademicTerm(term: string): string {
+  const [season, yearText] = term.split(" ");
+  const year = Number(yearText);
+  if (!Number.isFinite(year)) return "Fall";
+  if (season === "Fall") return `Spring ${year + 1}`;
+  return `Fall ${year}`;
+}
+
+/** Planning always starts at the first academic term after the student's current term. */
+export const FIRST_PLANNED_TERM = nextAcademicTerm(CURRENT_TERM);
+
 
 export interface CareerSkillWeight {
   skill: SkillKey;
