@@ -243,6 +243,7 @@ export function ForkProvider({ children }: { children: ReactNode }) {
     return {
       ...state,
       hydrated,
+      profileReady: hydrated && !authLoading && (!signedIn || remoteReady),
       session,
       authLoading,
       signedIn,
