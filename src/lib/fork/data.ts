@@ -85,6 +85,23 @@ export let COURSES: Course[] = [
   { code: "HINF 320", title: "Clinical Data Systems", credits: 3, prerequisites: ["HINF 210"] },
   { code: "HINF 410", title: "Health Data Analytics", credits: 3, prerequisites: ["HINF 320", "STAT 155"] },
   { code: "HINF 450", title: "Health Technology Ethics & Policy", credits: 3, prerequisites: ["HINF 210"] },
+  // Business (B.B.A.) core.
+  { code: "BUSI 101", title: "Financial Accounting", credits: 3, prerequisites: [] },
+  { code: "BUSI 202", title: "Managerial Accounting", credits: 3, prerequisites: ["BUSI 101"] },
+  { code: "ECON 101", title: "Principles of Microeconomics", credits: 3, prerequisites: [] },
+  { code: "ECON 102", title: "Principles of Macroeconomics", credits: 3, prerequisites: ["ECON 101"] },
+  { code: "BUSI 210", title: "Business Statistics", credits: 3, prerequisites: [] },
+  { code: "BUSI 310", title: "Corporate Finance", credits: 3, prerequisites: ["BUSI 101", "ECON 101"] },
+  { code: "BUSI 330", title: "Principles of Marketing", credits: 3, prerequisites: [] },
+  { code: "BUSI 350", title: "Business Law", credits: 3, prerequisites: [] },
+  { code: "BUSI 370", title: "Management & Organizations", credits: 3, prerequisites: [] },
+  { code: "BUSI 410", title: "Business Analytics", credits: 3, prerequisites: ["BUSI 210"] },
+  { code: "BUSI 495", title: "Business Strategy Capstone", credits: 3, prerequisites: ["BUSI 370"] },
+  // Data Science.
+  { code: "DATA 110", title: "Foundations of Data Science", credits: 3, prerequisites: [] },
+  { code: "DATA 220", title: "Data Wrangling & Visualization", credits: 3, prerequisites: ["DATA 110"] },
+  { code: "DATA 310", title: "Applied Machine Learning", credits: 3, prerequisites: ["DATA 220", "STAT 155"] },
+  { code: "DATA 495", title: "Data Science Capstone", credits: 3, prerequisites: ["DATA 310"] },
 ];
 
 export const courseByCode = (code: string) => COURSES.find((c) => c.code === code);
@@ -125,6 +142,21 @@ export const COURSE_SKILL_CONTRIBUTIONS: Record<string, Partial<Record<SkillKey,
   "HINF 320": { informatics: 0.35, data_analysis: 0.15 },
   "HINF 410": { informatics: 0.3, data_analysis: 0.35, statistics: 0.2, health_domain: 0.1 },
   "HINF 450": { informatics: 0.25, health_domain: 0.1 },
+  "BUSI 101": { data_analysis: 0.1 },
+  "BUSI 202": { data_analysis: 0.15 },
+  "ECON 101": { data_analysis: 0.1, statistics: 0.05 },
+  "ECON 102": { data_analysis: 0.1, statistics: 0.05 },
+  "BUSI 210": { statistics: 0.3, data_analysis: 0.2 },
+  "BUSI 310": { data_analysis: 0.2, statistics: 0.1 },
+  "BUSI 330": { data_analysis: 0.1 },
+  "BUSI 350": { research: 0.05 },
+  "BUSI 370": { informatics: 0.05 },
+  "BUSI 410": { data_analysis: 0.35, statistics: 0.2, informatics: 0.1 },
+  "BUSI 495": { data_analysis: 0.15, research: 0.1 },
+  "DATA 110": { data_analysis: 0.3, programming: 0.15, statistics: 0.1 },
+  "DATA 220": { data_analysis: 0.35, programming: 0.2 },
+  "DATA 310": { data_analysis: 0.35, programming: 0.25, statistics: 0.25 },
+  "DATA 495": { data_analysis: 0.25, programming: 0.15, research: 0.15 },
 };
 
 /** Contributions for one catalog course code. Unknown codes contribute nothing. */
@@ -142,9 +174,12 @@ export interface DegreeProgram {
 export let PROGRAMS: DegreeProgram[] = [
   { id: "bio_bs", name: "Biology, B.S.", kind: "major", requiredCredits: 120 },
   { id: "cs_bs", name: "Computer Science, B.S.", kind: "major", requiredCredits: 120 },
+  { id: "ba_bba", name: "Business Analytics, B.B.A.", kind: "major", requiredCredits: 120 },
+  { id: "ds_bs", name: "Data Science, B.S.", kind: "major", requiredCredits: 120 },
   { id: "cs_minor", name: "Computer Science minor", kind: "minor", requiredCredits: 18 },
   { id: "hinf_minor", name: "Health Informatics minor", kind: "minor", requiredCredits: 18 },
   { id: "ds_minor", name: "Data Science minor", kind: "minor", requiredCredits: 18 },
+  { id: "busi_minor", name: "Business minor", kind: "minor", requiredCredits: 18 },
 ];
 
 
@@ -292,31 +327,32 @@ export const DEMO_STUDENT_CS: StudentProfile = {
     { code: "MATH 152", status: "completed", term: "Fall 2024", grade: "B" },
     { code: "MATH 233", status: "completed", term: "Fall 2025", grade: "A-" },
     { code: "STAT 155", status: "completed", term: "Spring 2025", grade: "B+" },
-    // Remaining 28 completed credits are general-education requirements.
+    { code: "DATA 110", status: "completed", term: "Fall 2025", grade: "A" },
+    // Remaining 25 completed credits are general-education requirements.
     { code: "GEN ED", status: "completed", term: "2024 – 2026", grade: "—" },
     { code: "COMP 301", status: "in_progress", term: "Spring 2026" },
-    { code: "COMP 311", status: "in_progress", term: "Spring 2026" },
+    { code: "DATA 220", status: "in_progress", term: "Spring 2026" },
   ],
 };
 
 /**
- * Third demo record with coursework: a health-informatics-leaning junior.
+ * Third demo record with coursework: a business-analytics junior on a B.B.A. track.
  */
 export const DEMO_STUDENT_HINF: StudentProfile = {
   name: "Priya Raman",
   school: "University of North Carolina",
   institutionId: DEFAULT_INSTITUTION_ID,
-  degree: "Bachelor of Public Health",
-  major: "Biology",
-  minor: "Health Informatics minor",
+  degree: "Bachelor of Business Administration",
+  major: "Business Analytics",
+  minor: "Data Science minor",
 
   year: "Junior",
   graduationTarget: "December 2027",
   creditsCompleted: 30,
   gpa: 3.8,
-  interests: ["Healthcare", "Data", "Public health"],
-  careerInterests: ["Healthcare technology", "Health analytics"],
-  skills: ["Spreadsheet analysis", "Scientific writing"],
+  interests: ["Business", "Data", "Strategy"],
+  careerInterests: ["Data science", "Business analytics"],
+  skills: ["Spreadsheet analysis", "Financial modeling"],
   priorities: [
     "minimize_cost",
     "career_opportunities",
@@ -325,18 +361,18 @@ export const DEMO_STUDENT_HINF: StudentProfile = {
     "flexibility",
     "minimize_coursework",
   ],
-  goal: "I want to work with clinical data.",
-  goalCategory: "Healthcare technology",
+  goal: "I want to work with business and product data.",
+  goalCategory: "Data science",
   courses: [
-    { code: "BIOL 101", status: "completed", term: "Fall 2024", grade: "A" },
-    { code: "CHEM 101", status: "completed", term: "Fall 2024", grade: "B+" },
-    { code: "STAT 155", status: "completed", term: "Spring 2025", grade: "A" },
-    { code: "PSYC 101", status: "completed", term: "Spring 2025", grade: "A-" },
-    { code: "HINF 210", status: "completed", term: "Fall 2025", grade: "A" },
-    // Remaining 13 completed credits are general-education requirements.
+    { code: "BUSI 101", status: "completed", term: "Fall 2024", grade: "A" },
+    { code: "ECON 101", status: "completed", term: "Fall 2024", grade: "B+" },
+    { code: "BUSI 210", status: "completed", term: "Spring 2025", grade: "A" },
+    { code: "STAT 155", status: "completed", term: "Spring 2025", grade: "A-" },
+    { code: "DATA 110", status: "completed", term: "Fall 2025", grade: "A" },
+    // Remaining 15 completed credits are general-education requirements.
     { code: "GEN ED", status: "completed", term: "2024 – 2026", grade: "—" },
-    { code: "HINF 320", status: "in_progress", term: "Spring 2026" },
-    { code: "STAT 320", status: "in_progress", term: "Spring 2026" },
+    { code: "BUSI 310", status: "in_progress", term: "Spring 2026" },
+    { code: "DATA 220", status: "in_progress", term: "Spring 2026" },
   ],
 };
 
@@ -394,8 +430,8 @@ export const DEMO_STUDENTS: DemoStudentOption[] = [
   },
   {
     id: "priya",
-    label: "Priya Raman — Biology junior",
-    description: "B.P.H. with a Health Informatics minor · 30 credits on file.",
+    label: "Priya Raman — Business Analytics junior",
+    description: "B.B.A. Business Analytics with a Data Science minor · 30 credits on file.",
     profile: DEMO_STUDENT_HINF,
   },
   {
