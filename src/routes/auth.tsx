@@ -135,6 +135,31 @@ function AuthPage() {
           </Button>
         </form>
 
+        <div className="mt-5 rounded-2xl border border-border bg-muted/40 p-5">
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">Demo logins</p>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Each demo student has their own account. Signing in loads only that student&apos;s saved record.
+          </p>
+          <div className="mt-4 space-y-2">
+            {DEMO_ACCOUNTS.map((account) => (
+              <button
+                key={account.id}
+                type="button"
+                disabled={busy}
+                onClick={() => void signInAsDemo(account.id)}
+                className="w-full rounded-xl border border-border bg-card px-3 py-2.5 text-left transition-colors hover:border-primary/50 disabled:opacity-60"
+              >
+                <span className="block text-sm font-medium">{account.label}</span>
+                <span className="block text-xs text-muted-foreground">{account.description}</span>
+                <span className="mt-1 block text-xs tabular-nums text-muted-foreground">
+                  {account.email} · {account.password}
+                </span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+
         <p className="mt-4 text-sm text-muted-foreground">
           {mode === "signin" ? "New to Fork?" : "Already have an account?"}{" "}
           <button
