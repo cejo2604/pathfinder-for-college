@@ -322,7 +322,7 @@ export const PATHS: PathSpec[] = [
         label: "Spring 2028",
         kind: "academic",
         credits: 18,
-        courses: ["Capstone completion", "COMP 110", "Elective", "Elective"],
+        courses: ["Capstone completion", "Elective", "Elective", "Elective"],
         actions: ["Graduation application", "Interview for informatics analyst roles"],
       },
     ],
