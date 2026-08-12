@@ -118,7 +118,7 @@ describe("engine invariants", () => {
 
 describe("scenario matching", () => {
   it("returns null for input it cannot recognize instead of guessing", () => {
-    expect(matchScenario("what if I move to Berlin and open a bakery")).toBeNull();
+    expect(matchScenario("what if I adopt a dog next semester")).toBeNull();
   });
 
   it("matches a recognizable question to a real scenario", () => {
