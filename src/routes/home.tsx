@@ -104,11 +104,12 @@ function MyPath() {
             >
               <p className="font-display text-lg leading-tight">
                 {path.id === "baseline"
-                  ? "Stay in Biology"
+                  ? baselineLabel
                   : path.id === "switch_cs"
                     ? "Switch to Computer Science"
                     : "Add a Computer Science minor"}
               </p>
+
               <dl className="mt-3 space-y-1 text-sm">
                 <div className="flex justify-between gap-2">
                   <dt className="text-muted-foreground">Est. completion</dt>
