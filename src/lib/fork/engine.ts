@@ -613,6 +613,26 @@ export function parseScenario(input: string): Scenario {
   return matchScenario(input) ?? (scenarioById("career_health_tech") as Scenario);
 }
 
+/* ------------------------------------------------------------- AI boundary */
+
+/**
+ * The only thing a model may return: a scenario id and an optional target.
+ * Every other key — credits, cost, dates, scores — is stripped, so a model can
+ * never introduce an academic fact into the engine's output.
+ */
+export interface AiScenarioSelection {
+  scenarioId: string | null;
+  target: string | null;
+}
+
+export function validateAiScenarioSelection(raw: unknown): AiScenarioSelection {
+  const input = (raw ?? {}) as Record<string, unknown>;
+  const id = typeof input["scenarioId"] === "string" ? input["scenarioId"].trim() : "";
+  const scenario = scenarioById(id);
+  const target = typeof input["target"] === "string" && input["target"].trim() ? input["target"].trim() : null;
+  return { scenarioId: scenario?.id ?? null, target };
+}
+
 /* -------------------------------------------------------------- explanation */
 
 export interface Evidence {
