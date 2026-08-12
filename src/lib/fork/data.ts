@@ -174,9 +174,12 @@ export interface DegreeProgram {
 export let PROGRAMS: DegreeProgram[] = [
   { id: "bio_bs", name: "Biology, B.S.", kind: "major", requiredCredits: 120 },
   { id: "cs_bs", name: "Computer Science, B.S.", kind: "major", requiredCredits: 120 },
+  { id: "ba_bba", name: "Business Analytics, B.B.A.", kind: "major", requiredCredits: 120 },
+  { id: "ds_bs", name: "Data Science, B.S.", kind: "major", requiredCredits: 120 },
   { id: "cs_minor", name: "Computer Science minor", kind: "minor", requiredCredits: 18 },
   { id: "hinf_minor", name: "Health Informatics minor", kind: "minor", requiredCredits: 18 },
   { id: "ds_minor", name: "Data Science minor", kind: "minor", requiredCredits: 18 },
+  { id: "busi_minor", name: "Business minor", kind: "minor", requiredCredits: 18 },
 ];
 
 
