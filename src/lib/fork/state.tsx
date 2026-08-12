@@ -14,7 +14,8 @@ import {
 } from "./data";
 import { loadForkData, savePath, saveForkProfile, setPlanAction, type SavedPathRow } from "./user-data.functions";
 
-const STORAGE_KEY = "fork:state:v1";
+/** Storage is scoped per owner so one browser never shows another account's work. */
+const storageKeyFor = (userId: string | null) => `fork:state:v1:${userId ?? "anon"}`;
 
 export interface ChosenPathDetails {
   scenarioId: string;
