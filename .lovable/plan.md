@@ -32,7 +32,7 @@ Amend `.lovable/plan/fork-requirements-analysis-v2-2026-08-12.md` in place — n
 
 10. **Career-fit evidence.** Per path the engine returns relevant completed, in-progress, and planned courses plus thin-coverage and prerequisite-blocked skills, each deterministically sorted and independent of source order. Rendered beside the score with the existing Fork-estimate tooltip.
 
-11. **Risk formula — documented verbatim, unchanged.**
+11. **Risk formula — documented exactly, unchanged.** The table below is an exact behavioral specification of the existing implementation, not a literal copy of source wording. No risk behavior changes.
 
 | Driver | Points |
 |---|---|
