@@ -640,16 +640,45 @@ export function evidenceFor(path: SimulatedPath, profile: StudentProfile): Evide
       kind: "verified",
     },
     { label: "Credits remaining", value: `${path.creditsRemaining}`, kind: "estimated" },
-    { label: "Tuition per credit", value: `${currency(path.tuitionPerCredit)}`, kind: "estimated" },
-    { label: "Estimated remaining tuition", value: currency(path.estimatedCost), kind: "estimated" },
     {
-      label: "Graduation timeline",
-      value: `${path.semesters} semesters${path.summerSessions ? ` + ${path.summerSessions} summer session` : ""} → ${path.estimatedCompletionDate}`,
+      label: "Tuition per credit",
+      value: `${currency(path.tuitionPerCredit)}${path.pricedAtOutOfInstitutionRate ? " (out-of-institution rate)" : ""} — ${PLANNING_ASSUMPTION_LABEL}`,
+      kind: "estimated",
+    },
+    {
+      label: "Estimated remaining tuition",
+      value: `${currency(path.creditsRemaining)} credits x ${currency(path.tuitionPerCredit)} = ${currency(path.estimatedCost)}`.replace(
+        `${currency(path.creditsRemaining)} credits`,
+        `${path.creditsRemaining} credits`,
+      ),
+      kind: "estimated",
+    },
+    {
+      label: "Estimated completion",
+      value: `${path.semesters} semesters${path.summerSessions ? ` + ${path.summerSessions} summer session` : ""} → ${path.estimatedCompletionDate} (${COMPLETION_DISCLAIMER})`,
       kind: "estimated",
     },
     { label: "Average term load", value: `${path.averageLoad} credits`, kind: "estimated" },
+    ...path.careerFitEvidence
+      .filter((e) => e.courses.length > 0)
+      .map((e) => ({
+        label: `Career fit — ${e.label}`,
+        value: `${Math.round(e.coverage * 100)}% coverage x ${Math.round(e.weight * 100)}% weight, from ${e.courses
+          .map((c) => c.code)
+          .join(", ")}`,
+        kind: "estimated" as const,
+      })),
+    ...path.riskDrivers.map((d) => ({
+      label: `Risk driver — ${d.label}`,
+      value: `${d.points} point${d.points === 1 ? "" : "s"}`,
+      kind: "estimated" as const,
+    })),
     { label: "Fork tradeoff scores", value: "Comparison scores, not predictions", kind: "estimated" },
-    ...path.unknowns.map((u) => ({ label: u, value: "Confirm with your institution", kind: "unknown" as const })),
+    ...path.uncertaintyDrivers.map((u) => ({
+      label: u,
+      value: "No numeric value assigned — confirm with your institution",
+      kind: "unknown" as const,
+    })),
   ];
 }
 
@@ -662,7 +691,7 @@ export function whyThisPath(path: SimulatedPath, profile: StudentProfile, priori
   const lines: string[] = [];
 
   lines.push(
-    `You have completed ${profile.creditsCompleted} credits toward ${profile.major} and are currently tracking a ${profile.graduationTarget} graduation.`,
+    `You have completed ${profile.creditsCompleted} credits toward ${profile.major} and are currently tracking a ${profile.graduationTarget} completion target.`,
   );
 
   if (path.unappliedCredits > 0) {
@@ -677,15 +706,15 @@ export function whyThisPath(path: SimulatedPath, profile: StudentProfile, priori
 
   if (path.additionalSemesters > 0) {
     lines.push(
-      `It adds ${path.additionalSemesters} semester${path.additionalSemesters > 1 ? "s" : ""}, moving graduation to ${path.estimatedCompletionDate}, and ${formatDelta(path.additionalCost)} in estimated tuition.`,
+      `It adds ${path.additionalSemesters} semester${path.additionalSemesters > 1 ? "s" : ""}, moving estimated completion to ${path.estimatedCompletionDate}, and ${formatDelta(path.additionalCost)} in estimated tuition.`,
     );
   } else if (path.additionalSemesters < 0) {
     lines.push(
-      `It removes ${Math.abs(path.additionalSemesters)} semester, moving graduation to ${path.estimatedCompletionDate}, at the cost of ${path.averageLoad}-credit terms.`,
+      `It removes ${Math.abs(path.additionalSemesters)} semester, moving estimated completion to ${path.estimatedCompletionDate}, at the cost of ${path.averageLoad}-credit terms.`,
     );
   } else {
     lines.push(
-      `It holds the ${path.estimatedCompletionDate} graduation date, ${path.additionalCost === 0 ? "with no change in estimated tuition" : `for ${formatDelta(path.additionalCost)} in estimated tuition`}, and ${path.additionalCredits > 0 ? `${path.additionalCredits} additional credits` : "no additional credits"}.`,
+      `It holds the ${path.estimatedCompletionDate} estimated completion date, ${path.additionalCost === 0 ? "with no change in estimated tuition" : `for ${formatDelta(path.additionalCost)} in estimated tuition`}, and ${path.additionalCredits > 0 ? `${path.additionalCredits} additional credits` : "no additional credits"}.`,
     );
   }
 
@@ -705,15 +734,16 @@ export function whyThisPath(path: SimulatedPath, profile: StudentProfile, priori
 /** Engine-computed figures, flattened for the AI interpretation layer. */
 export function pathFactSheet(path: SimulatedPath, profile: StudentProfile, priorities: Priority[]): string {
   return [
-    `Student: ${profile.year}, current major ${profile.major}, ${profile.creditsCompleted} credits completed, graduation target ${profile.graduationTarget}, stated goal ${profile.goalCategory}.`,
+    `Student: ${profile.year}, current major ${profile.major}, ${profile.creditsCompleted} credits completed, completion target ${profile.graduationTarget}, stated goal ${profile.goalCategory}.`,
     `Ranked priorities: ${priorities.map((p) => p.replace(/_/g, " ")).join(" > ")}.`,
     `Path: ${path.name} (${path.program}).`,
-    `Graduation date: ${path.estimatedCompletionDate}. Semesters remaining: ${path.semesters}. Average load: ${path.averageLoad} credits.`,
+    `Estimated completion (based on planned course sequence): ${path.estimatedCompletionDate}. Semesters remaining: ${path.semesters}. Average load: ${path.averageLoad} credits.`,
     `Credits remaining: ${path.creditsRemaining}. Additional credits vs current plan: ${path.additionalCredits}.`,
     `Completed credits applied: ${path.appliedCredits}. Credits becoming electives: ${path.unappliedCredits}.`,
     `Estimated remaining tuition: ${currency(path.estimatedCost)}. Change vs current plan: ${formatDelta(path.additionalCost)}. Semester change: ${path.additionalSemesters}.`,
     `Prerequisites to sequence: ${path.prerequisiteCount}${path.prerequisiteCourses.length ? ` (${path.prerequisiteCourses.join(", ")})` : ""}.`,
-    `Risk: ${path.risk} — ${path.riskFactors.join("; ")}.`,
+    `Risk: ${path.risk} (${path.riskPoints} points) — ${path.riskDrivers.map((d) => `${d.label} +${d.points}`).join("; ")}.`,
+    `Unknowns (no numeric weight): ${path.uncertaintyDrivers.join("; ") || "none"}.`,
     `Scores out of 100 — career fit ${path.scores.careerFit}, cost efficiency ${path.scores.costEfficiency}, graduation efficiency ${path.scores.graduationEfficiency}, flexibility ${path.scores.flexibility}, overall fit ${path.scores.overallFit}.`,
     `Advantages: ${path.advantages.join("; ")}.`,
     `Tradeoffs: ${path.tradeoffs.join("; ")}.`,
