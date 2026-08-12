@@ -20,7 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { SCENARIOS, parseScenario, rankPaths, scenarioById, simulatePaths, type SimulatedPath } from "@/lib/fork/engine";
+import { SCENARIOS, matchScenario, parseScenario, rankPaths, scenarioById, simulatePaths, type SimulatedPath } from "@/lib/fork/engine";
 import { useFork, useForkProfile } from "@/lib/fork/state";
 
 export const Route = createFileRoute("/what-if")({
@@ -75,11 +75,13 @@ function WhatIfPage() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [revealBest, setRevealBest] = useState(false);
   const [whyId, setWhyId] = useState<string | null>(null);
+  const [unresolved, setUnresolved] = useState(false);
   const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
 
   const start = (id: string, question: string) => {
     timers.current.forEach(clearTimeout);
     timers.current = [];
+    setUnresolved(false);
     setActiveScenarioId(id);
     setInput(question);
     setPhase("analyzing");
@@ -128,19 +130,25 @@ function WhatIfPage() {
   const alternative = selected && cheapest && selected.id !== cheapest.id ? cheapest : (ranked[1] ?? null);
 
   // AI only routes the sentence to a scenario; the engine owns every number.
-  // If it is slow or unavailable, the deterministic keyword parse still runs.
+  // Unrecognized input is never guessed at — Fork asks for clarification.
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
     const text = input.trim();
     if (!text) return;
-    const fallback = parseScenario(text);
-    start(fallback.id, text);
+    const fallback = matchScenario(text);
+    setUnresolved(false);
+    if (fallback) start(fallback.id, text);
     void classify({ data: { text } })
       .then((result) => {
-        if (result.scenarioId !== fallback.id) start(result.scenarioId, text);
+        if (!result.resolved || !result.scenarioId) {
+          if (!fallback) setUnresolved(true);
+          return;
+        }
+        if (result.scenarioId !== fallback?.id) start(result.scenarioId, text);
       })
       .catch(() => undefined);
   };
+
 
 
   return (
@@ -278,6 +286,26 @@ function WhatIfPage() {
       <div className="mx-auto max-w-3xl">
         <div className="border-t border-border pt-10 text-center">
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">What if</p>
+
+          {unresolved && (
+            <div
+              role="status"
+              className="mx-auto mt-4 max-w-md rounded-2xl border border-border bg-card p-4 text-left text-sm"
+            >
+              <p className="font-medium">Fork could not match that question to a scenario it can simulate.</p>
+              <p className="mt-1 text-muted-foreground">
+                Rather than guess, pick the closest scenario below — or rephrase your question.
+              </p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                {SCENARIOS.map((s) => (
+                  <Button key={s.id} variant="outline" size="sm" onClick={() => start(s.id, s.question)}>
+                    {s.chip}
+                  </Button>
+                ))}
+              </div>
+            </div>
+          )}
+
           <form onSubmit={submit} className="mt-3 flex flex-col gap-2 sm:flex-row">
             <Input
               value={input}

@@ -181,6 +181,7 @@ A transcript alone cannot determine whether a future path is valid; the catalog 
 8. Every score sits within 0–100.
 9. Identical input produces byte-identical output.
 10. Changing priority order changes only ranking inputs, never the underlying credit/cost/career figures.
+11. Free-text classification returns no scenario when the question is unrecognized (`matchScenario` → null), so the simulator asks for clarification instead of silently simulating a default scenario.
 
 Invariant 7 caught a real defect on first run: several path plans re-scheduled courses Maya is already taking (BIOL 301, CHEM 261, STAT 320, HINF 210) and one completed course (COMP 110). Those slots are now electives.
 

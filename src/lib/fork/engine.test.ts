@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { DEMO_STUDENT, FIRST_PLANNED_TERM, courseByCode } from "./data";
-import { ALL_PATH_IDS, DEGREE_CREDITS, simulatePath, simulatePaths } from "./engine";
+import { ALL_PATH_IDS, DEGREE_CREDITS, matchScenario, simulatePath, simulatePaths } from "./engine";
 import { BASELINE_PATH_ID } from "./paths";
 
 const opts = { profile: DEMO_STUDENT };
@@ -113,5 +113,15 @@ describe("engine invariants", () => {
     expect(costFirst.creditsRemaining).toBe(baseline.creditsRemaining);
     expect(costFirst.scores.careerFit).toBe(baseline.scores.careerFit);
     expect(typeof costFirst.scores.overallFit).toBe("number");
+  });
+});
+
+describe("scenario matching", () => {
+  it("returns null for input it cannot recognize instead of guessing", () => {
+    expect(matchScenario("what if I adopt a dog next semester")).toBeNull();
+  });
+
+  it("matches a recognizable question to a real scenario", () => {
+    expect(matchScenario("what if I switch to computer science")?.id).toBe("switch_major");
   });
 });

@@ -331,8 +331,12 @@ export function waitlistedCourses(profile: StudentProfile) {
 }
 
 
-/** Deterministic free-text parsing: keyword match, no model, no invented scenarios. */
-export function parseScenario(input: string): Scenario {
+/**
+ * Deterministic free-text parsing: keyword match, no model, no invented
+ * scenarios. Returns null when nothing matches, so ambiguous input can be
+ * clarified instead of guessed.
+ */
+export function matchScenario(input: string): Scenario | null {
   const text = input.toLowerCase();
   let best: { scenario: Scenario; score: number } | null = null;
   for (const scenario of SCENARIOS) {
@@ -340,7 +344,12 @@ export function parseScenario(input: string): Scenario {
     for (const kw of scenario.keywords) if (text.includes(kw)) score += kw.split(" ").length;
     if (score > 0 && (!best || score > best.score)) best = { scenario, score };
   }
-  return best?.scenario ?? (scenarioById("career_health_tech") as Scenario);
+  return best?.scenario ?? null;
+}
+
+/** Same match, with Fork's default scenario when the text is unrecognized. */
+export function parseScenario(input: string): Scenario {
+  return matchScenario(input) ?? (scenarioById("career_health_tech") as Scenario);
 }
 
 /* -------------------------------------------------------------- explanation */
