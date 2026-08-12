@@ -24,11 +24,12 @@ export const Route = createFileRoute("/home")({
 const DECISION_PATHS = ["baseline", "switch_cs", "cs_minor"];
 
 // Each option card opens the What If? simulator with the matching question.
+// The baseline label/question are derived from the student's own program record.
 const SIMULATE_QUESTIONS: Record<string, string> = {
-  baseline: "What if I stay in Biology?",
   switch_cs: "What if I switch to Computer Science?",
   cs_minor: "What if I add a Computer Science minor?",
 };
+
 
 function MyPath() {
   const profile = useForkProfile();
