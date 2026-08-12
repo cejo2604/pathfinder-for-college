@@ -63,7 +63,7 @@ export function PathCard({
       </header>
 
       <dl className="mt-5 grid grid-cols-2 gap-4 border-y border-border py-4">
-        <Metric label="Graduation" value={path.graduationDate} />
+        <Metric label="Graduation" value={path.estimatedCompletionDate} />
         <Metric label="Credits remaining" value={`${credits}`} />
         <Metric label="Estimated remaining tuition" value={formatCurrency(cost)} />
         <Metric

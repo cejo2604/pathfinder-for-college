@@ -103,7 +103,7 @@ function MyPath() {
               <dl className="mt-3 space-y-1 text-sm">
                 <div className="flex justify-between gap-2">
                   <dt className="text-muted-foreground">Graduation</dt>
-                  <dd className="font-medium">{path.graduationDate}</dd>
+                  <dd className="font-medium">{path.estimatedCompletionDate}</dd>
                 </div>
                 <div className="flex justify-between gap-2">
                   <dt className="text-muted-foreground">Tuition change</dt>

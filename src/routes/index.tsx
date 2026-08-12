@@ -138,7 +138,7 @@ function Landing() {
                   className="animate-fork-rise rounded-xl border border-border bg-background px-3 py-3 text-center"
                 >
                   <p className="font-display text-sm leading-tight">{path.name}</p>
-                  <p className="mt-2 text-xs text-muted-foreground">{path.graduationDate}</p>
+                  <p className="mt-2 text-xs text-muted-foreground">{path.estimatedCompletionDate}</p>
                   <p className="text-xs font-medium tabular-nums">{formatCurrency(path.estimatedCost)}</p>
                 </div>
               ))}

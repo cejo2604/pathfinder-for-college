@@ -644,7 +644,7 @@ export function evidenceFor(path: SimulatedPath, profile: StudentProfile): Evide
     { label: "Estimated remaining tuition", value: currency(path.estimatedCost), kind: "estimated" },
     {
       label: "Graduation timeline",
-      value: `${path.semesters} semesters${path.summerSessions ? ` + ${path.summerSessions} summer session` : ""} → ${path.graduationDate}`,
+      value: `${path.semesters} semesters${path.summerSessions ? ` + ${path.summerSessions} summer session` : ""} → ${path.estimatedCompletionDate}`,
       kind: "estimated",
     },
     { label: "Average term load", value: `${path.averageLoad} credits`, kind: "estimated" },
@@ -677,15 +677,15 @@ export function whyThisPath(path: SimulatedPath, profile: StudentProfile, priori
 
   if (path.additionalSemesters > 0) {
     lines.push(
-      `It adds ${path.additionalSemesters} semester${path.additionalSemesters > 1 ? "s" : ""}, moving graduation to ${path.graduationDate}, and ${formatDelta(path.additionalCost)} in estimated tuition.`,
+      `It adds ${path.additionalSemesters} semester${path.additionalSemesters > 1 ? "s" : ""}, moving graduation to ${path.estimatedCompletionDate}, and ${formatDelta(path.additionalCost)} in estimated tuition.`,
     );
   } else if (path.additionalSemesters < 0) {
     lines.push(
-      `It removes ${Math.abs(path.additionalSemesters)} semester, moving graduation to ${path.graduationDate}, at the cost of ${path.averageLoad}-credit terms.`,
+      `It removes ${Math.abs(path.additionalSemesters)} semester, moving graduation to ${path.estimatedCompletionDate}, at the cost of ${path.averageLoad}-credit terms.`,
     );
   } else {
     lines.push(
-      `It holds the ${path.graduationDate} graduation date, ${path.additionalCost === 0 ? "with no change in estimated tuition" : `for ${formatDelta(path.additionalCost)} in estimated tuition`}, and ${path.additionalCredits > 0 ? `${path.additionalCredits} additional credits` : "no additional credits"}.`,
+      `It holds the ${path.estimatedCompletionDate} graduation date, ${path.additionalCost === 0 ? "with no change in estimated tuition" : `for ${formatDelta(path.additionalCost)} in estimated tuition`}, and ${path.additionalCredits > 0 ? `${path.additionalCredits} additional credits` : "no additional credits"}.`,
     );
   }
 
@@ -708,7 +708,7 @@ export function pathFactSheet(path: SimulatedPath, profile: StudentProfile, prio
     `Student: ${profile.year}, current major ${profile.major}, ${profile.creditsCompleted} credits completed, graduation target ${profile.graduationTarget}, stated goal ${profile.goalCategory}.`,
     `Ranked priorities: ${priorities.map((p) => p.replace(/_/g, " ")).join(" > ")}.`,
     `Path: ${path.name} (${path.program}).`,
-    `Graduation date: ${path.graduationDate}. Semesters remaining: ${path.semesters}. Average load: ${path.averageLoad} credits.`,
+    `Graduation date: ${path.estimatedCompletionDate}. Semesters remaining: ${path.semesters}. Average load: ${path.averageLoad} credits.`,
     `Credits remaining: ${path.creditsRemaining}. Additional credits vs current plan: ${path.additionalCredits}.`,
     `Completed credits applied: ${path.appliedCredits}. Credits becoming electives: ${path.unappliedCredits}.`,
     `Estimated remaining tuition: ${currency(path.estimatedCost)}. Change vs current plan: ${formatDelta(path.additionalCost)}. Semester change: ${path.additionalSemesters}.`,
@@ -759,8 +759,8 @@ function movesForPriority(priority: Priority, path: SimulatedPath, career: Caree
     case "graduate_on_time":
       return [
         path.additionalSemesters > 0
-          ? `Plan for ${path.semesters} academic semesters — ${path.additionalSemesters} more than staying put — and confirm the ${path.graduationDate} date with your advisor.`
-          : `Hold ${path.semesters} academic semesters at ~${path.averageLoad} credits to keep ${path.graduationDate} intact.`,
+          ? `Plan for ${path.semesters} academic semesters — ${path.additionalSemesters} more than staying put — and confirm the ${path.estimatedCompletionDate} date with your advisor.`
+          : `Hold ${path.semesters} academic semesters at ~${path.averageLoad} credits to keep ${path.estimatedCompletionDate} intact.`,
         path.summerSessions > 0
           ? `Register for ${path.summerSessions} summer session${path.summerSessions > 1 ? "s" : ""} — the timeline above depends on ${path.summerSessions > 1 ? "them" : "it"}.`
           : `Register on your first enrollment day each term; a missed seat is what usually adds a semester.`,
@@ -807,7 +807,7 @@ function movesForPriority(priority: Priority, path: SimulatedPath, career: Caree
 }
 
 const METRIC_FOR: Record<Priority, (p: SimulatedPath) => string> = {
-  graduate_on_time: (p) => `${p.graduationDate} · ${p.semesters} semesters`,
+  graduate_on_time: (p) => `${p.estimatedCompletionDate} · ${p.semesters} semesters`,
   minimize_cost: (p) => `${formatCurrency(p.estimatedCost)} remaining tuition`,
   career_opportunities: (p) => `${p.scores.careerFit}/100 career fit`,
   stay_close_to_major: (p) => `${p.scores.continuity}/100 continuity`,

@@ -52,7 +52,7 @@ describe("engine invariants", () => {
     for (const path of paths) {
       const first = path.terms[0];
       expect(first?.label).toBe(FIRST_PLANNED_TERM);
-      expect(TERM_ORDER(path.graduationTerm)).toBeGreaterThanOrEqual(TERM_ORDER(FIRST_PLANNED_TERM));
+      expect(TERM_ORDER(path.estimatedCompletionTerm)).toBeGreaterThanOrEqual(TERM_ORDER(FIRST_PLANNED_TERM));
     }
   });
 
