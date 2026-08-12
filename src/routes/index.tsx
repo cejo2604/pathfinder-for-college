@@ -26,7 +26,7 @@ export const Route = createFileRoute("/")({
   component: Landing,
 });
 
-const PREVIEW = simulatePaths(["stay_biology", "switch_cs", "cs_minor"], { profile: DEMO_STUDENT });
+const PREVIEW = simulatePaths(["baseline", "switch_cs", "cs_minor"], { profile: DEMO_STUDENT });
 
 function Landing() {
   const { loadDemoStudent, startBlank, session } = useFork();

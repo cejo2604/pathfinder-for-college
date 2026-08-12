@@ -99,7 +99,7 @@ describe("engine invariants", () => {
   });
 
   it("re-ranks deterministically when priorities change", () => {
-    const costFirst = simulatePath("stay_biology", {
+    const costFirst = simulatePath("baseline", {
       profile: DEMO_STUDENT,
       priorities: [
         "minimize_cost",

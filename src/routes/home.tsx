@@ -21,11 +21,11 @@ export const Route = createFileRoute("/home")({
   component: MyPath,
 });
 
-const DECISION_PATHS = ["stay_biology", "switch_cs", "cs_minor"];
+const DECISION_PATHS = ["baseline", "switch_cs", "cs_minor"];
 
 // Each option card opens the What If? simulator with the matching question.
 const SIMULATE_QUESTIONS: Record<string, string> = {
-  stay_biology: "What if I stay in Biology?",
+  baseline: "What if I stay in Biology?",
   switch_cs: "What if I switch to Computer Science?",
   cs_minor: "What if I add a Computer Science minor?",
 };
@@ -94,7 +94,7 @@ function MyPath() {
               className="flex flex-col rounded-2xl border border-border bg-background p-4 text-left"
             >
               <p className="font-display text-lg leading-tight">
-                {path.id === "stay_biology"
+                {path.id === "baseline"
                   ? "Stay in Biology"
                   : path.id === "switch_cs"
                     ? "Switch to Computer Science"

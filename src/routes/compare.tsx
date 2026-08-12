@@ -44,7 +44,7 @@ function ComparePage() {
   } = useFork();
   const [whyId, setWhyId] = useState<string | null>(null);
 
-  const selectedIds = comparison.length ? comparison : ["stay_biology", "switch_cs", "cs_minor"];
+  const selectedIds = comparison.length ? comparison : ["baseline", "switch_cs", "cs_minor"];
   const paths = useMemo(
     () => simulatePaths(selectedIds, { profile, careerId, priorities }),
     [selectedIds, profile, careerId, priorities],

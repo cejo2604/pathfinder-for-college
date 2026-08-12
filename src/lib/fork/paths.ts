@@ -1,4 +1,4 @@
-import type { SkillKey } from "./data";
+
 import { TRANSFER_TUITION_PER_CREDIT, TUITION_PER_CREDIT } from "./data";
 
 export type TermKind = "academic" | "summer" | "break";
@@ -37,21 +37,6 @@ export interface PathSpec {
   nextMoves: string[];
 }
 
-const cov = (
-  health_domain: number,
-  programming: number,
-  data_analysis: number,
-  statistics: number,
-  informatics: number,
-  research: number,
-): Record<SkillKey, number> => ({
-  health_domain,
-  programming,
-  data_analysis,
-  statistics,
-  informatics,
-  research,
-});
 
 export const PATHS: PathSpec[] = [
   {
