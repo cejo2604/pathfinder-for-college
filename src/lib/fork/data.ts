@@ -267,6 +267,32 @@ export const SAMPLE_STUDENT: StudentProfile = {
   goal: "I want to work in healthcare technology.",
 };
 
+/**
+ * The one empty-profile schema. Authenticated students with no saved profile
+ * always start from this — never from demo or sample data.
+ */
+export function createEmptyProfile(): StudentProfile {
+  return {
+    name: "",
+    school: "",
+    institutionId: DEFAULT_INSTITUTION_ID,
+    degree: "",
+    major: "",
+    minor: null,
+    year: "",
+    graduationTarget: "",
+    creditsCompleted: 0,
+    gpa: 0,
+    interests: [],
+    careerInterests: [],
+    skills: [],
+    priorities: [...PRIORITY_ORDER],
+    goal: "",
+    goalCategory: "",
+    courses: [],
+  };
+}
+
 export const CURRENT_TERM = "Spring 2026";
 
 /**
