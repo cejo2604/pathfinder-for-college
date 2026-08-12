@@ -257,6 +257,159 @@ export const DEMO_STUDENT: StudentProfile = {
 };
 
 /**
+ * Second demo record with coursework: a CS-leaning sophomore.
+ */
+export const DEMO_STUDENT_CS: StudentProfile = {
+  name: "Devon Carter",
+  school: "University of North Carolina",
+  institutionId: DEFAULT_INSTITUTION_ID,
+  degree: "Bachelor of Science",
+  major: "Computer Science",
+  minor: null,
+  year: "Sophomore",
+  graduationTarget: "May 2028",
+  creditsCompleted: 45,
+  gpa: 3.4,
+  interests: ["Technology", "Problem solving", "Design"],
+  careerInterests: ["Software engineering", "Data science"],
+  skills: ["Python", "Debugging", "Version control"],
+  priorities: [
+    "career_opportunities",
+    "graduate_on_time",
+    "flexibility",
+    "minimize_cost",
+    "stay_close_to_major",
+    "minimize_coursework",
+  ],
+  goal: "I want to become a software engineer.",
+  goalCategory: "Software engineering",
+  courses: [
+    { code: "COMP 110", status: "completed", term: "Fall 2024", grade: "A" },
+    { code: "COMP 210", status: "completed", term: "Spring 2025", grade: "B+" },
+    { code: "MATH 152", status: "completed", term: "Fall 2024", grade: "B" },
+    { code: "MATH 233", status: "completed", term: "Fall 2025", grade: "A-" },
+    { code: "STAT 155", status: "completed", term: "Spring 2025", grade: "B+" },
+    // Remaining 28 completed credits are general-education requirements.
+    { code: "GEN ED", status: "completed", term: "2024 – 2026", grade: "—" },
+    { code: "COMP 301", status: "in_progress", term: "Spring 2026" },
+    { code: "COMP 311", status: "in_progress", term: "Spring 2026" },
+  ],
+};
+
+/**
+ * Third demo record with coursework: a health-informatics-leaning junior.
+ */
+export const DEMO_STUDENT_HINF: StudentProfile = {
+  name: "Priya Raman",
+  school: "University of North Carolina",
+  institutionId: DEFAULT_INSTITUTION_ID,
+  degree: "Bachelor of Science",
+  major: "Biology",
+  minor: "Health Informatics minor",
+  year: "Junior",
+  graduationTarget: "December 2027",
+  creditsCompleted: 30,
+  gpa: 3.8,
+  interests: ["Healthcare", "Data", "Public health"],
+  careerInterests: ["Healthcare technology", "Health analytics"],
+  skills: ["Spreadsheet analysis", "Scientific writing"],
+  priorities: [
+    "minimize_cost",
+    "career_opportunities",
+    "graduate_on_time",
+    "stay_close_to_major",
+    "flexibility",
+    "minimize_coursework",
+  ],
+  goal: "I want to work with clinical data.",
+  goalCategory: "Healthcare technology",
+  courses: [
+    { code: "BIOL 101", status: "completed", term: "Fall 2024", grade: "A" },
+    { code: "CHEM 101", status: "completed", term: "Fall 2024", grade: "B+" },
+    { code: "STAT 155", status: "completed", term: "Spring 2025", grade: "A" },
+    { code: "PSYC 101", status: "completed", term: "Spring 2025", grade: "A-" },
+    { code: "HINF 210", status: "completed", term: "Fall 2025", grade: "A" },
+    // Remaining 13 completed credits are general-education requirements.
+    { code: "GEN ED", status: "completed", term: "2024 – 2026", grade: "—" },
+    { code: "HINF 320", status: "in_progress", term: "Spring 2026" },
+    { code: "STAT 320", status: "in_progress", term: "Spring 2026" },
+  ],
+};
+
+/**
+ * Demo record with no degree plan yet: undecided first-year, no coursework on file.
+ */
+export const DEMO_STUDENT_UNDECIDED: StudentProfile = {
+  ...createEmptyProfileBase(),
+  name: "Jordan Blake",
+  school: "University of North Carolina",
+  degree: "Bachelor of Science",
+  year: "Freshman",
+  gpa: 3.2,
+  interests: ["Technology", "Healthcare"],
+  careerInterests: ["Still exploring"],
+  goal: "I don't know what to major in yet.",
+};
+
+/**
+ * Second demo record with no degree plan: transfer student still deciding.
+ */
+export const DEMO_STUDENT_EXPLORING: StudentProfile = {
+  ...createEmptyProfileBase(),
+  name: "Alex Nguyen",
+  school: "University of North Carolina",
+  degree: "Bachelor of Arts",
+  year: "Sophomore",
+  gpa: 3.0,
+  interests: ["Business", "Design"],
+  careerInterests: ["Still exploring"],
+  goal: "I want to see which path costs the least.",
+};
+
+export interface DemoStudentOption {
+  id: string;
+  label: string;
+  description: string;
+  profile: StudentProfile;
+}
+
+/** The demo students offered in demo mode: three with coursework, two without a degree plan. */
+export const DEMO_STUDENTS: DemoStudentOption[] = [
+  {
+    id: "maya",
+    label: "Maya Rodriguez — Biology sophomore",
+    description: "54 credits of coursework on file, exploring healthcare technology.",
+    profile: DEMO_STUDENT,
+  },
+  {
+    id: "devon",
+    label: "Devon Carter — CS sophomore",
+    description: "45 credits of coursework on file, aiming at software engineering.",
+    profile: DEMO_STUDENT_CS,
+  },
+  {
+    id: "priya",
+    label: "Priya Raman — Biology junior",
+    description: "30 credits of coursework on file, health informatics minor.",
+    profile: DEMO_STUDENT_HINF,
+  },
+  {
+    id: "jordan",
+    label: "Jordan Blake — undecided freshman",
+    description: "No degree plan and no coursework on file yet.",
+    profile: DEMO_STUDENT_UNDECIDED,
+  },
+  {
+    id: "alex",
+    label: "Alex Nguyen — exploring sophomore",
+    description: "No degree plan on file, comparing cost-first options.",
+    profile: DEMO_STUDENT_EXPLORING,
+  },
+];
+
+export const demoStudentById = (id: string) => DEMO_STUDENTS.find((s) => s.id === id);
+
+/**
  * Anonymized sample profile for demos where the named demo student should not appear.
  * Same shape and credit math as the demo record so the deterministic engine behaves identically.
  */
@@ -266,6 +419,7 @@ export const SAMPLE_STUDENT: StudentProfile = {
   school: "Sample State University",
   goal: "I want to work in healthcare technology.",
 };
+
 
 /**
  * The one empty-profile schema. Authenticated students with no saved profile
