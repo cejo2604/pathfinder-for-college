@@ -304,9 +304,10 @@ export const DEMO_STUDENT_HINF: StudentProfile = {
   name: "Priya Raman",
   school: "University of North Carolina",
   institutionId: DEFAULT_INSTITUTION_ID,
-  degree: "Bachelor of Science",
+  degree: "Bachelor of Public Health",
   major: "Biology",
   minor: "Health Informatics minor",
+
   year: "Junior",
   graduationTarget: "December 2027",
   creditsCompleted: 30,
