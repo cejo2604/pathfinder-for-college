@@ -286,7 +286,7 @@ export function createEmptyProfile(): StudentProfile {
     interests: [],
     careerInterests: [],
     skills: [],
-    priorities: PRIORITY_ORDER,
+    priorities: [...PRIORITY_ORDER],
     goal: "",
     goalCategory: "",
     courses: [],

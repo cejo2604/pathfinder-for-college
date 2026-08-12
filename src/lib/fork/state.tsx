@@ -7,6 +7,7 @@ import {
   DEFAULT_INSTITUTION_ID,
   DEMO_STUDENT,
   PRIORITY_ORDER,
+  createEmptyProfile,
   SAMPLE_STUDENT,
   type Priority,
   type StudentProfile,
@@ -35,6 +36,8 @@ export interface ForkState {
   savedPaths: SavedPathRow[];
   /** True while the loaded profile is demo/sample data — never persisted to an account. */
   isDemoProfile: boolean;
+  /** Authenticated user id that owns this state, or null for anonymous/demo work. */
+  ownerId: string | null;
 }
 
 const initialState: ForkState = {
@@ -48,6 +51,7 @@ const initialState: ForkState = {
   doneActions: [],
   savedPaths: [],
   isDemoProfile: false,
+  ownerId: null,
 };
 
 
@@ -117,60 +121,61 @@ export function ForkProvider({ children }: { children: ReactNode }) {
   // Pull saved work for the signed-in student.
   useEffect(() => {
     if (!session) return;
+    const userId = session.user.id;
+    // Another account's (or an anonymous visitor's demo) local state never
+    // becomes this user's profile.
+    const local = stateRef.current;
+    const localBelongsToUser = local.ownerId === userId;
+    const localIsAdoptable = local.ownerId === null && !local.isDemoProfile && Boolean(local.profile);
+    if (!localBelongsToUser && !localIsAdoptable) {
+      setState({ ...initialState, ownerId: userId });
+    }
+
     let cancelled = false;
     void loadForkData()
       .then((remote) => {
         if (cancelled) return;
-        // Returning student: the account is the source of truth.
         const savedProfile = remote.profile;
         if (savedProfile) {
+          // Returning student: the account is the only source of truth.
           setState((s) => ({
             ...s,
+            ownerId: userId,
             profile: savedProfile,
             isDemoProfile: false,
-            priorities: savedProfile.priorities.length ? savedProfile.priorities : s.priorities,
-            careerId: remote.careerId ?? s.careerId,
+            priorities: savedProfile.priorities.length ? savedProfile.priorities : PRIORITY_ORDER,
+            careerId: remote.careerId ?? DEFAULT_CAREER_ID,
             doneActions: remote.doneActions,
             savedPaths: remote.savedPaths,
-            chosenPathId: remote.savedPaths.find((p) => p.isChosen)?.pathId ?? s.chosenPathId,
+            chosenPathId: remote.savedPaths.find((p) => p.isChosen)?.pathId ?? null,
           }));
           return;
         }
 
-        // First sign-in: keep whatever they already filled in locally and store it.
-        const local = stateRef.current;
-        // A brand-new account never inherits demo/sample data — start them clean.
-        const clearDemo = local.isDemoProfile;
-        setState((s) => ({
-          ...s,
-          ...(clearDemo
-            ? {
-                profile: null,
-                isDemoProfile: false,
-                priorities: PRIORITY_ORDER,
-                careerId: DEFAULT_CAREER_ID,
-                scenarioId: null,
-                scenarioQuestion: null,
-                comparison: [],
-                chosenPathId: null,
-                doneActions: [],
-              }
-            : { doneActions: remote.doneActions.length ? remote.doneActions : s.doneActions }),
-          savedPaths: remote.savedPaths,
-        }));
-        if (local.profile && !local.isDemoProfile) {
+        // No saved profile: start from the empty schema, unless this same
+        // browser session had the user's own pre-sign-in entries.
+        setState((s) => {
+          const adopt = localIsAdoptable && s.profile && !s.isDemoProfile;
+          return {
+            ...(adopt ? s : initialState),
+            ownerId: userId,
+            profile: adopt ? s.profile : createEmptyProfile(),
+            isDemoProfile: false,
+            doneActions: remote.doneActions,
+            savedPaths: remote.savedPaths,
+          };
+        });
+        if (localIsAdoptable && local.profile) {
           void saveForkProfile({
             data: { profile: { ...local.profile, priorities: local.priorities }, careerId: local.careerId },
           }).catch((error) => console.error("Could not save profile", error));
         }
       })
-
       .catch((error) => console.error("Could not load saved plan", error));
     return () => {
       cancelled = true;
     };
   }, [session]);
-
 
   // Debounced profile persistence.
   const profileTimer = useRef<number | undefined>(undefined);
@@ -222,6 +227,11 @@ export function ForkProvider({ children }: { children: ReactNode }) {
         if (signedIn) flushProfileSave();
         await supabase.auth.signOut();
         setState(initialState);
+        try {
+          window.localStorage.removeItem(STORAGE_KEY);
+        } catch {
+          /* ignore */
+        }
       },
       loadSampleStudent: () => {
         patch({
@@ -238,25 +248,7 @@ export function ForkProvider({ children }: { children: ReactNode }) {
       },
       startBlank: () => {
         patch({
-          profile: {
-            name: "",
-            school: "",
-            institutionId: DEFAULT_INSTITUTION_ID,
-            degree: "",
-            major: "",
-            minor: null,
-            year: "",
-            graduationTarget: "",
-            creditsCompleted: 0,
-            gpa: 0,
-            interests: [],
-            careerInterests: [],
-            skills: [],
-            priorities: PRIORITY_ORDER,
-            goal: "",
-            goalCategory: "",
-            courses: [],
-          },
+          profile: createEmptyProfile(),
           isDemoProfile: false,
           priorities: PRIORITY_ORDER,
           careerId: DEFAULT_CAREER_ID,
@@ -284,7 +276,7 @@ export function ForkProvider({ children }: { children: ReactNode }) {
       setProfile: (p) => {
         setState((s) => ({
           ...s,
-          profile: { ...(s.profile ?? DEMO_STUDENT), ...p },
+          profile: { ...(s.profile ?? createEmptyProfile()), ...p },
           // Editing demo data makes it the student's own profile.
           isDemoProfile: false,
         }));
@@ -350,10 +342,10 @@ export function useFork() {
   return ctx;
 }
 
-/** Profile with a safe fallback so every screen renders even before demo load. */
+/** Profile with an empty-schema fallback — never demo data. */
 export function useForkProfile(): StudentProfile {
   const { profile } = useFork();
-  const resolved = profile ?? DEMO_STUDENT;
+  const resolved = profile ?? createEmptyProfile();
   // Legacy stored profiles predate the institution id; default them to the
   // catalog Fork can verify rather than leaving simulation blocked.
   return resolved.institutionId ? resolved : { ...resolved, institutionId: DEFAULT_INSTITUTION_ID };
