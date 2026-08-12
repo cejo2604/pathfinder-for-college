@@ -43,18 +43,21 @@ export const PATHS: PathSpec[] = [
     id: "baseline",
     letter: "A",
     name: "Stay the course",
-    program: "Biology, B.S.",
-    headline: "Finish Biology exactly as planned.",
-    appliedCredits: 54,
+    // Generic baseline: the program label and applied credits come from the
+    // student's own record at simulation time, never from a hardcoded major.
+    program: "",
+    headline: "Finish your current program exactly as planned.",
+    appliedCredits: 0,
     extraProgramCredits: 0,
     prerequisiteCourses: [],
     changesInstitution: false,
     continuity: 100,
     flexibility: 62,
     advantages: [
-      "Graduates on the original May 2028 target",
+      "Completes on the planned course sequence with no added terms",
       "No credits lost, no new prerequisites",
       "Lowest cost of any path",
+
     ],
     tradeoffs: [
       "Fewest technical credentials for healthcare technology roles",
