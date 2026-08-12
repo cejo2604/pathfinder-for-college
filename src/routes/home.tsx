@@ -24,11 +24,12 @@ export const Route = createFileRoute("/home")({
 const DECISION_PATHS = ["baseline", "switch_cs", "cs_minor"];
 
 // Each option card opens the What If? simulator with the matching question.
+// The baseline label/question are derived from the student's own program record.
 const SIMULATE_QUESTIONS: Record<string, string> = {
-  baseline: "What if I stay in Biology?",
   switch_cs: "What if I switch to Computer Science?",
   cs_minor: "What if I add a Computer Science minor?",
 };
+
 
 function MyPath() {
   const profile = useForkProfile();
@@ -46,6 +47,14 @@ function MyPath() {
     return own ? example : String(value ?? "");
   };
   const firstName = show(profile.name.split(" ")[0], "Your");
+
+  // Baseline card mirrors the student's own program instead of a hardcoded major.
+  const baselineProgram = (options.find((p) => p.isBaseline)?.program ?? profile.major ?? "").trim();
+  const baselineLabel = baselineProgram ? `Stay in ${baselineProgram}` : "Stay the course";
+  const baselineQuestion = baselineProgram
+    ? `What if I stay in ${baselineProgram}?`
+    : "What if I stay on my current path?";
+
 
   return (
     <ForkShell>
@@ -103,11 +112,12 @@ function MyPath() {
             >
               <p className="font-display text-lg leading-tight">
                 {path.id === "baseline"
-                  ? "Stay in Biology"
+                  ? baselineLabel
                   : path.id === "switch_cs"
                     ? "Switch to Computer Science"
                     : "Add a Computer Science minor"}
               </p>
+
               <dl className="mt-3 space-y-1 text-sm">
                 <div className="flex justify-between gap-2">
                   <dt className="text-muted-foreground">Est. completion</dt>
@@ -128,7 +138,7 @@ function MyPath() {
                 size="sm"
                 variant="outline"
                 className="mt-4 w-full gap-1.5"
-                onClick={() => navigate({ to: "/what-if", search: { q: SIMULATE_QUESTIONS[path.id] ?? "What if I change my plan?" } })}
+                onClick={() => navigate({ to: "/what-if", search: { q: path.isBaseline ? baselineQuestion : (SIMULATE_QUESTIONS[path.id] ?? "What if I change my plan?") } })}
               >
                 <Sparkles className="size-3.5" /> Simulate this
               </Button>
