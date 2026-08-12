@@ -246,10 +246,13 @@ export function ForkProvider({ children }: { children: ReactNode }) {
       signedIn,
       signOut: async () => {
         if (signedIn) flushProfileSave();
+        const ownerKey = storageKeyFor(stateRef.current.ownerId);
+        typedThisSession.current = false;
         await supabase.auth.signOut();
         setState(initialState);
         try {
-          window.localStorage.removeItem(STORAGE_KEY);
+          window.localStorage.removeItem(ownerKey);
+          window.localStorage.removeItem(storageKeyFor(null));
         } catch {
           /* ignore */
         }
