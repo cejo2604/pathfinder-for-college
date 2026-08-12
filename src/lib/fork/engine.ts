@@ -647,12 +647,10 @@ export function evidenceFor(path: SimulatedPath, profile: StudentProfile): Evide
     },
     {
       label: "Estimated remaining tuition",
-      value: `${currency(path.creditsRemaining)} credits x ${currency(path.tuitionPerCredit)} = ${currency(path.estimatedCost)}`.replace(
-        `${currency(path.creditsRemaining)} credits`,
-        `${path.creditsRemaining} credits`,
-      ),
+      value: `${path.creditsRemaining} credits x ${currency(path.tuitionPerCredit)} = ${currency(path.estimatedCost)}`,
       kind: "estimated",
     },
+
     {
       label: "Estimated completion",
       value: `${path.semesters} semesters${path.summerSessions ? ` + ${path.summerSessions} summer session` : ""} → ${path.estimatedCompletionDate} (${COMPLETION_DISCLAIMER})`,
