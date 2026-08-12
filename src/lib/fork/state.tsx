@@ -302,6 +302,7 @@ export function ForkProvider({ children }: { children: ReactNode }) {
         });
       },
       setProfile: (p) => {
+        typedThisSession.current = true;
         setState((s) => ({
           ...s,
           profile: { ...(s.profile ?? createEmptyProfile()), ...p },
