@@ -263,9 +263,10 @@ export const DEMO_STUDENT_CS: StudentProfile = {
   name: "Devon Carter",
   school: "University of North Carolina",
   institutionId: DEFAULT_INSTITUTION_ID,
-  degree: "Bachelor of Science",
+  degree: "Bachelor of Science in Engineering",
   major: "Computer Science",
-  minor: null,
+  minor: "Data Science minor",
+
   year: "Sophomore",
   graduationTarget: "May 2028",
   creditsCompleted: 45,
