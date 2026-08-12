@@ -286,6 +286,26 @@ function WhatIfPage() {
       <div className="mx-auto max-w-3xl">
         <div className="border-t border-border pt-10 text-center">
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">What if</p>
+
+          {unresolved && (
+            <div
+              role="status"
+              className="mx-auto mt-4 max-w-md rounded-2xl border border-border bg-card p-4 text-left text-sm"
+            >
+              <p className="font-medium">Fork could not match that question to a scenario it can simulate.</p>
+              <p className="mt-1 text-muted-foreground">
+                Rather than guess, pick the closest scenario below — or rephrase your question.
+              </p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                {SCENARIOS.map((s) => (
+                  <Button key={s.id} variant="outline" size="sm" onClick={() => start(s.id, s.question)}>
+                    {s.chip}
+                  </Button>
+                ))}
+              </div>
+            </div>
+          )}
+
           <form onSubmit={submit} className="mt-3 flex flex-col gap-2 sm:flex-row">
             <Input
               value={input}
