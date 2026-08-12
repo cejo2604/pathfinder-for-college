@@ -430,8 +430,8 @@ export const DEMO_STUDENTS: DemoStudentOption[] = [
   },
   {
     id: "priya",
-    label: "Priya Raman — Biology junior",
-    description: "B.P.H. with a Health Informatics minor · 30 credits on file.",
+    label: "Priya Raman — Business Analytics junior",
+    description: "B.B.A. Business Analytics with a Data Science minor · 30 credits on file.",
     profile: DEMO_STUDENT_HINF,
   },
   {
