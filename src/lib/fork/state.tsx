@@ -4,6 +4,7 @@ import type { Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import {
   DEFAULT_CAREER_ID,
+  DEFAULT_INSTITUTION_ID,
   DEMO_STUDENT,
   PRIORITY_ORDER,
   SAMPLE_STUDENT,
@@ -240,6 +241,7 @@ export function ForkProvider({ children }: { children: ReactNode }) {
           profile: {
             name: "",
             school: "",
+            institutionId: DEFAULT_INSTITUTION_ID,
             degree: "",
             major: "",
             minor: null,
