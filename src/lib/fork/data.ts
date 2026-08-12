@@ -180,7 +180,7 @@ export const DEMO_STUDENT: StudentProfile = {
     { code: "BIOL 301", status: "in_progress", term: "Spring 2026" },
     { code: "CHEM 261", status: "in_progress", term: "Spring 2026" },
     { code: "STAT 320", status: "in_progress", term: "Spring 2026" },
-    { code: "PSYC 101", status: "in_progress", term: "Spring 2026" },
+    { code: "HINF 210", status: "in_progress", term: "Spring 2026" },
   ],
 };
 
