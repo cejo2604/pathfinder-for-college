@@ -144,7 +144,9 @@ export let PROGRAMS: DegreeProgram[] = [
   { id: "cs_bs", name: "Computer Science, B.S.", kind: "major", requiredCredits: 120 },
   { id: "cs_minor", name: "Computer Science minor", kind: "minor", requiredCredits: 18 },
   { id: "hinf_minor", name: "Health Informatics minor", kind: "minor", requiredCredits: 18 },
+  { id: "ds_minor", name: "Data Science minor", kind: "minor", requiredCredits: 18 },
 ];
+
 
 export const programById = (id: string) => PROGRAMS.find((p) => p.id === id);
 
