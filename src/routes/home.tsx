@@ -62,7 +62,7 @@ function MyPath() {
           <p className="text-sm">
             You&apos;re previewing the demo student. Load {profile.name} to save choices as you explore.
           </p>
-          <Button size="sm" className="gap-1.5" onClick={loadDemoStudent}>
+          <Button size="sm" className="gap-1.5" onClick={() => loadDemoStudent()}>
             <Sparkles className="size-3.5" /> Load demo student
           </Button>
         </div>

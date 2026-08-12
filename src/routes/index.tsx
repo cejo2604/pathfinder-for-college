@@ -3,7 +3,13 @@ import { ArrowRight, GitBranch, Sparkles } from "lucide-react";
 
 import { ForkLogo, PlanningEstimateNote } from "@/components/fork/ForkShell";
 import { Button } from "@/components/ui/button";
-import { DEMO_STUDENT } from "@/lib/fork/data";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { DEMO_STUDENT, DEMO_STUDENTS } from "@/lib/fork/data";
 import { formatCurrency, simulatePaths } from "@/lib/fork/engine";
 import { useFork } from "@/lib/fork/state";
 
@@ -32,8 +38,8 @@ function Landing() {
   const { loadDemoStudent, startBlank, session } = useFork();
   const navigate = useNavigate();
 
-  const startDemo = () => {
-    loadDemoStudent();
+  const startDemo = (id?: string) => {
+    loadDemoStudent(id);
     void navigate({ to: "/home" });
   };
 
