@@ -58,6 +58,8 @@ const initialState: ForkState = {
 
 interface ForkContextValue extends ForkState {
   hydrated: boolean;
+  /** True once the owner's own data is loaded — nothing profile-derived renders before this. */
+  profileReady: boolean;
   session: Session | null;
   authLoading: boolean;
   signedIn: boolean;
