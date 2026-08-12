@@ -37,7 +37,7 @@ export const Route = createFileRoute("/profile")({
 function ProfilePage() {
   const profile = useForkProfile();
   const navigate = useNavigate();
-  const { profile: loaded, loadDemoStudent, setProfile, priorities, setPriorities } = useFork();
+  const { profile: loaded, loadDemoStudent, setProfile, priorities, setPriorities, signedIn } = useFork();
 
   const completed = profile.courses.filter((c) => c.status === "completed");
   const current = profile.courses.filter((c) => c.status === "in_progress");
@@ -49,14 +49,15 @@ function ProfilePage() {
         <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Profile</p>
         <h1 className="mt-3 font-display text-4xl leading-tight sm:text-5xl">Your academic position</h1>
         <p className="mt-3 text-muted-foreground">
-          Nothing here is required to try Fork — the demo student fills it all in. Every number in the simulator traces
-          back to this page.
+          {signedIn
+            ? "This is your own record — nothing is shared with anyone else. Every number in the simulator traces back to this page."
+            : "Nothing here is required to try Fork — the demo student fills it all in. Every number in the simulator traces back to this page."}
         </p>
         <div className="mt-5 flex flex-wrap gap-2">
           <Button className="gap-1.5" onClick={() => void navigate({ to: "/import" })}>
             <Upload className="size-4" /> Import my academic history
           </Button>
-          {!loaded && (
+          {!loaded && !signedIn && (
             <Button variant="outline" className="gap-1.5" onClick={loadDemoStudent}>
               <Sparkles className="size-4" /> Load demo student
             </Button>

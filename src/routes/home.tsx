@@ -32,7 +32,7 @@ const SIMULATE_QUESTIONS: Record<string, string> = {
 
 function MyPath() {
   const profile = useForkProfile();
-  const { profile: loaded, loadDemoStudent, careerId, priorities } = useFork();
+  const { profile: loaded, loadDemoStudent, careerId, priorities, signedIn } = useFork();
   const navigate = useNavigate();
 
   const options = simulatePaths(DECISION_PATHS, { profile, careerId, priorities });
@@ -49,7 +49,15 @@ function MyPath() {
 
   return (
     <ForkShell>
-      {!loaded && (
+      {!loaded && signedIn && (
+        <div className="mb-8 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-primary/30 bg-primary/5 p-4">
+          <p className="text-sm">Your profile is empty. Add your academic record so Fork can simulate your paths.</p>
+          <Button size="sm" className="gap-1.5" onClick={() => void navigate({ to: "/profile" })}>
+            Complete my profile
+          </Button>
+        </div>
+      )}
+      {!loaded && !signedIn && (
         <div className="mb-8 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-primary/30 bg-primary/5 p-4">
           <p className="text-sm">
             You&apos;re previewing the demo student. Load {profile.name} to save choices as you explore.
