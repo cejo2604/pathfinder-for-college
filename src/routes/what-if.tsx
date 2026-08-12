@@ -369,26 +369,57 @@ function WhatIfPage() {
           </form>
 
           <div className="mt-4 flex flex-col items-center gap-2">
-            <Select
-              value={activeScenarioId ?? ""}
-              onValueChange={(value) => {
-                const s = SCENARIOS.find((x) => x.id === value);
-                if (s) start(s.id, s.question);
-              }}
-            >
-              <SelectTrigger className="w-full max-w-sm rounded-full border-border bg-card px-4 text-sm shadow-sm">
-                <SelectValue placeholder="Choose a quick scenario" />
-              </SelectTrigger>
-              <SelectContent className="rounded-xl border-border bg-card">
-                {SCENARIOS.map((s) => (
-                  <SelectItem key={s.id} value={s.id} className="rounded-lg text-sm">
-                    {s.chip}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <p className="text-xs text-muted-foreground">Or type your own question above and press Simulate.</p>
+            <div className="grid w-full gap-2 sm:grid-cols-3">
+              <Select
+                value={customScenario ? "" : (activeScenarioId ?? "")}
+                onValueChange={(value) => {
+                  const s = SCENARIOS.find((x) => x.id === value);
+                  if (s) start(s.id, s.question);
+                }}
+              >
+                <SelectTrigger className="rounded-full border-border bg-card px-4 text-sm shadow-sm">
+                  <SelectValue placeholder="Quick scenario" />
+                </SelectTrigger>
+                <SelectContent className="rounded-xl border-border bg-card">
+                  {SCENARIOS.map((s) => (
+                    <SelectItem key={s.id} value={s.id} className="rounded-lg text-sm">
+                      {s.chip}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              <Select value="" onValueChange={(value) => startProgram("switch", value)}>
+                <SelectTrigger className="rounded-full border-border bg-card px-4 text-sm shadow-sm">
+                  <SelectValue placeholder="Switch my major to…" />
+                </SelectTrigger>
+                <SelectContent className="rounded-xl border-border bg-card">
+                  {selectableMajors(profile).map((p) => (
+                    <SelectItem key={p.id} value={p.id} className="rounded-lg text-sm">
+                      {p.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              <Select value="" onValueChange={(value) => startProgram("minor", value)}>
+                <SelectTrigger className="rounded-full border-border bg-card px-4 text-sm shadow-sm">
+                  <SelectValue placeholder="Add a minor…" />
+                </SelectTrigger>
+                <SelectContent className="rounded-xl border-border bg-card">
+                  {selectableMinors(profile).map((p) => (
+                    <SelectItem key={p.id} value={p.id} className="rounded-lg text-sm">
+                      {p.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Major and minor options come from your school&apos;s catalog — Fork prices each one from your own record.
+            </p>
           </div>
+
         </div>
       </div>
 
