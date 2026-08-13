@@ -102,7 +102,38 @@ export let COURSES: Course[] = [
   { code: "DATA 220", title: "Data Wrangling & Visualization", credits: 3, prerequisites: ["DATA 110"] },
   { code: "DATA 310", title: "Applied Machine Learning", credits: 3, prerequisites: ["DATA 220", "STAT 155"] },
   { code: "DATA 495", title: "Data Science Capstone", credits: 3, prerequisites: ["DATA 310"] },
+  // Nursing (B.S.N.).
+  { code: "NURS 101", title: "Foundations of Nursing Practice", credits: 4, prerequisites: [] },
+  { code: "NURS 210", title: "Health Assessment", credits: 3, prerequisites: ["NURS 101"] },
+  { code: "NURS 220", title: "Pharmacology", credits: 3, prerequisites: ["NURS 101", "CHEM 101"] },
+  { code: "NURS 330", title: "Adult Health Nursing", credits: 4, prerequisites: ["NURS 210"] },
+  { code: "NURS 440", title: "Community Health Nursing", credits: 3, prerequisites: ["NURS 330"] },
+  { code: "NURS 495", title: "Nursing Clinical Capstone", credits: 4, prerequisites: ["NURS 440"] },
+  // Public Health.
+  { code: "PUBH 150", title: "Introduction to Public Health", credits: 3, prerequisites: [] },
+  { code: "PUBH 250", title: "Epidemiology", credits: 3, prerequisites: ["PUBH 150", "STAT 155"] },
+  { code: "PUBH 350", title: "Health Policy & Systems", credits: 3, prerequisites: ["PUBH 150"] },
+  { code: "PUBH 420", title: "Global Health", credits: 3, prerequisites: ["PUBH 250"] },
+  { code: "PUBH 495", title: "Public Health Capstone", credits: 3, prerequisites: ["PUBH 350"] },
+  // Psychology.
+  { code: "PSYC 210", title: "Research Methods in Psychology", credits: 4, prerequisites: ["PSYC 101"] },
+  { code: "PSYC 250", title: "Developmental Psychology", credits: 3, prerequisites: ["PSYC 101"] },
+  { code: "PSYC 330", title: "Cognitive Psychology", credits: 3, prerequisites: ["PSYC 210"] },
+  { code: "PSYC 360", title: "Abnormal Psychology", credits: 3, prerequisites: ["PSYC 101"] },
+  { code: "PSYC 495", title: "Psychology Capstone", credits: 3, prerequisites: ["PSYC 330"] },
+  // Information Science.
+  { code: "INLS 201", title: "Foundations of Information Science", credits: 3, prerequisites: [] },
+  { code: "INLS 310", title: "Database Design", credits: 3, prerequisites: ["INLS 201"] },
+  { code: "INLS 380", title: "Human-Computer Interaction", credits: 3, prerequisites: ["INLS 201"] },
+  { code: "INLS 425", title: "Information Security & Privacy", credits: 3, prerequisites: ["INLS 310"] },
+  { code: "INLS 495", title: "Information Science Capstone", credits: 3, prerequisites: ["INLS 380"] },
+  // Economics.
+  { code: "ECON 310", title: "Intermediate Microeconomics", credits: 3, prerequisites: ["ECON 101"] },
+  { code: "ECON 320", title: "Intermediate Macroeconomics", credits: 3, prerequisites: ["ECON 102"] },
+  { code: "ECON 400", title: "Econometrics", credits: 3, prerequisites: ["ECON 310", "STAT 155"] },
+  { code: "ECON 495", title: "Economics Senior Seminar", credits: 3, prerequisites: ["ECON 400"] },
 ];
+
 
 export const courseByCode = (code: string) => COURSES.find((c) => c.code === code);
 
