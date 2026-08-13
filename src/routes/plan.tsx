@@ -83,17 +83,8 @@ function PlanPage() {
         </section>
       )}
 
-      <PriorityPlan
-        className="mt-10"
-        plan={plan}
-        doneActions={doneActions}
-        toggleAction={toggleAction}
-        onReorder={() => prioritiesRef.current?.scrollIntoView({ behavior: "smooth", block: "center" })}
-      />
 
-      <div ref={prioritiesRef} className="mt-8">
-        <PriorityPanel priorities={priorities} onChange={setPriorities} topPathName={plan.ranked[0]?.name} />
-      </div>
+
 
 
       <section className="mt-10 rounded-3xl border border-primary/30 bg-primary/5 p-6 shadow-lift sm:p-8">
