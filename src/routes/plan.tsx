@@ -30,35 +30,33 @@ export const Route = createFileRoute("/plan")({
 function PlanPage() {
   const profile = useForkProfile();
   const navigate = useNavigate();
-  const { chosenPathId, careerId, priorities, doneActions, toggleAction, setPriorities } = useFork();
-  const prioritiesRef = useRef<HTMLDivElement>(null);
+  const { chosenPathId, careerId, priorities, doneActions, toggleAction } = useFork();
 
   const path = simulatePath(chosenPathId ?? "cs_minor", { profile, careerId, priorities });
   // Waitlisted seats come from the verified academic history, never predicted.
   const waitlisted = waitlistedCourses(profile);
-  // The plan itself is ordered by the student's ranked priorities.
-  const plan = priorityCareerPlan({ profile, careerId, priorities, pathId: chosenPathId ?? "cs_minor" });
-
-
-
 
   return (
     <ForkShell>
       <header className="max-w-2xl">
         <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Your Fork</p>
         <h1 className="mt-3 font-display text-4xl leading-tight sm:text-5xl">{path.name}</h1>
-        <p className="mt-3 text-muted-foreground">
-          {path.program} · {path.creditsRemaining} credits remaining ·{" "}
-          {formatCurrency(path.estimatedCost)} estimated tuition · estimated completion {path.estimatedCompletionDate}
-        </p>
-        <p className="mt-2 text-xs text-muted-foreground">
-          Planning estimate — confirm course availability and requirements with your academic advisor.
-        </p>
+        <p className="mt-2 text-muted-foreground">{path.program}</p>
         <Button variant="outline" className="mt-4 gap-1.5" onClick={() => void navigate({ to: "/path" })}>
           See the full path breakdown <ArrowRight className="size-4" />
         </Button>
-
       </header>
+
+      <section className="mt-8 grid gap-3 sm:grid-cols-3">
+        <Stat label="Total estimated cost" value={formatCurrency(path.estimatedCost)} />
+        <Stat label="Credits remaining" value={`${path.creditsRemaining}`} />
+        <Stat label="Estimated completion" value={path.estimatedCompletionDate} />
+        <p className="text-xs text-muted-foreground sm:col-span-3">
+          Fork estimate — {path.creditsRemaining} credits × {formatCurrency(path.tuitionPerCredit)} per credit. Confirm
+          course availability and requirements with your academic advisor.
+        </p>
+      </section>
+
 
       {waitlisted.length > 0 && (
         <section className="mt-8 rounded-2xl border border-gold/50 bg-gold/10 p-5 sm:p-6">
