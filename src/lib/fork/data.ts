@@ -102,7 +102,38 @@ export let COURSES: Course[] = [
   { code: "DATA 220", title: "Data Wrangling & Visualization", credits: 3, prerequisites: ["DATA 110"] },
   { code: "DATA 310", title: "Applied Machine Learning", credits: 3, prerequisites: ["DATA 220", "STAT 155"] },
   { code: "DATA 495", title: "Data Science Capstone", credits: 3, prerequisites: ["DATA 310"] },
+  // Nursing (B.S.N.).
+  { code: "NURS 101", title: "Foundations of Nursing Practice", credits: 4, prerequisites: [] },
+  { code: "NURS 210", title: "Health Assessment", credits: 3, prerequisites: ["NURS 101"] },
+  { code: "NURS 220", title: "Pharmacology", credits: 3, prerequisites: ["NURS 101", "CHEM 101"] },
+  { code: "NURS 330", title: "Adult Health Nursing", credits: 4, prerequisites: ["NURS 210"] },
+  { code: "NURS 440", title: "Community Health Nursing", credits: 3, prerequisites: ["NURS 330"] },
+  { code: "NURS 495", title: "Nursing Clinical Capstone", credits: 4, prerequisites: ["NURS 440"] },
+  // Public Health.
+  { code: "PUBH 150", title: "Introduction to Public Health", credits: 3, prerequisites: [] },
+  { code: "PUBH 250", title: "Epidemiology", credits: 3, prerequisites: ["PUBH 150", "STAT 155"] },
+  { code: "PUBH 350", title: "Health Policy & Systems", credits: 3, prerequisites: ["PUBH 150"] },
+  { code: "PUBH 420", title: "Global Health", credits: 3, prerequisites: ["PUBH 250"] },
+  { code: "PUBH 495", title: "Public Health Capstone", credits: 3, prerequisites: ["PUBH 350"] },
+  // Psychology.
+  { code: "PSYC 210", title: "Research Methods in Psychology", credits: 4, prerequisites: ["PSYC 101"] },
+  { code: "PSYC 250", title: "Developmental Psychology", credits: 3, prerequisites: ["PSYC 101"] },
+  { code: "PSYC 330", title: "Cognitive Psychology", credits: 3, prerequisites: ["PSYC 210"] },
+  { code: "PSYC 360", title: "Abnormal Psychology", credits: 3, prerequisites: ["PSYC 101"] },
+  { code: "PSYC 495", title: "Psychology Capstone", credits: 3, prerequisites: ["PSYC 330"] },
+  // Information Science.
+  { code: "INLS 201", title: "Foundations of Information Science", credits: 3, prerequisites: [] },
+  { code: "INLS 310", title: "Database Design", credits: 3, prerequisites: ["INLS 201"] },
+  { code: "INLS 380", title: "Human-Computer Interaction", credits: 3, prerequisites: ["INLS 201"] },
+  { code: "INLS 425", title: "Information Security & Privacy", credits: 3, prerequisites: ["INLS 310"] },
+  { code: "INLS 495", title: "Information Science Capstone", credits: 3, prerequisites: ["INLS 380"] },
+  // Economics.
+  { code: "ECON 310", title: "Intermediate Microeconomics", credits: 3, prerequisites: ["ECON 101"] },
+  { code: "ECON 320", title: "Intermediate Macroeconomics", credits: 3, prerequisites: ["ECON 102"] },
+  { code: "ECON 400", title: "Econometrics", credits: 3, prerequisites: ["ECON 310", "STAT 155"] },
+  { code: "ECON 495", title: "Economics Senior Seminar", credits: 3, prerequisites: ["ECON 400"] },
 ];
+
 
 export const courseByCode = (code: string) => COURSES.find((c) => c.code === code);
 
@@ -157,6 +188,31 @@ export const COURSE_SKILL_CONTRIBUTIONS: Record<string, Partial<Record<SkillKey,
   "DATA 220": { data_analysis: 0.35, programming: 0.2 },
   "DATA 310": { data_analysis: 0.35, programming: 0.25, statistics: 0.25 },
   "DATA 495": { data_analysis: 0.25, programming: 0.15, research: 0.15 },
+  "NURS 101": { health_domain: 0.3 },
+  "NURS 210": { health_domain: 0.3, research: 0.05 },
+  "NURS 220": { health_domain: 0.25, research: 0.05 },
+  "NURS 330": { health_domain: 0.35, research: 0.05 },
+  "NURS 440": { health_domain: 0.3, informatics: 0.1 },
+  "NURS 495": { health_domain: 0.35, research: 0.1 },
+  "PUBH 150": { health_domain: 0.25 },
+  "PUBH 250": { health_domain: 0.2, statistics: 0.3, research: 0.15 },
+  "PUBH 350": { health_domain: 0.2, informatics: 0.1 },
+  "PUBH 420": { health_domain: 0.2, research: 0.1 },
+  "PUBH 495": { health_domain: 0.2, research: 0.2, data_analysis: 0.1 },
+  "PSYC 210": { research: 0.35, statistics: 0.2 },
+  "PSYC 250": { health_domain: 0.1, research: 0.1 },
+  "PSYC 330": { research: 0.2, health_domain: 0.1 },
+  "PSYC 360": { health_domain: 0.15, research: 0.1 },
+  "PSYC 495": { research: 0.25, health_domain: 0.1 },
+  "INLS 201": { informatics: 0.3, data_analysis: 0.1 },
+  "INLS 310": { informatics: 0.3, data_analysis: 0.2, programming: 0.1 },
+  "INLS 380": { informatics: 0.25, programming: 0.1 },
+  "INLS 425": { informatics: 0.3, programming: 0.1 },
+  "INLS 495": { informatics: 0.25, data_analysis: 0.15 },
+  "ECON 310": { data_analysis: 0.15, statistics: 0.1 },
+  "ECON 320": { data_analysis: 0.15, statistics: 0.1 },
+  "ECON 400": { statistics: 0.35, data_analysis: 0.3, research: 0.15 },
+  "ECON 495": { research: 0.2, data_analysis: 0.15 },
 };
 
 /** Contributions for one catalog course code. Unknown codes contribute nothing. */
@@ -176,10 +232,19 @@ export let PROGRAMS: DegreeProgram[] = [
   { id: "cs_bs", name: "Computer Science, B.S.", kind: "major", requiredCredits: 120 },
   { id: "ba_bba", name: "Business Analytics, B.B.A.", kind: "major", requiredCredits: 120 },
   { id: "ds_bs", name: "Data Science, B.S.", kind: "major", requiredCredits: 120 },
+  { id: "nurs_bsn", name: "Nursing, B.S.N.", kind: "major", requiredCredits: 120 },
+  { id: "pubh_bsph", name: "Public Health, B.S.P.H.", kind: "major", requiredCredits: 120 },
+  { id: "psyc_ba", name: "Psychology, B.A.", kind: "major", requiredCredits: 120 },
+  { id: "inls_bs", name: "Information Science, B.S.", kind: "major", requiredCredits: 120 },
+  { id: "econ_ba", name: "Economics, B.A.", kind: "major", requiredCredits: 120 },
   { id: "cs_minor", name: "Computer Science minor", kind: "minor", requiredCredits: 18 },
   { id: "hinf_minor", name: "Health Informatics minor", kind: "minor", requiredCredits: 18 },
   { id: "ds_minor", name: "Data Science minor", kind: "minor", requiredCredits: 18 },
   { id: "busi_minor", name: "Business minor", kind: "minor", requiredCredits: 18 },
+  { id: "stat_minor", name: "Statistics minor", kind: "minor", requiredCredits: 18 },
+  { id: "pubh_minor", name: "Public Health minor", kind: "minor", requiredCredits: 18 },
+  { id: "psyc_minor", name: "Psychology minor", kind: "minor", requiredCredits: 18 },
+  { id: "econ_minor", name: "Economics minor", kind: "minor", requiredCredits: 18 },
 ];
 
 
@@ -194,10 +259,19 @@ export const PROGRAM_COURSES: Record<string, string[]> = {
   cs_bs: ["COMP 110", "COMP 210", "COMP 301", "COMP 311", "MATH 152", "MATH 233", "COMP 410", "COMP 480", "COMP 495"],
   ba_bba: ["BUSI 101", "BUSI 202", "ECON 101", "ECON 102", "BUSI 210", "BUSI 310", "BUSI 330", "BUSI 370", "BUSI 410", "BUSI 495"],
   ds_bs: ["DATA 110", "DATA 220", "STAT 155", "STAT 320", "COMP 110", "COMP 210", "DATA 310", "DATA 495"],
+  nurs_bsn: ["NURS 101", "NURS 210", "NURS 220", "NURS 330", "NURS 440", "NURS 495", "CHEM 101", "BIOL 101", "PSYC 101"],
+  pubh_bsph: ["PUBH 150", "STAT 155", "PUBH 250", "PUBH 350", "PUBH 420", "PUBH 495", "BIOL 101", "PSYC 101"],
+  psyc_ba: ["PSYC 101", "PSYC 210", "PSYC 250", "PSYC 330", "PSYC 360", "PSYC 495", "STAT 155"],
+  inls_bs: ["INLS 201", "COMP 110", "INLS 310", "INLS 380", "INLS 425", "INLS 495", "STAT 155"],
+  econ_ba: ["ECON 101", "ECON 102", "MATH 152", "STAT 155", "ECON 310", "ECON 320", "ECON 400", "ECON 495"],
   cs_minor: ["COMP 110", "COMP 210", "COMP 301", "COMP 410", "COMP 480"],
   hinf_minor: ["HINF 210", "HINF 320", "HINF 410", "HINF 450"],
   ds_minor: ["DATA 110", "DATA 220", "STAT 155", "DATA 310"],
   busi_minor: ["BUSI 101", "ECON 101", "BUSI 210", "BUSI 330"],
+  stat_minor: ["STAT 155", "STAT 320", "MATH 152", "DATA 220"],
+  pubh_minor: ["PUBH 150", "PUBH 250", "PUBH 350", "PUBH 420"],
+  psyc_minor: ["PSYC 101", "PSYC 210", "PSYC 250", "PSYC 360"],
+  econ_minor: ["ECON 101", "ECON 102", "ECON 310", "ECON 400"],
 };
 
 export const programCourses = (id: string): string[] => PROGRAM_COURSES[id] ?? [];

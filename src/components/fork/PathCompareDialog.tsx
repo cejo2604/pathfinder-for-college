@@ -67,6 +67,29 @@ export function PathCompareDialog({
           ))}
         </div>
 
+        {(() => {
+          const baselineCourses = new Set(baseline.terms.flatMap((t) => t.courses ?? []));
+          const added = Array.from(
+            new Set(option.terms.flatMap((t) => t.courses ?? []).filter((c) => c !== "Elective")),
+          ).filter((c) => !baselineCourses.has(c));
+          if (added.length === 0) return null;
+          return (
+            <div className="rounded-2xl border border-border px-4 py-3 text-sm">
+              <p className="font-medium">Courses this adds ({added.length})</p>
+              <p className="mt-0.5 text-xs text-muted-foreground">
+                These are the catalog courses driving the credits, tuition and career fit above.
+              </p>
+              <div className="mt-2 flex flex-wrap gap-1.5">
+                {added.map((code) => (
+                  <span key={code} className="rounded-full bg-muted px-2 py-0.5 text-xs tabular-nums">
+                    {code}
+                  </span>
+                ))}
+              </div>
+            </div>
+          );
+        })()}
+
         {option.tradeoffs.length > 0 && (
           <div className="rounded-2xl bg-muted px-4 py-3 text-sm">
             <p className="font-medium">Tradeoffs</p>
