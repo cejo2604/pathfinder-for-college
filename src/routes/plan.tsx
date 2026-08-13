@@ -113,80 +113,8 @@ function PlanPage() {
         </ol>
       </section>
 
-      <section className="mt-12">
-        <h2 className="font-display text-2xl">Semester by semester</h2>
-        <ol className="relative mt-6 space-y-6 border-l border-border pl-6 sm:pl-8">
-          {path.terms.map((term, i) => (
-            <li
-              key={term.label}
-              style={{ animationDelay: `${i * 0.09}s` }}
-              className="animate-fork-rise relative rounded-2xl border border-border bg-card p-5"
-            >
-              <span
-                className={cn(
-                  "absolute -left-[2.05rem] top-6 grid size-4 place-items-center rounded-full border-2 border-background sm:-left-[2.55rem]",
-                  term.kind === "academic" ? "bg-primary" : term.kind === "summer" ? "bg-gold" : "bg-muted-foreground",
-                )}
-              />
-              <div className="flex flex-wrap items-baseline justify-between gap-2">
-                <h3 className="font-display text-xl">{term.label}</h3>
-                <p className="text-sm text-muted-foreground">
-                  {term.kind === "break"
-                    ? "Break term"
-                    : `${term.credits} credits${term.kind === "summer" ? " · summer session" : ""}`}
-                </p>
-              </div>
+      <SemesterCards className="mt-12" path={path} doneActions={doneActions} toggleAction={toggleAction} />
 
-              {term.courses.length > 0 && (
-                <ul className="mt-3 flex flex-wrap gap-2">
-                  {term.courses.map((course, ci) => (
-                    <li
-                      key={`${term.label}-${course}-${ci}`}
-                      className="rounded-full bg-muted px-3 py-1 text-sm"
-                    >
-                      {course}
-                    </li>
-                  ))}
-                </ul>
-              )}
-
-              {term.actions.length > 0 && (
-                <ul className="mt-3 space-y-2">
-                  {term.actions.map((action, ai) => {
-                    const key = `${path.id}:${term.label}:${ai}`;
-                    const done = doneActions.includes(key);
-                    return (
-                      <li key={key} className="flex items-start gap-2 text-sm">
-                        <Checkbox
-                          id={key}
-                          checked={done}
-                          onCheckedChange={() => toggleAction(key)}
-                          aria-label={`Mark "${action}" complete`}
-                          className="mt-0.5"
-                        />
-                        <label htmlFor={key} className={cn("cursor-pointer", done && "text-muted-foreground line-through")}>
-                          {action}
-                        </label>
-                      </li>
-                    );
-                  })}
-                </ul>
-              )}
-            </li>
-          ))}
-
-          <li className="relative rounded-2xl border border-mint/50 bg-mint/10 p-5">
-            <span className="absolute -left-[2.05rem] top-6 grid size-4 place-items-center rounded-full border-2 border-background bg-mint sm:-left-[2.55rem]" />
-            <div className="flex items-center gap-2">
-              <GraduationCap className="size-5 text-mint-foreground" />
-              <h3 className="font-display text-xl">Estimated completion — {path.estimatedCompletionDate}</h3>
-            </div>
-            <p className="mt-1 text-sm text-muted-foreground">
-              {path.semesters} academic semesters from Fall 2026, at an average of {path.averageLoad} credits per term.
-            </p>
-          </li>
-        </ol>
-      </section>
 
       <RelevantCourses className="mt-12" careerId={careerId} profile={profile} />
 
