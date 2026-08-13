@@ -1,17 +1,16 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useRef } from "react";
-import { ArrowRight, Check, GraduationCap } from "lucide-react";
+import { ArrowRight, Check } from "lucide-react";
 
 import { ForkShell } from "@/components/fork/ForkShell";
-import { PriorityPanel } from "@/components/fork/Decision";
-import { PriorityPlan } from "@/components/fork/PriorityPlan";
 import { RelevantCourses } from "@/components/fork/RelevantCourses";
+import { SemesterCards } from "@/components/fork/SemesterCards";
 import { AssumptionsPanel } from "@/components/fork/WhyPath";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
-import { formatCurrency, priorityCareerPlan, simulatePath, waitlistedCourses } from "@/lib/fork/engine";
+import { formatCurrency, simulatePath, waitlistedCourses } from "@/lib/fork/engine";
 import { useFork, useForkProfile } from "@/lib/fork/state";
+
 
 export const Route = createFileRoute("/plan")({
   head: () => ({
