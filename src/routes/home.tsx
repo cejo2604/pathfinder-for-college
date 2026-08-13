@@ -6,6 +6,7 @@ import { ForkShell } from "@/components/fork/ForkShell";
 import { PathCompareDialog } from "@/components/fork/PathCompareDialog";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { courseByCode, programCourses } from "@/lib/fork/data";
 import { formatCurrency, formatDelta, simulatePaths, type SimulatedPath } from "@/lib/fork/engine";
 import { programPathId, selectableMajors, selectableMinors } from "@/lib/fork/program-paths";
 import { useFork, useForkProfile } from "@/lib/fork/state";
