@@ -188,6 +188,30 @@ function MyPath() {
   );
 }
 
+/** Courses in the selected program, read straight from the catalog. */
+function CourseMenu({ programId }: { programId: string }) {
+  const codes = programCourses(programId);
+  if (codes.length === 0) return null;
+  return (
+    <Select value="">
+      <SelectTrigger className="mt-2 text-xs" aria-label="Courses in this program">
+        <SelectValue placeholder={`${codes.length} courses in this program`} />
+      </SelectTrigger>
+      <SelectContent>
+        {codes.map((code) => {
+          const course = courseByCode(code);
+          return (
+            <SelectItem key={code} value={code} className="text-xs">
+              {code} — {course?.title ?? "Course"} ({course?.credits ?? 3} cr)
+            </SelectItem>
+          );
+        })}
+      </SelectContent>
+    </Select>
+  );
+}
+
+
 function DecisionCard({
   title,
   path,
