@@ -705,13 +705,31 @@ export let CAREERS: Career[] = [
 export const careerById = (id: string) => CAREERS.find((c) => c.id === id);
 export const DEFAULT_CAREER_ID = "healthcare_data_scientist";
 
-/** Catalog loaded from the database replaces the bundled defaults in place. */
+/** Catalog loaded from the database augments bundled defaults in place. */
 export function applyCatalog(catalog: {
   courses?: Course[];
   programs?: DegreeProgram[];
   careers?: Career[];
 }) {
-  if (catalog.courses?.length) COURSES = catalog.courses;
-  if (catalog.programs?.length) PROGRAMS = catalog.programs;
-  if (catalog.careers?.length) CAREERS = catalog.careers;
+  if (catalog.courses?.length) {
+    const remoteByCode = new Map(catalog.courses.map((course) => [course.code, course]));
+    COURSES = [
+      ...COURSES.map((course) => remoteByCode.get(course.code) ?? course),
+      ...catalog.courses.filter((course) => !COURSES.some((bundled) => bundled.code === course.code)),
+    ];
+  }
+  if (catalog.programs?.length) {
+    const remoteById = new Map(catalog.programs.map((program) => [program.id, program]));
+    PROGRAMS = [
+      ...PROGRAMS.map((program) => remoteById.get(program.id) ?? program),
+      ...catalog.programs.filter((program) => !PROGRAMS.some((bundled) => bundled.id === program.id)),
+    ];
+  }
+  if (catalog.careers?.length) {
+    const remoteById = new Map(catalog.careers.map((career) => [career.id, career]));
+    CAREERS = [
+      ...CAREERS.map((career) => remoteById.get(career.id) ?? career),
+      ...catalog.careers.filter((career) => !CAREERS.some((bundled) => bundled.id === career.id)),
+    ];
+  }
 }
