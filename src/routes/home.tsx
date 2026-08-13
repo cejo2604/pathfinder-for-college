@@ -6,6 +6,7 @@ import { ForkShell } from "@/components/fork/ForkShell";
 import { PathCompareDialog } from "@/components/fork/PathCompareDialog";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { courseByCode, programCourses } from "@/lib/fork/data";
 import { formatCurrency, formatDelta, simulatePaths, type SimulatedPath } from "@/lib/fork/engine";
 import { programPathId, selectableMajors, selectableMinors } from "@/lib/fork/program-paths";
 import { useFork, useForkProfile } from "@/lib/fork/state";
@@ -126,18 +127,21 @@ function MyPath() {
             path={switchPath}
             onSimulate={() => switchPath && setCompareId(switchPath.id)}
             control={
-              <Select value={majorId} onValueChange={setMajorId}>
-                <SelectTrigger className="mt-3" aria-label="Choose a major to switch into">
-                  <SelectValue placeholder="Choose a major" />
-                </SelectTrigger>
-                <SelectContent>
-                  {majors.map((p) => (
-                    <SelectItem key={p.id} value={p.id}>
-                      {p.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <>
+                <Select value={majorId} onValueChange={setMajorId}>
+                  <SelectTrigger className="mt-3" aria-label="Choose a major to switch into">
+                    <SelectValue placeholder="Choose a major" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {majors.map((p) => (
+                      <SelectItem key={p.id} value={p.id}>
+                        {p.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <CourseMenu programId={majorId} />
+              </>
             }
           />
 
@@ -146,22 +150,26 @@ function MyPath() {
             path={minorPath}
             onSimulate={() => minorPath && setCompareId(minorPath.id)}
             control={
-              <Select value={minorId} onValueChange={setMinorId}>
-                <SelectTrigger className="mt-3" aria-label="Choose a minor to add">
-                  <SelectValue placeholder="Choose a minor" />
-                </SelectTrigger>
-                <SelectContent>
-                  {minors.map((p) => (
-                    <SelectItem key={p.id} value={p.id}>
-                      {p.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <>
+                <Select value={minorId} onValueChange={setMinorId}>
+                  <SelectTrigger className="mt-3" aria-label="Choose a minor to add">
+                    <SelectValue placeholder="Choose a minor" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {minors.map((p) => (
+                      <SelectItem key={p.id} value={p.id}>
+                        {p.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <CourseMenu programId={minorId} />
+              </>
             }
           />
         </div>
       </section>
+
 
       <section className="mt-10 grid gap-4 sm:grid-cols-3">
         <Fact label="Current courses" value={profile.courses.filter((c) => c.status === "in_progress").length} sub="in progress this term" />
@@ -179,6 +187,30 @@ function MyPath() {
     </ForkShell>
   );
 }
+
+/** Courses in the selected program, read straight from the catalog. */
+function CourseMenu({ programId }: { programId: string }) {
+  const codes = programCourses(programId);
+  if (codes.length === 0) return null;
+  return (
+    <Select>
+      <SelectTrigger className="mt-2 text-xs" aria-label="Courses in this program">
+        <SelectValue placeholder={`${codes.length} courses in this program`} />
+      </SelectTrigger>
+      <SelectContent>
+        {codes.map((code) => {
+          const course = courseByCode(code);
+          return (
+            <SelectItem key={code} value={code} className="text-xs">
+              {code} — {course?.title ?? "Course"} ({course?.credits ?? 3} cr)
+            </SelectItem>
+          );
+        })}
+      </SelectContent>
+    </Select>
+  );
+}
+
 
 function DecisionCard({
   title,
