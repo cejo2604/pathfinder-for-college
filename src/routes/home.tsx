@@ -127,18 +127,21 @@ function MyPath() {
             path={switchPath}
             onSimulate={() => switchPath && setCompareId(switchPath.id)}
             control={
-              <Select value={majorId} onValueChange={setMajorId}>
-                <SelectTrigger className="mt-3" aria-label="Choose a major to switch into">
-                  <SelectValue placeholder="Choose a major" />
-                </SelectTrigger>
-                <SelectContent>
-                  {majors.map((p) => (
-                    <SelectItem key={p.id} value={p.id}>
-                      {p.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <>
+                <Select value={majorId} onValueChange={setMajorId}>
+                  <SelectTrigger className="mt-3" aria-label="Choose a major to switch into">
+                    <SelectValue placeholder="Choose a major" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {majors.map((p) => (
+                      <SelectItem key={p.id} value={p.id}>
+                        {p.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <CourseMenu programId={majorId} />
+              </>
             }
           />
 
@@ -147,22 +150,26 @@ function MyPath() {
             path={minorPath}
             onSimulate={() => minorPath && setCompareId(minorPath.id)}
             control={
-              <Select value={minorId} onValueChange={setMinorId}>
-                <SelectTrigger className="mt-3" aria-label="Choose a minor to add">
-                  <SelectValue placeholder="Choose a minor" />
-                </SelectTrigger>
-                <SelectContent>
-                  {minors.map((p) => (
-                    <SelectItem key={p.id} value={p.id}>
-                      {p.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <>
+                <Select value={minorId} onValueChange={setMinorId}>
+                  <SelectTrigger className="mt-3" aria-label="Choose a minor to add">
+                    <SelectValue placeholder="Choose a minor" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {minors.map((p) => (
+                      <SelectItem key={p.id} value={p.id}>
+                        {p.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <CourseMenu programId={minorId} />
+              </>
             }
           />
         </div>
       </section>
+
 
       <section className="mt-10 grid gap-4 sm:grid-cols-3">
         <Fact label="Current courses" value={profile.courses.filter((c) => c.status === "in_progress").length} sub="in progress this term" />
