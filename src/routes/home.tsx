@@ -193,7 +193,7 @@ function CourseMenu({ programId }: { programId: string }) {
   const codes = programCourses(programId);
   if (codes.length === 0) return null;
   return (
-    <Select value="">
+    <Select>
       <SelectTrigger className="mt-2 text-xs" aria-label="Courses in this program">
         <SelectValue placeholder={`${codes.length} courses in this program`} />
       </SelectTrigger>
