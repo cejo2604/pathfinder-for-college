@@ -1,9 +1,13 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useMemo, useState } from "react";
 import { Sparkles } from "lucide-react";
 
 import { ForkShell } from "@/components/fork/ForkShell";
+import { PathCompareDialog } from "@/components/fork/PathCompareDialog";
 import { Button } from "@/components/ui/button";
-import { formatCurrency, formatDelta, simulatePaths } from "@/lib/fork/engine";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { formatCurrency, formatDelta, simulatePaths, type SimulatedPath } from "@/lib/fork/engine";
+import { programPathId, selectableMajors, selectableMinors } from "@/lib/fork/program-paths";
 import { useFork, useForkProfile } from "@/lib/fork/state";
 
 export const Route = createFileRoute("/home")({
@@ -21,22 +25,26 @@ export const Route = createFileRoute("/home")({
   component: MyPath,
 });
 
-const DECISION_PATHS = ["baseline", "switch_cs", "cs_minor"];
-
-// Each option card opens the What If? simulator with the matching question.
-// The baseline label/question are derived from the student's own program record.
-const SIMULATE_QUESTIONS: Record<string, string> = {
-  switch_cs: "What if I switch to Computer Science?",
-  cs_minor: "What if I add a Computer Science minor?",
-};
-
-
 function MyPath() {
   const profile = useForkProfile();
-  const { profile: loaded, loadDemoStudent, careerId, priorities, signedIn } = useFork();
+  const { profile: loaded, loadDemoStudent, careerId, priorities, signedIn, choosePath } = useFork();
   const navigate = useNavigate();
 
-  const options = simulatePaths(DECISION_PATHS, { profile, careerId, priorities });
+  // Any catalog program can be simulated from here — the student picks it.
+  const majors = useMemo(() => selectableMajors(profile), [profile]);
+  const minors = useMemo(() => selectableMinors(profile), [profile]);
+  const [majorId, setMajorId] = useState(majors[0]?.id ?? "");
+  const [minorId, setMinorId] = useState(minors[0]?.id ?? "");
+  const [compareId, setCompareId] = useState<string | null>(null);
+
+  const ids = ["baseline"];
+  if (majorId) ids.push(programPathId("switch", majorId));
+  if (minorId) ids.push(programPathId("minor", minorId));
+  const options = simulatePaths(ids, { profile, careerId, priorities });
+  const baseline = options.find((p) => p.isBaseline);
+  const switchPath = majorId ? options.find((p) => p.id === programPathId("switch", majorId)) : undefined;
+  const minorPath = minorId ? options.find((p) => p.id === programPathId("minor", minorId)) : undefined;
+  const comparing = options.find((p) => p.id === compareId);
 
   // Once a student has created their own profile, only their own entries show —
   // empty fields fall back to a neutral example hint, never to demo-student data.
@@ -49,12 +57,20 @@ function MyPath() {
   const firstName = show(profile.name.split(" ")[0], "Your");
 
   // Baseline card mirrors the student's own program instead of a hardcoded major.
-  const baselineProgram = (options.find((p) => p.isBaseline)?.program ?? profile.major ?? "").trim();
+  const baselineProgram = (baseline?.program ?? profile.major ?? "").trim();
   const baselineLabel = baselineProgram ? `Stay in ${baselineProgram}` : "Stay the course";
-  const baselineQuestion = baselineProgram
-    ? `What if I stay in ${baselineProgram}?`
-    : "What if I stay on my current path?";
 
+  const accept = (option: SimulatedPath) => {
+    choosePath(option.id, {
+      scenarioId: option.id,
+      question: `What if I move to ${option.name}?`,
+      pathName: option.name,
+      program: option.program,
+      snapshot: option,
+    });
+    setCompareId(null);
+    void navigate({ to: "/plan" });
+  };
 
   return (
     <ForkShell>
@@ -95,66 +111,117 @@ function MyPath() {
         </p>
       </header>
 
-
       <section className="mt-12 rounded-3xl border border-border bg-card p-6 shadow-lift sm:p-8">
         <h2 className="font-display text-2xl">Your biggest decision</h2>
         <p className="mt-2 max-w-2xl text-muted-foreground">
-          You have several ways to combine your interest in healthcare and technology. They differ by about a semester
-          and {formatCurrency(Math.abs((options[1]?.additionalCost ?? 0) - (options[2]?.additionalCost ?? 0)))} in
-          tuition.
+          Pick any program from the catalog to see it against your current path. Compare, then accept it to make it your
+          plan.
         </p>
 
         <div className="mt-6 grid gap-4 md:grid-cols-3">
-          {options.map((path) => (
-            <div
-              key={path.id}
-              className="flex flex-col rounded-2xl border border-border bg-background p-4 text-left"
-            >
-              <p className="font-display text-lg leading-tight">
-                {path.id === "baseline"
-                  ? baselineLabel
-                  : path.id === "switch_cs"
-                    ? "Switch to Computer Science"
-                    : "Add a Computer Science minor"}
-              </p>
+          <DecisionCard title={baselineLabel} path={baseline} caption="Your current path" />
 
-              <dl className="mt-3 space-y-1 text-sm">
-                <div className="flex justify-between gap-2">
-                  <dt className="text-muted-foreground">Est. completion</dt>
-                  <dd className="font-medium">{path.estimatedCompletionDate}</dd>
-                </div>
-                <div className="flex justify-between gap-2">
-                  <dt className="text-muted-foreground">Tuition change</dt>
-                  <dd className="font-medium tabular-nums">
-                    {path.isBaseline ? "Baseline" : formatDelta(path.additionalCost)}
-                  </dd>
-                </div>
-                <div className="flex justify-between gap-2">
-                  <dt className="text-muted-foreground">Career fit</dt>
-                  <dd className="font-medium tabular-nums">{path.scores.careerFit} / 100</dd>
-                </div>
-              </dl>
-              <Button
-                size="sm"
-                variant="outline"
-                className="mt-4 w-full gap-1.5"
-                onClick={() => navigate({ to: "/what-if", search: { q: path.isBaseline ? baselineQuestion : (SIMULATE_QUESTIONS[path.id] ?? "What if I change my plan?") } })}
-              >
-                <Sparkles className="size-3.5" /> Simulate this
-              </Button>
-            </div>
-          ))}
+          <DecisionCard
+            title="Switch my major"
+            path={switchPath}
+            onSimulate={() => switchPath && setCompareId(switchPath.id)}
+            control={
+              <Select value={majorId} onValueChange={setMajorId}>
+                <SelectTrigger className="mt-3" aria-label="Choose a major to switch into">
+                  <SelectValue placeholder="Choose a major" />
+                </SelectTrigger>
+                <SelectContent>
+                  {majors.map((p) => (
+                    <SelectItem key={p.id} value={p.id}>
+                      {p.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            }
+          />
+
+          <DecisionCard
+            title="Add a minor"
+            path={minorPath}
+            onSimulate={() => minorPath && setCompareId(minorPath.id)}
+            control={
+              <Select value={minorId} onValueChange={setMinorId}>
+                <SelectTrigger className="mt-3" aria-label="Choose a minor to add">
+                  <SelectValue placeholder="Choose a minor" />
+                </SelectTrigger>
+                <SelectContent>
+                  {minors.map((p) => (
+                    <SelectItem key={p.id} value={p.id}>
+                      {p.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            }
+          />
         </div>
-
       </section>
-
 
       <section className="mt-10 grid gap-4 sm:grid-cols-3">
         <Fact label="Current courses" value={profile.courses.filter((c) => c.status === "in_progress").length} sub="in progress this term" />
         <Fact label="Credits completed" value={profile.creditsCompleted} sub={`of ${120} required`} />
         <Fact label="Career interests" value={profile.careerInterests.length} sub={profile.careerInterests.join(", ")} />
       </section>
+
+      <PathCompareDialog
+        open={Boolean(comparing)}
+        onOpenChange={(open) => !open && setCompareId(null)}
+        baseline={baseline}
+        option={comparing}
+        onAccept={accept}
+      />
     </ForkShell>
+  );
+}
+
+function DecisionCard({
+  title,
+  path,
+  caption,
+  control,
+  onSimulate,
+}: {
+  title: string;
+  path: SimulatedPath | undefined;
+  caption?: string;
+  control?: React.ReactNode;
+  onSimulate?: () => void;
+}) {
+  return (
+    <div className="flex flex-col rounded-2xl border border-border bg-background p-4 text-left">
+      <p className="font-display text-lg leading-tight">{title}</p>
+      {control}
+      {caption && <p className="mt-2 text-sm text-muted-foreground">{caption}</p>}
+
+      <dl className="mt-3 space-y-1 text-sm">
+        <div className="flex justify-between gap-2">
+          <dt className="text-muted-foreground">Est. completion</dt>
+          <dd className="font-medium">{path?.estimatedCompletionDate ?? "—"}</dd>
+        </div>
+        <div className="flex justify-between gap-2">
+          <dt className="text-muted-foreground">Tuition change</dt>
+          <dd className="font-medium tabular-nums">
+            {!path ? "—" : path.isBaseline ? "Baseline" : formatDelta(path.additionalCost)}
+          </dd>
+        </div>
+        <div className="flex justify-between gap-2">
+          <dt className="text-muted-foreground">Career fit</dt>
+          <dd className="font-medium tabular-nums">{path ? `${path.scores.careerFit} / 100` : "—"}</dd>
+        </div>
+      </dl>
+
+      {onSimulate && (
+        <Button size="sm" variant="outline" className="mt-4 w-full gap-1.5" disabled={!path} onClick={onSimulate}>
+          <Sparkles className="size-3.5" /> Simulate this
+        </Button>
+      )}
+    </div>
   );
 }
 
