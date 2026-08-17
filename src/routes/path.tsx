@@ -2,7 +2,6 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { ArrowRight, GraduationCap, ListChecks, Lightbulb, TriangleAlert } from "lucide-react";
 
 import { ForkShell, PlanningEstimateNote } from "@/components/fork/ForkShell";
-import { PriorityPlan } from "@/components/fork/PriorityPlan";
 import { RelevantCourses } from "@/components/fork/RelevantCourses";
 import { RiskTag, ScorePanel, EstimateBadge } from "@/components/fork/Scores";
 import { AssumptionsPanel } from "@/components/fork/WhyPath";
@@ -15,7 +14,6 @@ import {
   PLANNING_ASSUMPTION_LABEL,
   formatCurrency,
   formatDelta,
-  priorityCareerPlan,
   simulatePath,
   whyThisPath,
 } from "@/lib/fork/engine";
@@ -51,7 +49,6 @@ function PathBreakdownPage() {
   const pathId = chosenPathId ?? "cs_minor";
   const path = simulatePath(pathId, { profile, careerId, priorities });
   const baseline = simulatePath(BASELINE_PATH_ID, { profile, careerId, priorities });
-  const plan = priorityCareerPlan({ profile, careerId, priorities, pathId });
   const career = careerById(careerId);
   const reasons = whyThisPath(path, profile, priorities);
 
@@ -222,13 +219,6 @@ function PathBreakdownPage() {
         )}
       </section>
 
-      <PriorityPlan
-        className="mt-10"
-        plan={plan}
-        doneActions={doneActions}
-        toggleAction={toggleAction}
-        onReorder={() => void navigate({ to: "/plan" })}
-      />
 
       <section className="mt-12">
         <h2 className="font-display text-2xl">Your term-by-term shape</h2>
