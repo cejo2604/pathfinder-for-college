@@ -1,10 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useServerFn } from "@tanstack/react-start";
-import { ArrowRight, Loader2, Sparkles } from "lucide-react";
+import { ArrowRight, Loader2 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
-
-import { classifyScenario } from "@/lib/fork/ai.functions";
-
 
 import { BranchTree } from "@/components/fork/BranchTree";
 import { CostOfDecision, PriorityPanel } from "@/components/fork/Decision";
@@ -12,19 +8,18 @@ import { ForkShell } from "@/components/fork/ForkShell";
 import { PathCard } from "@/components/fork/PathCard";
 import { AssumptionsPanel, WhyPathSheet } from "@/components/fork/WhyPath";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
+  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
 import {
   SCENARIOS,
   UNSUPPORTED_INSTITUTION_MESSAGE,
-  matchScenario,
-  parseScenario,
   rankPaths,
   scenarioById,
   simulate,
@@ -42,7 +37,6 @@ export const Route = createFileRoute("/what-if")({
     typeof search["q"] === "string" ? { q: search["q"] as string } : {},
   head: () => ({
     meta: [
-
       { title: "What If? — Fork" },
       {
         name: "description",
@@ -60,6 +54,13 @@ export const Route = createFileRoute("/what-if")({
 });
 
 type Phase = "idle" | "analyzing" | "results";
+
+type ScenarioOption = {
+  id: string;
+  label: string;
+  question: string;
+  run: () => void;
+};
 
 function WhatIfPage() {
   const profile = useForkProfile();
@@ -80,36 +81,28 @@ function WhatIfPage() {
     hydrated,
   } = useFork();
 
-  const classify = useServerFn(classifyScenario);
-  const [input, setInput] = useState("");
-
   const [phase, setPhase] = useState<Phase>("idle");
   const [activeScenarioId, setActiveScenarioId] = useState<string | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [revealBest, setRevealBest] = useState(false);
   const [whyId, setWhyId] = useState<string | null>(null);
-  const [unresolved, setUnresolved] = useState(false);
-  // A program chosen from the catalog dropdowns becomes an ad-hoc scenario.
+  const [selectedOptionId, setSelectedOptionId] = useState<string>("");
   const [customScenario, setCustomScenario] = useState<Scenario | null>(null);
   const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
 
   const start = (id: string, question: string, custom?: Scenario | null) => {
     timers.current.forEach(clearTimeout);
     timers.current = [];
-    setUnresolved(false);
     setCustomScenario(custom ?? null);
     setActiveScenarioId(id);
-    setInput(question);
     setPhase("analyzing");
     setSelectedId(null);
     setRevealBest(false);
     runScenario(id, question);
     timers.current.push(setTimeout(() => setPhase("results"), 950));
-    // Alternatives are shown before Fork highlights a best fit.
     timers.current.push(setTimeout(() => setRevealBest(true), 2400));
   };
 
-  // Program dropdowns: any catalog major to switch into, any minor to add.
   const startProgram = (mode: "switch" | "minor", programId: string) => {
     const program = programById(programId);
     if (!program) return;
@@ -129,13 +122,39 @@ function WhatIfPage() {
     });
   };
 
+  const options = useMemo<ScenarioOption[]>(() => {
+    const built: ScenarioOption[] = SCENARIOS.map((s) => ({
+      id: s.id,
+      label: s.chip,
+      question: s.question,
+      run: () => start(s.id, s.question),
+    }));
+    selectableMajors(profile).forEach((p) => {
+      const id = programPathId("switch", p.id);
+      built.push({
+        id,
+        label: `Switch my major to ${p.name}`,
+        question: `What if I switch to ${p.name}?`,
+        run: () => startProgram("switch", p.id),
+      });
+    });
+    selectableMinors(profile).forEach((p) => {
+      const id = programPathId("minor", p.id);
+      built.push({
+        id,
+        label: `Add a minor in ${p.name}`,
+        question: `What if I add the ${p.name}?`,
+        run: () => startProgram("minor", p.id),
+      });
+    });
+    return built;
+  }, [profile]);
 
-  // A pre-filled question (e.g. a waitlist warning on the Plan screen) runs first.
-  useEffect(() => {
-    if (!hydrated || activeScenarioId || phase !== "idle" || !prefilled) return;
-    start(parseScenario(prefilled).id, prefilled);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [hydrated, prefilled]);
+  const simulateSelected = () => {
+    const option = options.find((o) => o.id === selectedOptionId);
+    if (!option) return;
+    option.run();
+  };
 
   // A scenario chosen elsewhere (My Path quick chips) runs on arrival.
   useEffect(() => {
@@ -150,7 +169,6 @@ function WhatIfPage() {
 
   const scenario = customScenario ?? (activeScenarioId ? scenarioById(activeScenarioId) : null);
 
-  // Institution support is checked before any path is generated.
   const institution = useMemo(() => validateInstitution(profile), [profile]);
 
   const paths = useMemo<SimulatedPath[]>(() => {
@@ -170,61 +188,38 @@ function WhatIfPage() {
   );
   const alternative = selected && cheapest && selected.id !== cheapest.id ? cheapest : (ranked[1] ?? null);
 
-  // AI only routes the sentence to a scenario; the engine owns every number.
-  // Unrecognized input is never guessed at — Fork asks for clarification.
-  const submit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const text = input.trim();
-    if (!text) return;
-    const fallback = matchScenario(text);
-    setUnresolved(false);
-    if (fallback) start(fallback.id, text);
-    void classify({ data: { text } })
-      .then((result) => {
-        if (!result.resolved || !result.scenarioId) {
-          if (!fallback) setUnresolved(true);
-          return;
-        }
-        if (result.scenarioId !== fallback?.id) start(result.scenarioId, text);
-      })
-      .catch(() => undefined);
-  };
-
-
-
   return (
     <ForkShell>
       <div className="mx-auto max-w-3xl text-center">
         <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">The simulator</p>
         <h1 className="mt-3 font-display text-4xl leading-tight sm:text-5xl">What if…</h1>
         <p className="mt-3 text-muted-foreground">
-          Ask about a decision you are actually weighing. Fork branches your future and computes what each option costs.
+          Pick a supported scenario. Fork branches your future and computes what each option costs.
         </p>
       </div>
 
       {institution.status === "unsupported" && (
-        <div className="mx-auto mt-12 max-w-xl rounded-xl border border-destructive/30 bg-destructive/5 p-5 text-center text-sm">
+        <div className="mx-auto mt-8 max-w-xl rounded-xl border border-destructive/30 bg-destructive/5 p-5 text-center text-sm">
           <p className="font-medium text-destructive">Simulation unavailable</p>
           <p className="mt-2 text-muted-foreground">{UNSUPPORTED_INSTITUTION_MESSAGE}</p>
         </div>
       )}
 
       {institution.status === "supported" && phase === "idle" && (
-        <p className="mx-auto mt-16 max-w-md text-center text-sm text-muted-foreground">
+        <p className="mx-auto mt-8 max-w-md text-center text-sm text-muted-foreground">
           Pick a scenario below to branch {profile.name.split(" ")[0]}&apos;s future.
         </p>
       )}
 
-
       {phase === "analyzing" && (
-        <div className="mt-20 flex flex-col items-center gap-3 text-muted-foreground">
+        <div className="mt-12 flex flex-col items-center gap-3 text-muted-foreground">
           <Loader2 className="size-6 animate-spin text-primary" />
           <p className="text-sm">Analyzing your options…</p>
         </div>
       )}
 
       {phase === "results" && scenario && (
-        <div className="mt-14 space-y-12">
+        <div className="mt-10 space-y-10">
           <section>
             <div className="mb-6 text-center">
               <h2 className="font-display text-2xl">{scenario.question}</h2>
@@ -326,100 +321,59 @@ function WhatIfPage() {
         </div>
       )}
 
-      {phase === "results" && (
-        <p className="mb-2 text-center text-sm text-muted-foreground">
-          Ask another question below or pick a quick scenario to keep exploring.
-        </p>
-      )}
-
-      <div className="mx-auto max-w-3xl">
-        <div className="border-t border-border pt-10 text-center">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">What if</p>
-
-          {unresolved && (
-            <div
-              role="status"
-              className="mx-auto mt-4 max-w-md rounded-2xl border border-border bg-card p-4 text-left text-sm"
-            >
-              <p className="font-medium">Fork could not match that question to a scenario it can simulate.</p>
-              <p className="mt-1 text-muted-foreground">
-                Rather than guess, pick the closest scenario below — or rephrase your question.
-              </p>
-              <div className="mt-3 flex flex-wrap gap-2">
-                {SCENARIOS.map((s) => (
-                  <Button key={s.id} variant="outline" size="sm" onClick={() => start(s.id, s.question)}>
-                    {s.chip}
-                  </Button>
-                ))}
-              </div>
-            </div>
-          )}
-
-          <form onSubmit={submit} className="mt-3 flex flex-col gap-2 sm:flex-row">
-            <Input
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              placeholder="What if I switch to Computer Science?"
-              aria-label="Describe your what-if scenario"
-              className="h-14 rounded-full border-border bg-card px-6 text-base shadow-lift"
-            />
-            <Button type="submit" size="lg" className="h-14 gap-2 rounded-full px-7">
-              <Sparkles className="size-4" /> Simulate
-            </Button>
-          </form>
-
-          <div className="mt-4 flex flex-col items-center gap-2">
-            <div className="grid w-full gap-2 sm:grid-cols-3">
-              <Select
-                value={customScenario ? "" : (activeScenarioId ?? "")}
-                onValueChange={(value) => {
-                  const s = SCENARIOS.find((x) => x.id === value);
-                  if (s) start(s.id, s.question);
-                }}
-              >
-                <SelectTrigger className="rounded-full border-border bg-card px-4 text-sm shadow-sm">
-                  <SelectValue placeholder="Quick scenario" />
-                </SelectTrigger>
-                <SelectContent className="rounded-xl border-border bg-card">
+      <div className="mx-auto mt-8 max-w-3xl">
+        <div className="border-t border-border pt-6">
+          <div className="mx-auto flex max-w-xl flex-col gap-3 sm:flex-row">
+            <Select value={selectedOptionId} onValueChange={setSelectedOptionId}>
+              <SelectTrigger className="h-12 flex-1 rounded-full border-border bg-card px-4 text-sm shadow-sm">
+                <SelectValue placeholder="Choose a scenario" />
+              </SelectTrigger>
+              <SelectContent className="rounded-xl border-border bg-card">
+                <SelectGroup>
+                  <SelectLabel className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                    Scenarios
+                  </SelectLabel>
                   {SCENARIOS.map((s) => (
                     <SelectItem key={s.id} value={s.id} className="rounded-lg text-sm">
                       {s.chip}
                     </SelectItem>
                   ))}
-                </SelectContent>
-              </Select>
-
-              <Select value="" onValueChange={(value) => startProgram("switch", value)}>
-                <SelectTrigger className="rounded-full border-border bg-card px-4 text-sm shadow-sm">
-                  <SelectValue placeholder="Switch my major to…" />
-                </SelectTrigger>
-                <SelectContent className="rounded-xl border-border bg-card">
+                </SelectGroup>
+                <SelectGroup>
+                  <SelectLabel className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                    Switch my major
+                  </SelectLabel>
                   {selectableMajors(profile).map((p) => (
-                    <SelectItem key={p.id} value={p.id} className="rounded-lg text-sm">
+                    <SelectItem key={programPathId("switch", p.id)} value={programPathId("switch", p.id)} className="rounded-lg text-sm">
                       {p.name}
                     </SelectItem>
                   ))}
-                </SelectContent>
-              </Select>
-
-              <Select value="" onValueChange={(value) => startProgram("minor", value)}>
-                <SelectTrigger className="rounded-full border-border bg-card px-4 text-sm shadow-sm">
-                  <SelectValue placeholder="Add a minor…" />
-                </SelectTrigger>
-                <SelectContent className="rounded-xl border-border bg-card">
+                </SelectGroup>
+                <SelectGroup>
+                  <SelectLabel className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                    Add a minor
+                  </SelectLabel>
                   {selectableMinors(profile).map((p) => (
-                    <SelectItem key={p.id} value={p.id} className="rounded-lg text-sm">
+                    <SelectItem key={programPathId("minor", p.id)} value={programPathId("minor", p.id)} className="rounded-lg text-sm">
                       {p.name}
                     </SelectItem>
                   ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <p className="text-xs text-muted-foreground">
-              Major and minor options come from your school&apos;s catalog — Fork prices each one from your own record.
-            </p>
-          </div>
+                </SelectGroup>
+              </SelectContent>
+            </Select>
 
+            <Button
+              size="lg"
+              className="h-12 gap-2 rounded-full px-7"
+              onClick={simulateSelected}
+              disabled={!selectedOptionId}
+            >
+              Simulate
+            </Button>
+          </div>
+          <p className="mt-3 text-center text-xs text-muted-foreground">
+            Major and minor options come from your school&apos;s catalog — Fork prices each one from your own record.
+          </p>
         </div>
       </div>
 
