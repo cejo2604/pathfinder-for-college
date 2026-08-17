@@ -106,6 +106,7 @@ function ImportPage() {
   const [rows, setRows] = useState<StudentCourseRow[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [busy, setBusy] = useState<null | "uploading" | "extracting" | "confirming">(null);
+  const [error, setError] = useState<string | null>(null);
   const [conflicts, setConflicts] = useState<ConflictField[] | null>(null);
   const fileInput = useRef<HTMLInputElement | null>(null);
   const pendingType = useRef<"pdf" | "csv">("pdf");
