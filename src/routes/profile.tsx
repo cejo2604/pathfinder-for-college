@@ -55,6 +55,9 @@ function ProfilePage() {
           <Button className="gap-1.5" onClick={() => void navigate({ to: "/import" })}>
             <Upload className="size-4" /> Import my academic history
           </Button>
+          <Button className="gap-1.5" size="lg" onClick={() => void navigate({ to: "/home" })}>
+            Create my profile <ArrowRight className="size-4" />
+          </Button>
           {!loaded && !signedIn && (
             <Button variant="outline" className="gap-1.5" onClick={() => loadDemoStudent()}>
               <Sparkles className="size-4" /> Load demo student
@@ -220,11 +223,6 @@ function ProfilePage() {
           </Button>
         </section>
 
-        <div className="flex flex-col gap-4 lg:justify-end">
-          <Button className="w-full gap-1.5" size="lg" onClick={() => void navigate({ to: "/home" })}>
-            Create my profile <ArrowRight className="size-4" />
-          </Button>
-        </div>
       </div>
 
     </ForkShell>
