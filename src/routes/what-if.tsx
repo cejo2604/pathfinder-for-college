@@ -321,42 +321,60 @@ function WhatIfPage() {
 
       <div className="mx-auto mt-8 max-w-3xl">
         <div className="border-t border-border pt-6">
-          <div className="mx-auto flex max-w-xl flex-col gap-3 sm:flex-row">
-            <Select value={selectedOptionId} onValueChange={setSelectedOptionId}>
-              <SelectTrigger className="h-12 flex-1 rounded-full border-border bg-card px-4 text-sm shadow-sm">
+          <div className="mx-auto flex max-w-xl flex-col gap-3">
+            <Select
+              value={SCENARIOS.some((s) => s.id === selectedOptionId) ? selectedOptionId : ""}
+              onValueChange={(id) => setSelectedOptionId(id)}
+            >
+              <SelectTrigger className="h-12 rounded-full border-border bg-card px-4 text-sm shadow-sm">
                 <SelectValue placeholder="Choose a scenario" />
               </SelectTrigger>
               <SelectContent className="rounded-xl border-border bg-card">
-                <SelectGroup>
-                  <SelectLabel className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                    Scenarios
-                  </SelectLabel>
-                  {SCENARIOS.map((s) => (
-                    <SelectItem key={s.id} value={s.id} className="rounded-lg text-sm">
-                      {s.chip}
-                    </SelectItem>
-                  ))}
-                </SelectGroup>
-                <SelectGroup>
-                  <SelectLabel className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                    Switch my major
-                  </SelectLabel>
-                  {selectableMajors(profile).map((p) => (
-                    <SelectItem key={programPathId("switch", p.id)} value={programPathId("switch", p.id)} className="rounded-lg text-sm">
-                      {p.name}
-                    </SelectItem>
-                  ))}
-                </SelectGroup>
-                <SelectGroup>
-                  <SelectLabel className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                    Add a minor
-                  </SelectLabel>
-                  {selectableMinors(profile).map((p) => (
-                    <SelectItem key={programPathId("minor", p.id)} value={programPathId("minor", p.id)} className="rounded-lg text-sm">
-                      {p.name}
-                    </SelectItem>
-                  ))}
-                </SelectGroup>
+                {SCENARIOS.map((s) => (
+                  <SelectItem key={s.id} value={s.id} className="rounded-lg text-sm">
+                    {s.chip}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <Select
+              value={selectedOptionId.startsWith("program:switch:") ? selectedOptionId : ""}
+              onValueChange={(id) => setSelectedOptionId(id)}
+            >
+              <SelectTrigger className="h-12 rounded-full border-border bg-card px-4 text-sm shadow-sm">
+                <SelectValue placeholder="Switch my major" />
+              </SelectTrigger>
+              <SelectContent className="rounded-xl border-border bg-card">
+                {selectableMajors(profile).map((p) => (
+                  <SelectItem
+                    key={programPathId("switch", p.id)}
+                    value={programPathId("switch", p.id)}
+                    className="rounded-lg text-sm"
+                  >
+                    {p.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <Select
+              value={selectedOptionId.startsWith("program:minor:") ? selectedOptionId : ""}
+              onValueChange={(id) => setSelectedOptionId(id)}
+            >
+              <SelectTrigger className="h-12 rounded-full border-border bg-card px-4 text-sm shadow-sm">
+                <SelectValue placeholder="Add a minor" />
+              </SelectTrigger>
+              <SelectContent className="rounded-xl border-border bg-card">
+                {selectableMinors(profile).map((p) => (
+                  <SelectItem
+                    key={programPathId("minor", p.id)}
+                    value={programPathId("minor", p.id)}
+                    className="rounded-lg text-sm"
+                  >
+                    {p.name}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
 
