@@ -223,11 +223,7 @@ function ProfilePage() {
           </Button>
         </section>
 
-        <div className="flex flex-col gap-4 lg:justify-end">
-          <Button className="w-full gap-1.5" size="lg" onClick={() => void navigate({ to: "/home" })}>
-            Create my profile <ArrowRight className="size-4" />
-          </Button>
-        </div>
+        <div className="flex flex-col gap-4 lg:justify-end" />
       </div>
 
     </ForkShell>
