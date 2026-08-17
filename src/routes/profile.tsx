@@ -223,7 +223,6 @@ function ProfilePage() {
           </Button>
         </section>
 
-        <div className="flex flex-col gap-4 lg:justify-end" />
       </div>
 
     </ForkShell>
