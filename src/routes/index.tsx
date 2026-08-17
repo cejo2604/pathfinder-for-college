@@ -63,7 +63,7 @@ function Landing() {
             <p className="inline-flex items-center gap-2 rounded-full bg-muted px-3 py-1 text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground">
               <GitBranch className="size-3.5" /> Decision simulator
             </p>
-            <h1 className="mt-5 font-display text-5xl leading-[1.03] tracking-tight text-balance-tight sm:text-6xl lg:text-7xl">
+            <h1 className="mt-6 font-display text-5xl leading-[1.03] tracking-tight text-balance-tight sm:text-6xl lg:text-7xl">
               See where your choices lead.
             </h1>
             <p className="mt-6 max-w-xl text-lg leading-relaxed text-muted-foreground">
