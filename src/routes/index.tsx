@@ -1,5 +1,5 @@
 import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
-import { ArrowRight, GitBranch, Sparkles } from "lucide-react";
+import { GitBranch, Sparkles } from "lucide-react";
 
 import { ForkLogo, PlanningEstimateNote } from "@/components/fork/ForkShell";
 import { Button } from "@/components/ui/button";
@@ -72,8 +72,8 @@ function Landing() {
             </p>
 
             <div className="mt-10 flex flex-wrap items-center gap-3">
-              <Button size="lg" className="gap-2 rounded-full px-10 shadow-lift" onClick={startFresh}>
-                Start here <ArrowRight className="size-4" />
+              <Button size="lg" className="rounded-full px-10 shadow-lift" onClick={startFresh}>
+                Start here
               </Button>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
