@@ -17,7 +17,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 
 import { ForkShell } from "@/components/fork/ForkShell";
-import { TranscriptGuide } from "@/components/fork/TranscriptGuide";
 
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
