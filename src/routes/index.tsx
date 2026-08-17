@@ -148,16 +148,16 @@ function Landing() {
               ))}
             </svg>
 
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-3 gap-4">
               {PREVIEW.map((path, i) => (
                 <div
                   key={path.id}
                   style={{ animationDelay: `${0.45 + i * 0.12}s` }}
-                  className="animate-fork-rise rounded-xl border border-border bg-background px-3 py-3 text-center"
+                  className="animate-fork-rise rounded-2xl border border-border bg-background px-4 py-4 text-center"
                 >
                   <p className="font-display text-sm leading-tight">{path.name}</p>
-                  <p className="mt-2 text-xs text-muted-foreground">{path.estimatedCompletionDate}</p>
-                  <p className="text-xs font-medium tabular-nums">{formatCurrency(path.estimatedCost)}</p>
+                  <p className="mt-3 font-display text-base font-semibold tabular-nums">{formatCurrency(path.estimatedCost)}</p>
+                  <p className="mt-1.5 text-xs text-muted-foreground">{path.estimatedCompletionDate}</p>
                 </div>
               ))}
             </div>
