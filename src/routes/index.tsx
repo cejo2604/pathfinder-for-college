@@ -57,7 +57,7 @@ function Landing() {
         <ForkLogo />
       </header>
 
-      <section className="mx-auto max-w-6xl px-4 pb-8 pt-8 sm:px-6 sm:pt-16">
+      <section className="mx-auto max-w-6xl px-4 pb-12 pt-10 sm:px-6 sm:pb-16 sm:pt-20">
         <div className="grid items-center gap-12 lg:grid-cols-[1.05fr_1fr]">
           <div>
             <p className="inline-flex items-center gap-2 rounded-full bg-muted px-3 py-1 text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground">
