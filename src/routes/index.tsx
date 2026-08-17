@@ -66,18 +66,18 @@ function Landing() {
             <h1 className="mt-6 font-display text-5xl leading-[1.03] tracking-tight text-balance-tight sm:text-6xl lg:text-7xl">
               See where your choices lead.
             </h1>
-            <p className="mt-6 max-w-xl text-lg leading-relaxed text-muted-foreground">
+            <p className="mt-8 max-w-xl text-lg leading-relaxed text-muted-foreground">
               Fork helps you explore academic and career decisions before you make them. Compare time, cost,
               coursework, career alignment and tradeoffs across multiple possible futures.
             </p>
 
-            <div className="mt-8 flex flex-wrap items-center gap-3">
-              <Button size="lg" className="gap-2 rounded-full px-8 shadow-lift" onClick={startFresh}>
+            <div className="mt-10 flex flex-wrap items-center gap-3">
+              <Button size="lg" className="gap-2 rounded-full px-10 shadow-lift" onClick={startFresh}>
                 Start here <ArrowRight className="size-4" />
               </Button>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button size="lg" variant="outline" className="gap-2 rounded-full px-6">
+                  <Button size="default" variant="outline" className="gap-2 rounded-full px-5">
                     <Sparkles className="size-4" /> Try a demo student
                   </Button>
                 </DropdownMenuTrigger>
@@ -95,12 +95,12 @@ function Landing() {
                 </DropdownMenuContent>
               </DropdownMenu>
 
-              <Button asChild size="lg" variant="ghost" className="rounded-full px-4">
+              <Button asChild size="default" variant="ghost" className="rounded-full px-4">
                 <Link to="/import">Import my academic history</Link>
               </Button>
             </div>
 
-            <p className="mt-5 text-sm text-muted-foreground">
+            <p className="mt-6 text-sm text-muted-foreground">
               No sign-up needed to try the demo. Upload a transcript or degree audit when you want Fork to simulate{" "}
               <Link to="/import" className="font-medium text-foreground underline-offset-4 hover:underline">
                 your own
