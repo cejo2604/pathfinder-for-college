@@ -5,8 +5,6 @@ import { useState } from "react";
 
 
 import { AutofillField } from "@/components/fork/AutofillField";
-import { PriorityPanel } from "@/components/fork/Decision";
-
 import { ForkShell } from "@/components/fork/ForkShell";
 import { SchoolField } from "@/components/fork/SchoolField";
 import { TagField } from "@/components/fork/TagField";
@@ -37,7 +35,7 @@ export const Route = createFileRoute("/profile")({
 function ProfilePage() {
   const profile = useForkProfile();
   const navigate = useNavigate();
-  const { profile: loaded, loadDemoStudent, setProfile, priorities, setPriorities, signedIn } = useFork();
+  const { profile: loaded, loadDemoStudent, setProfile, signedIn } = useFork();
 
   const completed = profile.courses.filter((c) => c.status === "completed");
   const current = profile.courses.filter((c) => c.status === "in_progress");
@@ -222,8 +220,7 @@ function ProfilePage() {
           </Button>
         </section>
 
-        <div className="flex flex-col gap-4">
-          <PriorityPanel priorities={priorities} onChange={setPriorities} />
+        <div className="flex flex-col gap-4 lg:justify-end">
           <Button className="w-full gap-1.5" size="lg" onClick={() => void navigate({ to: "/home" })}>
             Create my profile <ArrowRight className="size-4" />
           </Button>
