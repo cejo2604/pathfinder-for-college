@@ -57,27 +57,27 @@ function Landing() {
         <ForkLogo />
       </header>
 
-      <section className="mx-auto max-w-6xl px-4 pb-8 pt-8 sm:px-6 sm:pt-16">
+      <section className="mx-auto max-w-6xl px-4 pb-12 pt-10 sm:px-6 sm:pb-16 sm:pt-20">
         <div className="grid items-center gap-12 lg:grid-cols-[1.05fr_1fr]">
           <div>
             <p className="inline-flex items-center gap-2 rounded-full bg-muted px-3 py-1 text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground">
               <GitBranch className="size-3.5" /> Decision simulator
             </p>
-            <h1 className="mt-5 font-display text-5xl leading-[1.03] tracking-tight text-balance-tight sm:text-6xl lg:text-7xl">
+            <h1 className="mt-6 font-display text-5xl leading-[1.03] tracking-tight text-balance-tight sm:text-6xl lg:text-7xl">
               See where your choices lead.
             </h1>
-            <p className="mt-6 max-w-xl text-lg leading-relaxed text-muted-foreground">
+            <p className="mt-8 max-w-xl text-lg leading-relaxed text-muted-foreground">
               Fork helps you explore academic and career decisions before you make them. Compare time, cost,
               coursework, career alignment and tradeoffs across multiple possible futures.
             </p>
 
-            <div className="mt-8 flex flex-wrap items-center gap-3">
-              <Button size="lg" className="gap-2 rounded-full px-8 shadow-lift" onClick={startFresh}>
+            <div className="mt-10 flex flex-wrap items-center gap-3">
+              <Button size="lg" className="gap-2 rounded-full px-10 shadow-lift" onClick={startFresh}>
                 Start here <ArrowRight className="size-4" />
               </Button>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button size="lg" variant="outline" className="gap-2 rounded-full px-6">
+                  <Button size="default" variant="outline" className="gap-2 rounded-full px-5">
                     <Sparkles className="size-4" /> Try a demo student
                   </Button>
                 </DropdownMenuTrigger>
@@ -95,12 +95,12 @@ function Landing() {
                 </DropdownMenuContent>
               </DropdownMenu>
 
-              <Button asChild size="lg" variant="ghost" className="rounded-full px-4">
+              <Button asChild size="default" variant="ghost" className="rounded-full px-4">
                 <Link to="/import">Import my academic history</Link>
               </Button>
             </div>
 
-            <p className="mt-5 text-sm text-muted-foreground">
+            <p className="mt-6 text-sm text-muted-foreground">
               No sign-up needed to try the demo. Upload a transcript or degree audit when you want Fork to simulate{" "}
               <Link to="/import" className="font-medium text-foreground underline-offset-4 hover:underline">
                 your own
@@ -148,16 +148,16 @@ function Landing() {
               ))}
             </svg>
 
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-3 gap-4">
               {PREVIEW.map((path, i) => (
                 <div
                   key={path.id}
                   style={{ animationDelay: `${0.45 + i * 0.12}s` }}
-                  className="animate-fork-rise rounded-xl border border-border bg-background px-3 py-3 text-center"
+                  className="animate-fork-rise rounded-2xl border border-border bg-background px-4 py-4 text-center"
                 >
                   <p className="font-display text-sm leading-tight">{path.name}</p>
-                  <p className="mt-2 text-xs text-muted-foreground">{path.estimatedCompletionDate}</p>
-                  <p className="text-xs font-medium tabular-nums">{formatCurrency(path.estimatedCost)}</p>
+                  <p className="mt-3 font-display text-base font-semibold tabular-nums">{formatCurrency(path.estimatedCost)}</p>
+                  <p className="mt-1.5 text-xs text-muted-foreground">{path.estimatedCompletionDate}</p>
                 </div>
               ))}
             </div>
