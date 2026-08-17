@@ -17,8 +17,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 
 import { ForkShell } from "@/components/fork/ForkShell";
-import { SchoolLink, type SchoolLinkRecord } from "@/components/fork/SchoolLink";
-import { TranscriptGuide } from "@/components/fork/TranscriptGuide";
 
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -109,7 +107,6 @@ function ImportPage() {
   const [busy, setBusy] = useState<null | "uploading" | "extracting" | "confirming">(null);
   const [error, setError] = useState<string | null>(null);
   const [conflicts, setConflicts] = useState<ConflictField[] | null>(null);
-  const [link, setLink] = useState<SchoolLinkRecord | null>(null);
   const fileInput = useRef<HTMLInputElement | null>(null);
   const pendingType = useRef<"pdf" | "csv">("pdf");
 
@@ -178,18 +175,6 @@ function ImportPage() {
         return;
       }
 
-      // With a linked school ID, a clean extraction is confirmed automatically:
-      // every course matched the catalog and nothing came back low-confidence.
-      if (link) {
-        const doc = data.documents.find((d) => d.id === documentId);
-        const extracted = data.courses.filter((r) => r.sourceDocumentId === documentId);
-        const clean =
-          extracted.length > 0 && extracted.every((r) => Boolean(r.courseId) && r.confidence !== "low");
-        if (doc && clean) {
-          setBusy("confirming");
-          await runConfirm(doc, true);
-        }
-      }
     } catch (e) {
       setError(e instanceof Error ? e.message : "The upload failed.");
     } finally {
@@ -374,15 +359,6 @@ function ImportPage() {
         </section>
       ) : (
         <>
-          {/* Step 0 — link school ID so uploads are tagged to the right institution */}
-          <SchoolLink
-            school={profile.school}
-            onSchoolChange={(school) => setProfile({ ...profile, school })}
-            onRecordChange={setLink}
-          />
-
-          {/* Linked: guided download steps straight into extraction */}
-          {link && <TranscriptGuide school={link.school} disabled={busy !== null} onPick={pick} />}
 
           {/* Step 1 — upload */}
           <section className="mt-8 grid gap-4 sm:grid-cols-2 lg:max-w-3xl">
