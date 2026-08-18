@@ -74,7 +74,6 @@ export function PathCard({
       </dl>
 
       <div className="mt-4 space-y-3">
-        <ScoreBar label="Career fit" value={fit} />
         <div className="flex items-center justify-between gap-2">
           <RiskTag risk={path.risk} factors={path.riskFactors} />
           <EstimateBadge />
