@@ -249,12 +249,15 @@ function WhatIfPage() {
               <Button
                 variant="outline"
                 className="gap-1"
+                disabled={comparison.filter((id) => paths.some((p) => p.id === id)).length === 0}
                 onClick={() => {
-                  setComparison(paths.map((p) => p.id).slice(0, 4));
+                  const selectedIds = comparison.filter((id) => paths.some((p) => p.id === id));
+                  if (selectedIds.length === 0) return;
+                  setComparison(selectedIds);
                   void navigate({ to: "/compare" });
                 }}
               >
-                Compare these paths <ArrowRight className="size-4" />
+                Compare selected paths <ArrowRight className="size-4" />
               </Button>
             </div>
 
