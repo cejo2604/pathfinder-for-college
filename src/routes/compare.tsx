@@ -85,7 +85,7 @@ function ComparePage() {
         })}
       </div>
 
-      <div className="mt-10 grid gap-5 lg:grid-cols-3">
+      <div className="mt-10 grid grid-cols-[repeat(auto-fit,minmax(260px,1fr))] gap-4">
         {paths.map((path) => (
           <article
             key={path.id}
