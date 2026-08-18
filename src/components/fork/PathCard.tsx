@@ -1,6 +1,6 @@
 import { Check, ChevronRight, Plus } from "lucide-react";
 
-import { RiskTag, ScoreBar, EstimateBadge } from "@/components/fork/Scores";
+import { RiskTag, EstimateBadge } from "@/components/fork/Scores";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { COMPLETION_DISCLAIMER, formatCurrency, formatDelta, type SimulatedPath } from "@/lib/fork/engine";
@@ -31,7 +31,6 @@ export function PathCard({
 }: PathCardProps) {
   const credits = useCountUp(path.creditsRemaining, animate);
   const cost = useCountUp(path.estimatedCost, animate);
-  const fit = useCountUp(path.scores.careerFit, animate);
 
   return (
     <article
