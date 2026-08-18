@@ -123,7 +123,7 @@ function ComparePage() {
               <Row label="Avg. term load" value={`${path.averageLoad} credits`} />
             </dl>
 
-            <div className="mt-4">
+            <div className="mt-3">
               <p className="mb-1 text-xs uppercase tracking-[0.1em] text-muted-foreground">Estimated tuition</p>
               <div className="h-2 overflow-hidden rounded-full bg-muted">
                 <div
@@ -133,7 +133,7 @@ function ComparePage() {
               </div>
             </div>
 
-            <div className="mt-4 space-y-3">
+            <div className="mt-3 space-y-2">
               <ScoreBar label="Career fit" value={path.scores.careerFit} />
               <ScoreBar label="Cost efficiency" value={path.scores.costEfficiency} tone="mint" />
               <ScoreBar label="Graduation efficiency" value={path.scores.graduationEfficiency} tone="mint" />
@@ -145,7 +145,7 @@ function ComparePage() {
               </div>
             </div>
 
-            <div className="mt-4">
+            <div className="mt-3">
               <p className="text-xs uppercase tracking-[0.1em] text-muted-foreground">Opportunities this opens</p>
               <ul className="mt-1.5 space-y-1 text-sm">
                 {path.opportunities.map((o) => (
@@ -157,7 +157,7 @@ function ComparePage() {
               </ul>
             </div>
 
-            <div className="mt-5 flex flex-wrap gap-2">
+            <div className="mt-4 flex flex-wrap gap-2">
               <Button
                 className="gap-1.5"
                 onClick={() => {
