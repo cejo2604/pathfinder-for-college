@@ -106,7 +106,7 @@ function ComparePage() {
             </div>
             <h2 className="mt-1.5 font-display text-xl leading-tight">{path.name}</h2>
 
-            <dl className="mt-4 space-y-2 text-sm">
+            <dl className="mt-3 space-y-1 text-sm">
               <Row label="Estimated completion" value={path.estimatedCompletionDate} />
               <Row label="Semesters remaining" value={`${path.semesters}${path.summerSessions ? ` + ${path.summerSessions} summer` : ""}`} />
               <Row label="Credits remaining" value={`${path.creditsRemaining}`} />
