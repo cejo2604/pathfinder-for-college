@@ -2,7 +2,6 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { ArrowRight } from "lucide-react";
 import { useMemo, useState } from "react";
 
-import { PriorityPanel } from "@/components/fork/Decision";
 import { ForkShell } from "@/components/fork/ForkShell";
 import { EstimateBadge, RiskTag, ScoreBar } from "@/components/fork/Scores";
 import { WhyPathSheet } from "@/components/fork/WhyPath";
