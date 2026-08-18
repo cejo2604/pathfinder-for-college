@@ -3,7 +3,7 @@ import { ArrowRight } from "lucide-react";
 import { useMemo, useState } from "react";
 
 import { ForkShell } from "@/components/fork/ForkShell";
-import { EstimateBadge, RiskTag, ScoreBar } from "@/components/fork/Scores";
+import { RiskTag, ScoreBar } from "@/components/fork/Scores";
 import { WhyPathSheet } from "@/components/fork/WhyPath";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -130,14 +130,12 @@ function ComparePage() {
             </div>
 
             <div className="mt-2 space-y-1.5">
-              <CompactScoreBar label="Career fit" value={path.scores.careerFit} />
               <CompactScoreBar label="Cost" value={path.scores.costEfficiency} tone="mint" />
               <CompactScoreBar label="Graduation" value={path.scores.graduationEfficiency} tone="mint" />
               <CompactScoreBar label="Flexibility" value={path.scores.flexibility} tone="gold" />
               <CompactScoreBar label="Overall" value={path.scores.overallFit} tone="navy" />
               <div className="flex items-center justify-between pt-1">
                 <RiskTag risk={path.risk} factors={path.riskFactors} />
-                <EstimateBadge />
               </div>
             </div>
 

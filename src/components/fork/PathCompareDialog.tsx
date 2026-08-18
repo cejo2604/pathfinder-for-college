@@ -38,7 +38,7 @@ export function PathCompareDialog({
     { label: "Semesters", a: `${baseline.semesters}`, b: `${option.semesters}` },
     { label: "Estimated tuition", a: formatCurrency(baseline.estimatedCost), b: formatCurrency(option.estimatedCost) },
     { label: "Tuition change", a: "Baseline", b: formatDelta(option.additionalCost) },
-    { label: "Career fit", a: `${baseline.scores.careerFit} / 100`, b: `${option.scores.careerFit} / 100` },
+    
     { label: "Risk", a: baseline.risk, b: option.risk },
   ];
 

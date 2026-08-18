@@ -62,9 +62,7 @@ export function ScorePanel({ scores }: { scores: ScoreBreakdown }) {
     <div className="space-y-3">
       <div className="flex items-center justify-between">
         <h4 className="text-sm font-semibold">Tradeoff scores</h4>
-        <EstimateBadge />
       </div>
-      <ScoreBar label="Career fit" value={scores.careerFit} />
       <ScoreBar label="Cost efficiency" value={scores.costEfficiency} tone="mint" />
       <ScoreBar label="Graduation efficiency" value={scores.graduationEfficiency} tone="mint" />
       <ScoreBar label="Flexibility" value={scores.flexibility} tone="gold" />
