@@ -221,7 +221,6 @@ function DecisionCard({
           </dd>
         </div>
       </dl>
-      </dl>
 
       {onSimulate && (
         <Button size="sm" variant="outline" className="mt-4 w-full gap-1.5" disabled={!path} onClick={onSimulate}>
