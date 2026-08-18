@@ -90,42 +90,38 @@ function ComparePage() {
           <article
             key={path.id}
             className={cn(
-              "flex flex-col rounded-2xl border bg-card p-4",
+              "flex flex-col rounded-2xl border bg-card p-3",
               best?.id === path.id ? "border-primary shadow-node" : "border-border shadow-lift",
             )}
           >
             <div className="flex items-center justify-between gap-2">
-              <span className="text-[0.7rem] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+              <span className="text-[0.65rem] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
                 Path {path.letter}
               </span>
               {best?.id === path.id && (
-                <span className="rounded-full bg-gold/20 px-2 py-0.5 text-[0.65rem] font-medium uppercase tracking-wide text-gold-foreground">
+                <span className="rounded-full bg-gold/20 px-2 py-0.5 text-[0.6rem] font-medium uppercase tracking-wide text-gold-foreground">
                   Best fit
                 </span>
               )}
             </div>
-            <h2 className="mt-1.5 font-display text-xl leading-tight">{path.name}</h2>
+            <h2 className="mt-1 font-display text-lg leading-tight">{path.name}</h2>
 
-            <dl className="mt-3 space-y-1 text-sm">
-              <Row label="Estimated completion" value={path.estimatedCompletionDate} />
-              <Row label="Semesters remaining" value={`${path.semesters}${path.summerSessions ? ` + ${path.summerSessions} summer` : ""}`} />
-              <Row label="Credits remaining" value={`${path.creditsRemaining}`} />
+            <dl className="mt-2 space-y-0.5 text-xs">
+              <Row label="Completion" value={path.estimatedCompletionDate} />
+              <Row label="Semesters" value={`${path.semesters}${path.summerSessions ? ` + ${path.summerSessions} summer` : ""}`} />
+              <Row label="Credits" value={`${path.creditsRemaining}`} />
               <Row
-                label="Additional credits"
+                label="Additional"
                 value={path.additionalCredits === 0 ? "None" : `${path.additionalCredits > 0 ? "+" : "−"}${Math.abs(path.additionalCredits)}`}
               />
-              <Row
-                label="Estimated tuition"
-                value={`${formatCurrency(path.estimatedCost)} (${formatCurrency(path.tuitionPerCredit)}/credit${path.pricedAtOutOfInstitutionRate ? ", out-of-institution" : ""})`}
-              />
-              <Row label="Vs. current plan" value={path.isBaseline ? "Baseline" : formatDelta(path.additionalCost)} />
-              <Row label="Prerequisites" value={path.prerequisiteCount ? path.prerequisiteCourses.join(", ") : "None"} />
-              <Row label="Avg. term load" value={`${path.averageLoad} credits`} />
+              <Row label="Tuition" value={`${formatCurrency(path.estimatedCost)}`} />
+              <Row label="Vs. current" value={path.isBaseline ? "Baseline" : formatDelta(path.additionalCost)} />
+              <Row label="Prereqs" value={path.prerequisiteCount ? path.prerequisiteCourses.join(", ") : "None"} />
+              <Row label="Avg. load" value={`${path.averageLoad} credits`} />
             </dl>
 
-            <div className="mt-3">
-              <p className="mb-1 text-xs uppercase tracking-[0.1em] text-muted-foreground">Estimated tuition</p>
-              <div className="h-2 overflow-hidden rounded-full bg-muted">
+            <div className="mt-2">
+              <div className="h-1.5 overflow-hidden rounded-full bg-muted">
                 <div
                   className="h-full rounded-full bg-navy transition-[width] duration-700"
                   style={{ width: `${(path.estimatedCost / maxCost) * 100}%` }}
@@ -133,33 +129,34 @@ function ComparePage() {
               </div>
             </div>
 
-            <div className="mt-3 space-y-2">
-              <ScoreBar label="Career fit" value={path.scores.careerFit} />
-              <ScoreBar label="Cost efficiency" value={path.scores.costEfficiency} tone="mint" />
-              <ScoreBar label="Graduation efficiency" value={path.scores.graduationEfficiency} tone="mint" />
-              <ScoreBar label="Flexibility" value={path.scores.flexibility} tone="gold" />
-              <ScoreBar label="Overall fit" value={path.scores.overallFit} tone="navy" />
-              <div className="flex items-center justify-between">
+            <div className="mt-2 space-y-1.5">
+              <CompactScoreBar label="Career fit" value={path.scores.careerFit} />
+              <CompactScoreBar label="Cost" value={path.scores.costEfficiency} tone="mint" />
+              <CompactScoreBar label="Graduation" value={path.scores.graduationEfficiency} tone="mint" />
+              <CompactScoreBar label="Flexibility" value={path.scores.flexibility} tone="gold" />
+              <CompactScoreBar label="Overall" value={path.scores.overallFit} tone="navy" />
+              <div className="flex items-center justify-between pt-1">
                 <RiskTag risk={path.risk} factors={path.riskFactors} />
                 <EstimateBadge />
               </div>
             </div>
 
-            <div className="mt-3">
-              <p className="text-xs uppercase tracking-[0.1em] text-muted-foreground">Opportunities this opens</p>
-              <ul className="mt-1.5 space-y-1 text-sm">
-                {path.opportunities.map((o) => (
+            <div className="mt-2">
+              <p className="text-[0.65rem] uppercase tracking-[0.1em] text-muted-foreground">Opportunities</p>
+              <ul className="mt-1 space-y-0.5 text-xs">
+                {path.opportunities.slice(0, 3).map((o) => (
                   <li key={o} className="flex gap-2">
-                    <span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-gold" />
+                    <span className="mt-1 size-1 shrink-0 rounded-full bg-gold" />
                     {o}
                   </li>
                 ))}
               </ul>
             </div>
 
-            <div className="mt-4 flex flex-wrap gap-2">
+            <div className="mt-3 flex flex-wrap gap-2">
               <Button
-                className="gap-1.5"
+                size="sm"
+                className="gap-1"
                 onClick={() => {
                   choosePath(path.id, {
                     scenarioId: scenarioId ?? path.id,
@@ -171,9 +168,9 @@ function ComparePage() {
                   void navigate({ to: "/path" });
                 }}
               >
-                See my full path <ArrowRight className="size-4" />
+                See full path <ArrowRight className="size-4" />
               </Button>
-              <Button variant="outline" onClick={() => setWhyId(path.id)}>
+              <Button size="sm" variant="outline" onClick={() => setWhyId(path.id)}>
                 Why this path?
               </Button>
             </div>
