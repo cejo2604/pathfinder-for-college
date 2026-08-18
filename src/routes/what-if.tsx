@@ -84,7 +84,11 @@ function WhatIfPage() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [revealBest, setRevealBest] = useState(false);
   const [whyId, setWhyId] = useState<string | null>(null);
-  const [selectedOptionId, setSelectedOptionId] = useState<string>("");
+  // One selection per dropdown — students can combine a scenario, a major
+  // switch and a minor, then simulate every branch side by side.
+  const [pickedScenarioId, setPickedScenarioId] = useState<string>("");
+  const [pickedMajorId, setPickedMajorId] = useState<string>("");
+  const [pickedMinorId, setPickedMinorId] = useState<string>("");
   const [customScenario, setCustomScenario] = useState<Scenario | null>(null);
   const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
 
@@ -101,57 +105,56 @@ function WhatIfPage() {
     timers.current.push(setTimeout(() => setRevealBest(true), 2400));
   };
 
-  const startProgram = (mode: "switch" | "minor", programId: string) => {
-    const program = programById(programId);
-    if (!program) return;
-    const pathId = programPathId(mode, programId);
-    const question =
-      mode === "switch" ? `What if I switch to ${program.name}?` : `What if I add the ${program.name}?`;
-    start(`program:${mode}:${programId}`, question, {
-      id: `program:${mode}:${programId}`,
-      question,
-      chip: mode === "switch" ? `Switch to ${program.name}` : `Add ${program.name}`,
-      pathIds: ["baseline", pathId],
-      keywords: [],
-      framing:
-        mode === "switch"
-          ? "Your current program next to a full switch, priced from your own record."
-          : "Your current program next to the same degree with the minor added.",
-    });
-  };
-
-  const options = useMemo<ScenarioOption[]>(() => {
-    const built: ScenarioOption[] = SCENARIOS.map((s) => ({
-      id: s.id,
-      label: s.chip,
-      question: s.question,
-      run: () => start(s.id, s.question),
-    }));
-    selectableMajors(profile).forEach((p) => {
-      const id = programPathId("switch", p.id);
-      built.push({
-        id,
-        label: `Switch my major to ${p.name}`,
-        question: `What if I switch to ${p.name}?`,
-        run: () => startProgram("switch", p.id),
-      });
-    });
-    selectableMinors(profile).forEach((p) => {
-      const id = programPathId("minor", p.id);
-      built.push({
-        id,
-        label: `Add a minor in ${p.name}`,
-        question: `What if I add the ${p.name}?`,
-        run: () => startProgram("minor", p.id),
-      });
-    });
-    return built;
-  }, [profile]);
+  const hasSelection = Boolean(pickedScenarioId || pickedMajorId || pickedMinorId);
 
   const simulateSelected = () => {
-    const option = options.find((o) => o.id === selectedOptionId);
-    if (!option) return;
-    option.run();
+    const pathIds: string[] = ["baseline"];
+    const labels: string[] = [];
+
+    const scenario = pickedScenarioId ? scenarioById(pickedScenarioId) : null;
+    if (scenario) {
+      scenario.pathIds.forEach((id) => {
+        if (!pathIds.includes(id)) pathIds.push(id);
+      });
+      labels.push(scenario.chip);
+    }
+
+    if (pickedMajorId) {
+      const program = programById(pickedMajorId);
+      if (program) {
+        const pathId = programPathId("switch", pickedMajorId);
+        if (!pathIds.includes(pathId)) pathIds.push(pathId);
+        labels.push(`switch to ${program.name}`);
+      }
+    }
+
+    if (pickedMinorId) {
+      const program = programById(pickedMinorId);
+      if (program) {
+        const pathId = programPathId("minor", pickedMinorId);
+        if (!pathIds.includes(pathId)) pathIds.push(pathId);
+        labels.push(`add the ${program.name}`);
+      }
+    }
+
+    if (pathIds.length < 2) return;
+
+    // A single scenario keeps its own framing; combinations get a merged one.
+    if (labels.length === 1 && scenario) {
+      start(scenario.id, scenario.question);
+      return;
+    }
+
+    const question = `What if I ${labels.join(" or ")}?`;
+    const id = `combo:${pathIds.slice(1).join("+")}`;
+    start(id, question, {
+      id,
+      question,
+      chip: labels.join(" · "),
+      pathIds,
+      keywords: [],
+      framing: "Your current program next to every option you selected, priced from your own record.",
+    });
   };
 
   // A scenario chosen elsewhere (My Path quick chips) runs on arrival.
