@@ -84,7 +84,11 @@ function WhatIfPage() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [revealBest, setRevealBest] = useState(false);
   const [whyId, setWhyId] = useState<string | null>(null);
-  const [selectedOptionId, setSelectedOptionId] = useState<string>("");
+  // One selection per dropdown — students can combine a scenario, a major
+  // switch and a minor, then simulate every branch side by side.
+  const [pickedScenarioId, setPickedScenarioId] = useState<string>("");
+  const [pickedMajorId, setPickedMajorId] = useState<string>("");
+  const [pickedMinorId, setPickedMinorId] = useState<string>("");
   const [customScenario, setCustomScenario] = useState<Scenario | null>(null);
   const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
 
@@ -101,57 +105,56 @@ function WhatIfPage() {
     timers.current.push(setTimeout(() => setRevealBest(true), 2400));
   };
 
-  const startProgram = (mode: "switch" | "minor", programId: string) => {
-    const program = programById(programId);
-    if (!program) return;
-    const pathId = programPathId(mode, programId);
-    const question =
-      mode === "switch" ? `What if I switch to ${program.name}?` : `What if I add the ${program.name}?`;
-    start(`program:${mode}:${programId}`, question, {
-      id: `program:${mode}:${programId}`,
-      question,
-      chip: mode === "switch" ? `Switch to ${program.name}` : `Add ${program.name}`,
-      pathIds: ["baseline", pathId],
-      keywords: [],
-      framing:
-        mode === "switch"
-          ? "Your current program next to a full switch, priced from your own record."
-          : "Your current program next to the same degree with the minor added.",
-    });
-  };
-
-  const options = useMemo<ScenarioOption[]>(() => {
-    const built: ScenarioOption[] = SCENARIOS.map((s) => ({
-      id: s.id,
-      label: s.chip,
-      question: s.question,
-      run: () => start(s.id, s.question),
-    }));
-    selectableMajors(profile).forEach((p) => {
-      const id = programPathId("switch", p.id);
-      built.push({
-        id,
-        label: `Switch my major to ${p.name}`,
-        question: `What if I switch to ${p.name}?`,
-        run: () => startProgram("switch", p.id),
-      });
-    });
-    selectableMinors(profile).forEach((p) => {
-      const id = programPathId("minor", p.id);
-      built.push({
-        id,
-        label: `Add a minor in ${p.name}`,
-        question: `What if I add the ${p.name}?`,
-        run: () => startProgram("minor", p.id),
-      });
-    });
-    return built;
-  }, [profile]);
+  const hasSelection = Boolean(pickedScenarioId || pickedMajorId || pickedMinorId);
 
   const simulateSelected = () => {
-    const option = options.find((o) => o.id === selectedOptionId);
-    if (!option) return;
-    option.run();
+    const pathIds: string[] = ["baseline"];
+    const labels: string[] = [];
+
+    const scenario = pickedScenarioId ? scenarioById(pickedScenarioId) : null;
+    if (scenario) {
+      scenario.pathIds.forEach((id) => {
+        if (!pathIds.includes(id)) pathIds.push(id);
+      });
+      labels.push(scenario.chip);
+    }
+
+    if (pickedMajorId) {
+      const program = programById(pickedMajorId);
+      if (program) {
+        const pathId = programPathId("switch", pickedMajorId);
+        if (!pathIds.includes(pathId)) pathIds.push(pathId);
+        labels.push(`switch to ${program.name}`);
+      }
+    }
+
+    if (pickedMinorId) {
+      const program = programById(pickedMinorId);
+      if (program) {
+        const pathId = programPathId("minor", pickedMinorId);
+        if (!pathIds.includes(pathId)) pathIds.push(pathId);
+        labels.push(`add the ${program.name}`);
+      }
+    }
+
+    if (pathIds.length < 2) return;
+
+    // A single scenario keeps its own framing; combinations get a merged one.
+    if (labels.length === 1 && scenario) {
+      start(scenario.id, scenario.question);
+      return;
+    }
+
+    const question = `What if I ${labels.join(" or ")}?`;
+    const id = `combo:${pathIds.slice(1).join("+")}`;
+    start(id, question, {
+      id,
+      question,
+      chip: labels.join(" · "),
+      pathIds,
+      keywords: [],
+      framing: "Your current program next to every option you selected, priced from your own record.",
+    });
   };
 
   // A scenario chosen elsewhere (My Path quick chips) runs on arrival.
@@ -322,10 +325,7 @@ function WhatIfPage() {
       <div className="mx-auto mt-8 max-w-3xl">
         <div className="border-t border-border pt-6">
           <div className="mx-auto flex max-w-xl flex-col gap-3">
-            <Select
-              value={SCENARIOS.some((s) => s.id === selectedOptionId) ? selectedOptionId : ""}
-              onValueChange={(id) => setSelectedOptionId(id)}
-            >
+            <Select value={pickedScenarioId} onValueChange={setPickedScenarioId}>
               <SelectTrigger className="h-12 rounded-full border-border bg-card px-4 text-sm shadow-sm">
                 <SelectValue placeholder="Choose a scenario" />
               </SelectTrigger>
@@ -338,57 +338,59 @@ function WhatIfPage() {
               </SelectContent>
             </Select>
 
-            <Select
-              value={selectedOptionId.startsWith("program:switch:") ? selectedOptionId : ""}
-              onValueChange={(id) => setSelectedOptionId(id)}
-            >
+            <Select value={pickedMajorId} onValueChange={setPickedMajorId}>
               <SelectTrigger className="h-12 rounded-full border-border bg-card px-4 text-sm shadow-sm">
                 <SelectValue placeholder="Switch my major" />
               </SelectTrigger>
               <SelectContent className="rounded-xl border-border bg-card">
                 {selectableMajors(profile).map((p) => (
-                  <SelectItem
-                    key={programPathId("switch", p.id)}
-                    value={programPathId("switch", p.id)}
-                    className="rounded-lg text-sm"
-                  >
+                  <SelectItem key={p.id} value={p.id} className="rounded-lg text-sm">
                     {p.name}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
 
-            <Select
-              value={selectedOptionId.startsWith("program:minor:") ? selectedOptionId : ""}
-              onValueChange={(id) => setSelectedOptionId(id)}
-            >
+            <Select value={pickedMinorId} onValueChange={setPickedMinorId}>
               <SelectTrigger className="h-12 rounded-full border-border bg-card px-4 text-sm shadow-sm">
                 <SelectValue placeholder="Add a minor" />
               </SelectTrigger>
               <SelectContent className="rounded-xl border-border bg-card">
                 {selectableMinors(profile).map((p) => (
-                  <SelectItem
-                    key={programPathId("minor", p.id)}
-                    value={programPathId("minor", p.id)}
-                    className="rounded-lg text-sm"
-                  >
+                  <SelectItem key={p.id} value={p.id} className="rounded-lg text-sm">
                     {p.name}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
 
-            <Button
-              size="lg"
-              className="h-12 gap-2 rounded-full px-7"
-              onClick={simulateSelected}
-              disabled={!selectedOptionId}
-            >
-              Simulate
-            </Button>
+            <div className="flex flex-wrap items-center justify-center gap-3">
+              <Button
+                size="lg"
+                className="h-12 gap-2 rounded-full px-7"
+                onClick={simulateSelected}
+                disabled={!hasSelection}
+              >
+                Simulate
+              </Button>
+              {hasSelection && (
+                <Button
+                  variant="ghost"
+                  size="lg"
+                  className="h-12 rounded-full px-5 text-sm"
+                  onClick={() => {
+                    setPickedScenarioId("");
+                    setPickedMajorId("");
+                    setPickedMinorId("");
+                  }}
+                >
+                  Clear selections
+                </Button>
+              )}
+            </div>
           </div>
           <p className="mt-3 text-center text-xs text-muted-foreground">
-            Major and minor options come from your school&apos;s catalog — Fork prices each one from your own record.
+            Combine any of the three — Fork simulates every option you pick against your current path.
           </p>
         </div>
       </div>
