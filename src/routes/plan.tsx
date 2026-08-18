@@ -118,18 +118,18 @@ function PlanPage() {
 
       <RelevantCourses className="mt-12" careerId={careerId} profile={profile} />
 
-      <div className="mt-12 grid gap-6 lg:grid-cols-2">
+      <div className="mt-6 grid gap-4 lg:grid-cols-2">
         <AssumptionsPanel path={path} profile={profile} />
-        <section className="rounded-2xl border border-border bg-card p-5">
-          <h3 className="font-display text-xl">Keep exploring</h3>
-          <p className="mt-1 text-sm text-muted-foreground">
+        <section className="rounded-xl border border-border bg-card p-3">
+          <h3 className="font-display text-base">Keep exploring</h3>
+          <p className="mt-1 text-xs text-muted-foreground">
             Nothing here is locked in. Visit the Compare page to see alternatives side by side.
           </p>
-          <div className="mt-4 flex flex-wrap gap-2">
-            <Button variant="outline" onClick={() => void navigate({ to: "/compare" })}>
+          <div className="mt-2 flex flex-wrap gap-2">
+            <Button size="sm" variant="outline" onClick={() => void navigate({ to: "/compare" })}>
               Compare against other paths
             </Button>
-            <Button variant="ghost" className="gap-1.5" onClick={() => void navigate({ to: "/career" })}>
+            <Button size="sm" variant="ghost" className="gap-1.5" onClick={() => void navigate({ to: "/career" })}>
               <Check className="size-4" /> Career reference
             </Button>
           </div>
