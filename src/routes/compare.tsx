@@ -36,7 +36,6 @@ function ComparePage() {
     setComparison,
     careerId,
     priorities,
-    setPriorities,
     choosePath,
     scenarioId,
     scenarioQuestion,
