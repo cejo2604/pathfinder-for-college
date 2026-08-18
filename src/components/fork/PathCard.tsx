@@ -75,7 +75,6 @@ export function PathCard({
       <div className="mt-4 space-y-3">
         <div className="flex items-center justify-between gap-2">
           <RiskTag risk={path.risk} factors={path.riskFactors} />
-          <EstimateBadge />
         </div>
       </div>
 
