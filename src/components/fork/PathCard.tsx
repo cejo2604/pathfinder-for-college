@@ -1,6 +1,6 @@
 import { Check, ChevronRight, Plus } from "lucide-react";
 
-import { RiskTag, EstimateBadge } from "@/components/fork/Scores";
+import { RiskTag } from "@/components/fork/Scores";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { COMPLETION_DISCLAIMER, formatCurrency, formatDelta, type SimulatedPath } from "@/lib/fork/engine";
