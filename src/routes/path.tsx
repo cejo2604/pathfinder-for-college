@@ -251,22 +251,22 @@ function PathBreakdownPage() {
 
       <RelevantCourses className="mt-12" careerId={careerId} profile={profile} />
 
-      <div className="mt-6 grid gap-4 lg:grid-cols-2">
+      <div className="mt-12 grid gap-6 lg:grid-cols-2">
         <AssumptionsPanel path={path} profile={profile} />
-        <section className="rounded-xl border border-border bg-card p-3">
-          <h3 className="font-display text-base">Where to next</h3>
-          <p className="mt-1 text-xs text-muted-foreground">
+        <section className="rounded-2xl border border-border bg-card p-5">
+          <h3 className="font-display text-xl">Where to next</h3>
+          <p className="mt-1 text-sm text-muted-foreground">
             Your priorities right now: {priorities.map((p) => PRIORITY_LABELS[p]).join(" → ")}.
           </p>
-          <div className="mt-2 flex flex-wrap gap-2">
-            <Button size="sm" className="gap-1.5" onClick={() => void navigate({ to: "/plan" })}>
+          <div className="mt-4 flex flex-wrap gap-2">
+            <Button className="gap-1.5" onClick={() => void navigate({ to: "/plan" })}>
               Open the semester roadmap <ArrowRight className="size-4" />
             </Button>
-            <Button size="sm" variant="outline" onClick={() => void navigate({ to: "/compare" })}>
+            <Button variant="outline" onClick={() => void navigate({ to: "/compare" })}>
               Compare against other paths
             </Button>
           </div>
-          <PlanningEstimateNote className="mt-2" />
+          <PlanningEstimateNote className="mt-4" />
         </section>
       </div>
     </ForkShell>
