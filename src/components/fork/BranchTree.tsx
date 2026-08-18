@@ -169,10 +169,6 @@ function BranchNode({
           <dt className="text-muted-foreground">Remaining tuition</dt>
           <dd className="font-medium tabular-nums">{formatCurrency(cost)}</dd>
         </div>
-        <div className="flex items-baseline justify-between gap-2">
-          <dt className="text-muted-foreground">Career fit</dt>
-          <dd className="font-medium tabular-nums">{path.scores.careerFit} / 100</dd>
-        </div>
       </dl>
     </button>
   );

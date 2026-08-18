@@ -3,7 +3,7 @@ import { ArrowRight, GraduationCap, ListChecks, Lightbulb, TriangleAlert } from 
 
 import { ForkShell, PlanningEstimateNote } from "@/components/fork/ForkShell";
 import { RelevantCourses } from "@/components/fork/RelevantCourses";
-import { RiskTag, ScorePanel, EstimateBadge } from "@/components/fork/Scores";
+import { RiskTag, ScorePanel } from "@/components/fork/Scores";
 import { AssumptionsPanel } from "@/components/fork/WhyPath";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -84,7 +84,6 @@ function PathBreakdownPage() {
         </p>
         <div className="mt-6 flex flex-wrap items-center gap-3">
           <RiskTag risk={path.risk} factors={path.riskFactors} />
-          <EstimateBadge />
         </div>
       </header>
 
@@ -118,7 +117,7 @@ function PathBreakdownPage() {
             {path.additionalSemesters === 0
               ? "same number of semesters"
               : `${path.additionalSemesters > 0 ? "+" : "−"}${Math.abs(path.additionalSemesters)} semester(s)`}
-            , career fit {path.scores.careerFit} vs {baseline.scores.careerFit}.
+            .
           </p>
         </div>
         <ScorePanel scores={path.scores} />

@@ -33,17 +33,20 @@ function MyPath() {
   // Any catalog program can be simulated from here — the student picks it.
   const majors = useMemo(() => selectableMajors(profile), [profile]);
   const minors = useMemo(() => selectableMinors(profile), [profile]);
-  const [majorId, setMajorId] = useState(majors[0]?.id ?? "");
-  const [minorId, setMinorId] = useState(minors[0]?.id ?? "");
+  const NONE = "__none";
+  const [majorId, setMajorId] = useState(NONE);
+  const [minorId, setMinorId] = useState(NONE);
   const [compareId, setCompareId] = useState<string | null>(null);
 
+  const pickedMajor = majorId === NONE ? "" : majorId;
+  const pickedMinor = minorId === NONE ? "" : minorId;
   const ids = ["baseline"];
-  if (majorId) ids.push(programPathId("switch", majorId));
-  if (minorId) ids.push(programPathId("minor", minorId));
+  if (pickedMajor) ids.push(programPathId("switch", pickedMajor));
+  if (pickedMinor) ids.push(programPathId("minor", pickedMinor));
   const options = simulatePaths(ids, { profile, careerId, priorities });
   const baseline = options.find((p) => p.isBaseline);
-  const switchPath = majorId ? options.find((p) => p.id === programPathId("switch", majorId)) : undefined;
-  const minorPath = minorId ? options.find((p) => p.id === programPathId("minor", minorId)) : undefined;
+  const switchPath = pickedMajor ? options.find((p) => p.id === programPathId("switch", pickedMajor)) : undefined;
+  const minorPath = pickedMinor ? options.find((p) => p.id === programPathId("minor", pickedMinor)) : undefined;
   const comparing = options.find((p) => p.id === compareId);
 
   // Once a student has created their own profile, only their own entries show —
@@ -132,6 +135,7 @@ function MyPath() {
                     <SelectValue placeholder="Choose a major" />
                   </SelectTrigger>
                   <SelectContent>
+                    <SelectItem value={NONE}>No selection — don&apos;t simulate</SelectItem>
                     {majors.map((p) => (
                       <SelectItem key={p.id} value={p.id}>
                         {p.name}
@@ -154,6 +158,7 @@ function MyPath() {
                     <SelectValue placeholder="Choose a minor" />
                   </SelectTrigger>
                   <SelectContent>
+                    <SelectItem value={NONE}>No selection — don&apos;t simulate</SelectItem>
                     {minors.map((p) => (
                       <SelectItem key={p.id} value={p.id}>
                         {p.name}
@@ -214,10 +219,6 @@ function DecisionCard({
           <dd className="font-medium tabular-nums">
             {!path ? "—" : path.isBaseline ? "Baseline" : formatDelta(path.additionalCost)}
           </dd>
-        </div>
-        <div className="flex justify-between gap-2">
-          <dt className="text-muted-foreground">Career fit</dt>
-          <dd className="font-medium tabular-nums">{path ? `${path.scores.careerFit} / 100` : "—"}</dd>
         </div>
       </dl>
 
