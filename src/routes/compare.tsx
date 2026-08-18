@@ -181,24 +181,6 @@ function ComparePage() {
         ))}
       </div>
 
-      <section className="mt-10 rounded-2xl border border-border bg-card p-5">
-        <h3 className="font-display text-xl">What would change your decision?</h3>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Current ranking by overall fit.
-        </p>
-        <ol className="mt-4 space-y-2">
-          {ranked.map((path, i) => (
-            <li key={path.id} className="flex items-center gap-3 rounded-xl border border-border px-3 py-2 text-sm">
-              <span className="grid size-6 place-items-center rounded-md bg-muted text-xs font-semibold">{i + 1}</span>
-              <span className="flex-1">{path.name}</span>
-              <span className="tabular-nums text-muted-foreground">
-                <span className="font-semibold text-foreground">{path.scores.overallFit}</span> / 100
-              </span>
-            </li>
-          ))}
-        </ol>
-      </section>
-
       <WhyPathSheet path={whyPath} open={Boolean(whyId)} onOpenChange={(open) => !open && setWhyId(null)} />
     </ForkShell>
   );
