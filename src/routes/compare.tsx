@@ -57,14 +57,14 @@ function ComparePage() {
     <ForkShell>
       <header className="max-w-2xl">
         <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Compare</p>
-        <h1 className="mt-3 font-display text-4xl leading-tight sm:text-5xl">Your futures, side by side</h1>
-        <p className="mt-3 text-muted-foreground">
+        <h1 className="mt-2 font-display text-3xl leading-tight sm:text-4xl">Your futures, side by side</h1>
+        <p className="mt-2 text-sm text-muted-foreground">
           Pick two to four paths. Everything below is computed from your {profile.creditsCompleted} completed credits and
           the demo institutional dataset.
         </p>
       </header>
 
-      <div className="mt-6 flex flex-wrap gap-2">
+      <div className="mt-4 flex flex-wrap gap-2">
         {PATHS.map((spec) => {
           const active = selectedIds.includes(spec.id);
           return (
@@ -73,7 +73,7 @@ function ComparePage() {
               type="button"
               onClick={() => (comparison.length ? toggleComparison(spec.id) : setComparison([...selectedIds, spec.id]))}
               className={cn(
-                "rounded-full border px-3.5 py-1.5 text-sm transition-colors",
+                "rounded-full border px-3 py-1 text-sm transition-colors",
                 active
                   ? "border-primary bg-primary/10 font-medium text-foreground"
                   : "border-border bg-card text-muted-foreground hover:border-primary/40 hover:text-foreground",
@@ -85,7 +85,7 @@ function ComparePage() {
         })}
       </div>
 
-      <div className="mt-10 grid grid-cols-[repeat(auto-fit,minmax(260px,1fr))] gap-4">
+      <div className="mt-6 grid grid-cols-[repeat(auto-fit,minmax(260px,1fr))] gap-4">
         {paths.map((path) => (
           <article
             key={path.id}
