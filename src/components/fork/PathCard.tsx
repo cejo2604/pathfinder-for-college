@@ -1,6 +1,6 @@
 import { Check, ChevronRight, Plus } from "lucide-react";
 
-import { RiskTag, EstimateBadge } from "@/components/fork/Scores";
+import { RiskTag } from "@/components/fork/Scores";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { COMPLETION_DISCLAIMER, formatCurrency, formatDelta, type SimulatedPath } from "@/lib/fork/engine";
@@ -75,7 +75,6 @@ export function PathCard({
       <div className="mt-4 space-y-3">
         <div className="flex items-center justify-between gap-2">
           <RiskTag risk={path.risk} factors={path.riskFactors} />
-          <EstimateBadge />
         </div>
       </div>
 
