@@ -90,7 +90,7 @@ function ComparePage() {
           <article
             key={path.id}
             className={cn(
-              "rounded-2xl border bg-card p-5",
+              "flex flex-col rounded-2xl border bg-card p-4",
               best?.id === path.id ? "border-primary shadow-node" : "border-border shadow-lift",
             )}
           >
