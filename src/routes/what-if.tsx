@@ -325,10 +325,7 @@ function WhatIfPage() {
       <div className="mx-auto mt-8 max-w-3xl">
         <div className="border-t border-border pt-6">
           <div className="mx-auto flex max-w-xl flex-col gap-3">
-            <Select
-              value={SCENARIOS.some((s) => s.id === selectedOptionId) ? selectedOptionId : ""}
-              onValueChange={(id) => setSelectedOptionId(id)}
-            >
+            <Select value={pickedScenarioId} onValueChange={setPickedScenarioId}>
               <SelectTrigger className="h-12 rounded-full border-border bg-card px-4 text-sm shadow-sm">
                 <SelectValue placeholder="Choose a scenario" />
               </SelectTrigger>
@@ -341,57 +338,59 @@ function WhatIfPage() {
               </SelectContent>
             </Select>
 
-            <Select
-              value={selectedOptionId.startsWith("program:switch:") ? selectedOptionId : ""}
-              onValueChange={(id) => setSelectedOptionId(id)}
-            >
+            <Select value={pickedMajorId} onValueChange={setPickedMajorId}>
               <SelectTrigger className="h-12 rounded-full border-border bg-card px-4 text-sm shadow-sm">
                 <SelectValue placeholder="Switch my major" />
               </SelectTrigger>
               <SelectContent className="rounded-xl border-border bg-card">
                 {selectableMajors(profile).map((p) => (
-                  <SelectItem
-                    key={programPathId("switch", p.id)}
-                    value={programPathId("switch", p.id)}
-                    className="rounded-lg text-sm"
-                  >
+                  <SelectItem key={p.id} value={p.id} className="rounded-lg text-sm">
                     {p.name}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
 
-            <Select
-              value={selectedOptionId.startsWith("program:minor:") ? selectedOptionId : ""}
-              onValueChange={(id) => setSelectedOptionId(id)}
-            >
+            <Select value={pickedMinorId} onValueChange={setPickedMinorId}>
               <SelectTrigger className="h-12 rounded-full border-border bg-card px-4 text-sm shadow-sm">
                 <SelectValue placeholder="Add a minor" />
               </SelectTrigger>
               <SelectContent className="rounded-xl border-border bg-card">
                 {selectableMinors(profile).map((p) => (
-                  <SelectItem
-                    key={programPathId("minor", p.id)}
-                    value={programPathId("minor", p.id)}
-                    className="rounded-lg text-sm"
-                  >
+                  <SelectItem key={p.id} value={p.id} className="rounded-lg text-sm">
                     {p.name}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
 
-            <Button
-              size="lg"
-              className="h-12 gap-2 rounded-full px-7"
-              onClick={simulateSelected}
-              disabled={!selectedOptionId}
-            >
-              Simulate
-            </Button>
+            <div className="flex flex-wrap items-center justify-center gap-3">
+              <Button
+                size="lg"
+                className="h-12 gap-2 rounded-full px-7"
+                onClick={simulateSelected}
+                disabled={!hasSelection}
+              >
+                Simulate
+              </Button>
+              {hasSelection && (
+                <Button
+                  variant="ghost"
+                  size="lg"
+                  className="h-12 rounded-full px-5 text-sm"
+                  onClick={() => {
+                    setPickedScenarioId("");
+                    setPickedMajorId("");
+                    setPickedMinorId("");
+                  }}
+                >
+                  Clear selections
+                </Button>
+              )}
+            </div>
           </div>
           <p className="mt-3 text-center text-xs text-muted-foreground">
-            Major and minor options come from your school&apos;s catalog — Fork prices each one from your own record.
+            Combine any of the three — Fork simulates every option you pick against your current path.
           </p>
         </div>
       </div>
