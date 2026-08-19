@@ -3,7 +3,7 @@ import { ArrowRight, Loader2 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import { BranchTree } from "@/components/fork/BranchTree";
-import { CostOfDecision, PriorityPanel } from "@/components/fork/Decision";
+import { CostOfDecision } from "@/components/fork/Decision";
 import { ForkShell } from "@/components/fork/ForkShell";
 import { PathCard } from "@/components/fork/PathCard";
 import { AssumptionsPanel, WhyPathSheet } from "@/components/fork/WhyPath";
