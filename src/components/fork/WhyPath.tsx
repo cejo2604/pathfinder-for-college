@@ -121,6 +121,8 @@ export function WhyPathSheet({
                 ))}
               </div>
 
+              <AiReading path={path} profile={profile} priorities={priorities} open={open} />
+
               <AssumptionsPanel path={path} profile={profile} compact />
             </div>
 
