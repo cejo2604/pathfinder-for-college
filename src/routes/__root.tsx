@@ -95,7 +95,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       {
         name: "description",
         content:
-          "Fork is a decision simulator for college students: compare majors, minors, timelines, cost and career fit across possible futures.",
+          "Fork is a decision simulator for college students: compare majors, minors, timelines, cost and coursework across possible futures.",
       },
       { property: "og:title", content: "Fork — See where your choices lead" },
       {

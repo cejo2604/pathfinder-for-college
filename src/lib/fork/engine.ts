@@ -682,15 +682,6 @@ export function evidenceFor(path: SimulatedPath, profile: StudentProfile): Evide
       kind: "estimated",
     },
     { label: "Average term load", value: `${path.averageLoad} credits`, kind: "estimated" },
-    ...path.careerFitEvidence
-      .filter((e) => e.courses.length > 0)
-      .map((e) => ({
-        label: `Career fit — ${e.label}`,
-        value: `${Math.round(e.coverage * 100)}% coverage x ${Math.round(e.weight * 100)}% weight, from ${e.courses
-          .map((c) => c.code)
-          .join(", ")}`,
-        kind: "estimated" as const,
-      })),
     ...path.riskDrivers.map((d) => ({
       label: `Risk driver — ${d.label}`,
       value: `${d.points} point${d.points === 1 ? "" : "s"}`,
@@ -748,7 +739,7 @@ export function whyThisPath(path: SimulatedPath, profile: StudentProfile, priori
   }
 
   lines.push(
-    `Measured against your stated goal (${profile.goalCategory}) it scores ${path.scores.careerFit}/100 on career fit, and against your top priorities — ${top.join(", ")} — it scores ${path.scores.overallFit}/100 overall.`,
+    `Measured against your top priorities — ${top.join(", ")} — it scores ${path.scores.overallFit}/100 overall.`,
   );
 
   return lines;

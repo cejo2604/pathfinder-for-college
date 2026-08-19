@@ -163,7 +163,7 @@ function Landing() {
             </div>
 
             <p className="mt-6 text-sm text-muted-foreground">
-              Same student. Different graduation dates, different costs, different career fit.
+              Same student. Different graduation dates, different costs, different coursework.
             </p>
           </div>
         </div>
@@ -178,7 +178,7 @@ function Landing() {
             },
             {
               title: "Watch the futures branch",
-              body: "Fork computes graduation dates, remaining credits, tuition and career fit for every alternative.",
+              body: "Fork computes graduation dates, remaining credits, tuition and coursework for every alternative.",
             },
             {
               title: "Turn a choice into a plan",
