@@ -129,14 +129,8 @@ function ComparePage() {
               </div>
             </div>
 
-            <div className="mt-2 space-y-1.5">
-              <CompactScoreBar label="Cost" value={path.scores.costEfficiency} tone="mint" />
-              <CompactScoreBar label="Graduation" value={path.scores.graduationEfficiency} tone="mint" />
-              <CompactScoreBar label="Flexibility" value={path.scores.flexibility} tone="gold" />
-              <CompactScoreBar label="Overall" value={path.scores.overallFit} tone="navy" />
-              <div className="flex items-center justify-between pt-1">
-                <RiskTag risk={path.risk} factors={path.riskFactors} />
-              </div>
+            <div className="mt-2 flex items-center justify-between pt-1">
+              <RiskTag risk={path.risk} factors={path.riskFactors} />
             </div>
 
             <div className="mt-2">
@@ -190,31 +184,5 @@ function Row({ label, value }: { label: string; value: string }) {
   );
 }
 
-function CompactScoreBar({
-  label,
-  value,
-  tone = "primary",
-}: {
-  label: string;
-  value: number;
-  tone?: "primary" | "mint" | "gold" | "navy";
-}) {
-  const toneClass = {
-    primary: "bg-primary",
-    mint: "bg-mint",
-    gold: "bg-gold",
-    navy: "bg-navy",
-  }[tone];
-
-  return (
-    <div className="flex items-center gap-2">
-      <span className="w-16 shrink-0 text-xs text-muted-foreground">{label}</span>
-      <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-muted">
-        <div className={cn("h-full rounded-full transition-[width] duration-700 ease-out", toneClass)} style={{ width: `${value}%` }} />
-      </div>
-      <span className="w-8 text-right text-xs font-semibold tabular-nums">{value}</span>
-    </div>
-  );
-}
 
 export type { SimulatedPath };
