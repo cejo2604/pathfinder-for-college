@@ -2,7 +2,7 @@ import { Info } from "lucide-react";
 
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
-import type { RiskLevel, ScoreBreakdown } from "@/lib/fork/engine";
+import type { RiskLevel } from "@/lib/fork/engine";
 
 export const SCORE_TOOLTIP =
   "This is a comparison score based on the student's stated goal, academic path, skills and priorities. It is not a prediction or guarantee of career success.";
@@ -21,55 +21,6 @@ export function EstimateBadge({ label = "Fork estimate" }: { label?: string }) {
   );
 }
 
-export function ScoreBar({
-  label,
-  value,
-  tone = "primary",
-  animate = true,
-}: {
-  label: string;
-  value: number;
-  tone?: "primary" | "mint" | "gold" | "navy";
-  animate?: boolean;
-}) {
-  const toneClass = {
-    primary: "bg-primary",
-    mint: "bg-mint",
-    gold: "bg-gold",
-    navy: "bg-navy",
-  }[tone];
-
-  return (
-    <div>
-      <div className="flex items-baseline justify-between gap-3">
-        <span className="text-sm font-medium">{label}</span>
-        <span className="text-sm tabular-nums text-muted-foreground">
-          <span className="font-semibold text-foreground">{value}</span> / 100
-        </span>
-      </div>
-      <div className="mt-1.5 h-2 w-full overflow-hidden rounded-full bg-muted">
-        <div
-          className={cn("h-full rounded-full transition-[width] duration-700 ease-out", toneClass)}
-          style={{ width: animate ? `${value}%` : `${value}%` }}
-        />
-      </div>
-    </div>
-  );
-}
-
-export function ScorePanel({ scores }: { scores: ScoreBreakdown }) {
-  return (
-    <div className="space-y-3">
-      <div className="flex items-center justify-between">
-        <h4 className="text-sm font-semibold">Tradeoff scores</h4>
-      </div>
-      <ScoreBar label="Cost efficiency" value={scores.costEfficiency} tone="mint" />
-      <ScoreBar label="Graduation efficiency" value={scores.graduationEfficiency} tone="mint" />
-      <ScoreBar label="Flexibility" value={scores.flexibility} tone="gold" />
-      <ScoreBar label="Overall fit" value={scores.overallFit} tone="navy" />
-    </div>
-  );
-}
 
 const RISK_STYLES: Record<RiskLevel, string> = {
   Low: "bg-mint/20 text-mint-foreground",
