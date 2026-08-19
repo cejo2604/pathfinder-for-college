@@ -3,7 +3,7 @@ import { ArrowRight, Loader2 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import { BranchTree } from "@/components/fork/BranchTree";
-import { CostOfDecision, PriorityPanel } from "@/components/fork/Decision";
+import { CostOfDecision } from "@/components/fork/Decision";
 import { ForkShell } from "@/components/fork/ForkShell";
 import { PathCard } from "@/components/fork/PathCard";
 import { AssumptionsPanel, WhyPathSheet } from "@/components/fork/WhyPath";
@@ -68,7 +68,6 @@ function WhatIfPage() {
   const {
     careerId,
     priorities,
-    setPriorities,
     scenarioId,
     scenarioQuestion,
     runScenario,
@@ -285,7 +284,7 @@ function WhatIfPage() {
               <div className="grid gap-6 lg:grid-cols-2">
                 <AssumptionsPanel path={selected} profile={profile} />
                 <div className="space-y-6">
-                  <PriorityPanel priorities={priorities} onChange={setPriorities} topPathName={best?.name} />
+                  
                   <div className="rounded-2xl border border-border bg-card p-5">
                     <h3 className="font-display text-xl">Ready to commit to {selected.name}?</h3>
                     <p className="mt-1 text-sm text-muted-foreground">
