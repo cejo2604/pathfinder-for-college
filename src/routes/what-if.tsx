@@ -68,7 +68,6 @@ function WhatIfPage() {
   const {
     careerId,
     priorities,
-    setPriorities,
     scenarioId,
     scenarioQuestion,
     runScenario,
