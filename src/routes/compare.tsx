@@ -3,7 +3,7 @@ import { ArrowRight } from "lucide-react";
 import { useMemo, useState } from "react";
 
 import { ForkShell } from "@/components/fork/ForkShell";
-import { RiskTag, ScoreBar } from "@/components/fork/Scores";
+import { RiskTag } from "@/components/fork/Scores";
 import { WhyPathSheet } from "@/components/fork/WhyPath";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
