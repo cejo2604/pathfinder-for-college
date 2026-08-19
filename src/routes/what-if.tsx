@@ -44,7 +44,7 @@ export const Route = createFileRoute("/what-if")({
       { property: "og:title", content: "What If? — the Fork simulator" },
       {
         property: "og:description",
-        content: "Simulate an academic decision and see graduation date, cost, credits and career fit change.",
+        content: "Simulate an academic decision and see graduation date, cost and credits change.",
       },
     ],
   }),

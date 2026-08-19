@@ -62,7 +62,7 @@ export const PATHS: PathSpec[] = [
       "Fewest technical credentials for healthcare technology roles",
       "Programming and data skills would need to come from outside the degree",
     ],
-    riskFactors: ["No added prerequisites", "No schedule change", "Career fit depends on skills built outside class"],
+    riskFactors: ["No added prerequisites", "No schedule change", "Outcomes depend on skills built outside class"],
     opportunities: ["Research lab positions", "Clinical or lab internships", "Graduate school in life sciences"],
     unknowns: ["Seat availability in BIOL 410", "Whether target employers expect a technical credential"],
     terms: [

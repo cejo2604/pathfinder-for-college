@@ -77,7 +77,7 @@ export function PathCompareDialog({
             <div className="rounded-2xl border border-border px-4 py-3 text-sm">
               <p className="font-medium">Courses this adds ({added.length})</p>
               <p className="mt-0.5 text-xs text-muted-foreground">
-                These are the catalog courses driving the credits, tuition and career fit above.
+                These are the catalog courses driving the credits and tuition above.
               </p>
               <div className="mt-2 flex flex-wrap gap-1.5">
                 {added.map((code) => (

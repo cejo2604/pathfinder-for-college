@@ -18,10 +18,10 @@ export const Route = createFileRoute("/compare")({
       {
         name: "description",
         content:
-          "Put two to four possible futures side by side: graduation date, credits, tuition, career fit, risk and flexibility.",
+          "Put two to four possible futures side by side: graduation date, credits, tuition, risk and flexibility.",
       },
       { property: "og:title", content: "Compare your possible futures — Fork" },
-      { property: "og:description", content: "Graduation date, cost, coursework and career fit, side by side." },
+      { property: "og:description", content: "Graduation date, cost and coursework, side by side." },
     ],
   }),
   component: ComparePage,
