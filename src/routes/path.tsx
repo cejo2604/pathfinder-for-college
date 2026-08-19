@@ -101,7 +101,7 @@ function PathBreakdownPage() {
         ))}
       </section>
 
-      <section className="mt-10 grid gap-6 lg:grid-cols-[1.1fr_1fr]">
+      <section className="mt-10">
         <div className="rounded-3xl border border-primary/30 bg-primary/5 p-6 shadow-lift sm:p-8">
           <h2 className="font-display text-2xl">Why this path fits you</h2>
           <ul className="mt-4 space-y-3 text-[0.975rem]">
@@ -120,7 +120,6 @@ function PathBreakdownPage() {
             .
           </p>
         </div>
-        <ScorePanel scores={path.scores} />
       </section>
 
       <section className="mt-10 grid gap-6 md:grid-cols-2">
