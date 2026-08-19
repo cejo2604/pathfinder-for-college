@@ -129,14 +129,8 @@ function ComparePage() {
               </div>
             </div>
 
-            <div className="mt-2 space-y-1.5">
-              <CompactScoreBar label="Cost" value={path.scores.costEfficiency} tone="mint" />
-              <CompactScoreBar label="Graduation" value={path.scores.graduationEfficiency} tone="mint" />
-              <CompactScoreBar label="Flexibility" value={path.scores.flexibility} tone="gold" />
-              <CompactScoreBar label="Overall" value={path.scores.overallFit} tone="navy" />
-              <div className="flex items-center justify-between pt-1">
-                <RiskTag risk={path.risk} factors={path.riskFactors} />
-              </div>
+            <div className="mt-2 flex items-center justify-between pt-1">
+              <RiskTag risk={path.risk} factors={path.riskFactors} />
             </div>
 
             <div className="mt-2">
