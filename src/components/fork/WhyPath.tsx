@@ -3,7 +3,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { Loader2, Sparkles } from "lucide-react";
 
 import { PlanningEstimateNote } from "@/components/fork/ForkShell";
-import { ScorePanel } from "@/components/fork/Scores";
+
 import {
   Sheet,
   SheetContent,

@@ -3,7 +3,7 @@ import { ArrowRight, GraduationCap, ListChecks, Lightbulb, TriangleAlert } from 
 
 import { ForkShell, PlanningEstimateNote } from "@/components/fork/ForkShell";
 import { RelevantCourses } from "@/components/fork/RelevantCourses";
-import { RiskTag, ScorePanel } from "@/components/fork/Scores";
+import { RiskTag } from "@/components/fork/Scores";
 import { AssumptionsPanel } from "@/components/fork/WhyPath";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
