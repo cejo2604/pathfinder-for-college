@@ -59,6 +59,12 @@ function AuthPage() {
         });
         if (signUpError) throw signUpError;
         if (!data.session) setMessage("Check your email to confirm your account, then sign in.");
+      } else if (mode === "forgot") {
+        const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
+          redirectTo: `${window.location.origin}/reset-password`,
+        });
+        if (resetError) throw resetError;
+        setMessage("If that email is registered, you’ll receive a reset link shortly.");
       } else {
         const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
         if (signInError) throw signInError;
