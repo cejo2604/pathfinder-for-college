@@ -60,7 +60,7 @@ function ComparePage() {
         <h1 className="mt-2 font-display text-3xl leading-tight sm:text-4xl">Your futures, side by side</h1>
         <p className="mt-2 text-sm text-muted-foreground">
           Pick two to four paths. Everything below is computed from your {profile.creditsCompleted} completed credits and
-          the demo institutional dataset.
+          the verified institutional dataset.
         </p>
       </header>
 

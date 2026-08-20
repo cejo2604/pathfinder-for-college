@@ -7,8 +7,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { lovable } from "@/integrations/lovable/index";
 import { supabase } from "@/integrations/supabase/client";
-import { DEMO_ACCOUNTS } from "@/lib/fork/demo-accounts";
-import { ensureDemoAccount } from "@/lib/fork/demo-accounts.functions";
 import { useFork } from "@/lib/fork/state";
 
 export const Route = createFileRoute("/auth")({
@@ -28,7 +26,7 @@ export const Route = createFileRoute("/auth")({
 
 function AuthPage() {
   const navigate = useNavigate();
-  const { session, profile, isDemoProfile } = useFork();
+  const { session } = useFork();
   const [mode, setMode] = useState<"signin" | "signup" | "forgot">("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -39,9 +37,9 @@ function AuthPage() {
 
   useEffect(() => {
     if (!session) return;
-    // New accounts (or leftover demo data) have no saved profile — go set one up.
-    void navigate({ to: profile && !isDemoProfile ? "/home" : "/profile" });
-  }, [session, profile, isDemoProfile, navigate]);
+    // The profile page shows the saved record, or the empty form to create one.
+    void navigate({ to: "/profile" });
+  }, [session, navigate]);
 
 
 
@@ -76,24 +74,6 @@ function AuthPage() {
     }
   };
 
-  const signInAsDemo = async (id: string) => {
-    setBusy(true);
-    setError(null);
-    setMessage(null);
-    try {
-      const { email: demoEmail, password: demoPassword } = await ensureDemoAccount({ data: { id } });
-      const { error: signInError } = await supabase.auth.signInWithPassword({
-        email: demoEmail,
-        password: demoPassword,
-      });
-      if (signInError) throw signInError;
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not sign in to that demo account.");
-    } finally {
-      setBusy(false);
-    }
-  };
-
   const google = async () => {
     setError(null);
     const result = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin });
@@ -102,7 +82,7 @@ function AuthPage() {
       return;
     }
     if (result.redirected) return;
-    void navigate({ to: "/home" });
+    void navigate({ to: "/profile" });
   };
 
   return (
@@ -203,31 +183,6 @@ function AuthPage() {
           )}
         </form>
 
-        <div className="mt-5 rounded-2xl border border-border bg-muted/40 p-5">
-          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">Demo logins</p>
-          <p className="mt-2 text-sm text-muted-foreground">
-            Each demo student has their own account. Signing in loads only that student&apos;s saved record.
-          </p>
-          <div className="mt-4 space-y-2">
-            {DEMO_ACCOUNTS.map((account) => (
-              <button
-                key={account.id}
-                type="button"
-                disabled={busy}
-                onClick={() => void signInAsDemo(account.id)}
-                className="w-full rounded-xl border border-border bg-card px-3 py-2.5 text-left transition-colors hover:border-primary/50 disabled:opacity-60"
-              >
-                <span className="block text-sm font-medium">{account.label}</span>
-                <span className="block text-xs text-muted-foreground">{account.description}</span>
-                <span className="mt-1 block text-xs tabular-nums text-muted-foreground">
-                  {account.email} · {account.password}
-                </span>
-              </button>
-            ))}
-          </div>
-        </div>
-
-
         <p className="mt-4 text-sm text-muted-foreground">
           {mode === "signin" && (
             <>
@@ -265,17 +220,6 @@ function AuthPage() {
               </button>
             </>
           )}
-        </p>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Or{" "}
-          <button
-            type="button"
-            className="font-medium text-foreground underline underline-offset-4"
-            onClick={() => void navigate({ to: "/home" })}
-          >
-            keep exploring the demo student
-          </button>
-          .
         </p>
       </div>
     </div>
