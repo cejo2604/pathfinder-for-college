@@ -32,12 +32,54 @@ function ResetPasswordPage() {
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [validLink, setValidLink] = useState(false);
+  const [checking, setChecking] = useState(true);
 
   useEffect(() => {
-    // Supabase password-recovery links carry the recovery token in the URL hash.
-    const hash = window.location.hash;
-    const params = new URLSearchParams(hash.replace(/^#/, ""));
-    setValidLink(params.get("type") === "recovery");
+    let cancelled = false;
+
+    // Recovery links arrive in several shapes: a hash with access/refresh tokens,
+    // a PKCE `?code=`, or an already-established recovery session.
+    const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
+      if (cancelled) return;
+      if (event === "PASSWORD_RECOVERY" || session) {
+        setValidLink(true);
+        setChecking(false);
+      }
+    });
+
+    const resolve = async () => {
+      const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ""));
+      const queryParams = new URLSearchParams(window.location.search);
+      const code = queryParams.get("code");
+      const accessToken = hashParams.get("access_token");
+      const refreshToken = hashParams.get("refresh_token");
+
+      try {
+        if (accessToken && refreshToken) {
+          await supabase.auth.setSession({ access_token: accessToken, refresh_token: refreshToken });
+        } else if (code) {
+          await supabase.auth.exchangeCodeForSession(code);
+        }
+      } catch {
+        // fall through to the session check below
+      }
+
+      const { data } = await supabase.auth.getSession();
+      if (cancelled) return;
+      setValidLink(
+        Boolean(data.session) ||
+          hashParams.get("type") === "recovery" ||
+          queryParams.get("type") === "recovery",
+      );
+      setChecking(false);
+    };
+
+    void resolve();
+
+    return () => {
+      cancelled = true;
+      sub.subscription.unsubscribe();
+    };
   }, []);
 
   const submit = async (event: React.FormEvent) => {
