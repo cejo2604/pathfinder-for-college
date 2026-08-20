@@ -29,9 +29,10 @@ export const Route = createFileRoute("/auth")({
 function AuthPage() {
   const navigate = useNavigate();
   const { session, profile, isDemoProfile } = useFork();
-  const [mode, setMode] = useState<"signin" | "signup">("signin");
+  const [mode, setMode] = useState<"signin" | "signup" | "forgot">("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -58,6 +59,12 @@ function AuthPage() {
         });
         if (signUpError) throw signUpError;
         if (!data.session) setMessage("Check your email to confirm your account, then sign in.");
+      } else if (mode === "forgot") {
+        const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
+          redirectTo: `${window.location.origin}/reset-password`,
+        });
+        if (resetError) throw resetError;
+        setMessage("If that email is registered, you’ll receive a reset link shortly.");
       } else {
         const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
         if (signInError) throw signInError;
@@ -109,10 +116,16 @@ function AuthPage() {
         </div>
 
         <h1 className="mt-6 font-display text-3xl leading-tight">
-          {mode === "signin" ? "Welcome back" : "Create your account"}
+          {mode === "signin"
+            ? "Welcome back"
+            : mode === "signup"
+              ? "Create your account"
+              : "Reset your password"}
         </h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          Your profile, simulated paths and semester plan are saved to your account — only you can see them.
+          {mode === "forgot"
+            ? "Enter your email and we’ll send you a link to choose a new password."
+            : "Your profile, simulated paths and semester plan are saved to your account — only you can see them."}
         </p>
 
         <form onSubmit={submit} className="mt-7 space-y-4 rounded-2xl border border-border bg-card p-5">
@@ -128,31 +141,66 @@ function AuthPage() {
               className="mt-1.5"
             />
           </div>
-          <div>
-            <Label htmlFor="password">Password</Label>
-            <Input
-              id="password"
-              type="password"
-              autoComplete={mode === "signin" ? "current-password" : "new-password"}
-              required
-              minLength={6}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="mt-1.5"
-            />
-          </div>
+          {mode !== "forgot" && (
+            <div>
+              <Label htmlFor="password">Password</Label>
+              <Input
+                id="password"
+                type="password"
+                autoComplete={mode === "signin" ? "current-password" : "new-password"}
+                required
+                minLength={6}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="mt-1.5"
+              />
+            </div>
+          )}
+          {mode === "signup" && (
+            <div>
+              <Label htmlFor="confirmPassword">Confirm password</Label>
+              <Input
+                id="confirmPassword"
+                type="password"
+                autoComplete="new-password"
+                required
+                minLength={6}
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                className="mt-1.5"
+              />
+            </div>
+          )}
+
+          {mode === "signin" && (
+            <div className="text-right">
+              <button
+                type="button"
+                className="text-sm font-medium text-foreground underline underline-offset-4"
+                onClick={() => setMode("forgot")}
+              >
+                Forgot password?
+              </button>
+            </div>
+          )}
 
           {error && <p className="text-sm text-destructive">{error}</p>}
           {message && <p className="text-sm text-muted-foreground">{message}</p>}
 
           <Button type="submit" className="w-full gap-1.5" disabled={busy}>
             {busy && <Loader2 className="size-4 animate-spin" />}
-            {mode === "signin" ? "Sign in" : "Create account"}
+            {mode === "signin"
+              ? "Sign in"
+              : mode === "signup"
+                ? "Create account"
+                : "Send reset link"}
           </Button>
 
-          <Button type="button" variant="outline" className="w-full" onClick={() => void google()}>
-            Continue with Google
-          </Button>
+          {mode !== "forgot" && (
+            <Button type="button" variant="outline" className="w-full" onClick={() => void google()}>
+              Continue with Google
+            </Button>
+          )}
         </form>
 
         <div className="mt-5 rounded-2xl border border-border bg-muted/40 p-5">
@@ -181,14 +229,42 @@ function AuthPage() {
 
 
         <p className="mt-4 text-sm text-muted-foreground">
-          {mode === "signin" ? "New to Fork?" : "Already have an account?"}{" "}
-          <button
-            type="button"
-            className="font-medium text-foreground underline underline-offset-4"
-            onClick={() => setMode(mode === "signin" ? "signup" : "signin")}
-          >
-            {mode === "signin" ? "Create an account" : "Sign in"}
-          </button>
+          {mode === "signin" && (
+            <>
+              New to Fork?{" "}
+              <button
+                type="button"
+                className="font-medium text-foreground underline underline-offset-4"
+                onClick={() => setMode("signup")}
+              >
+                Create an account
+              </button>
+            </>
+          )}
+          {mode === "signup" && (
+            <>
+              Already have an account?{" "}
+              <button
+                type="button"
+                className="font-medium text-foreground underline underline-offset-4"
+                onClick={() => setMode("signin")}
+              >
+                Sign in
+              </button>
+            </>
+          )}
+          {mode === "forgot" && (
+            <>
+              Remember your password?{" "}
+              <button
+                type="button"
+                className="font-medium text-foreground underline underline-offset-4"
+                onClick={() => setMode("signin")}
+              >
+                Sign in
+              </button>
+            </>
+          )}
         </p>
         <p className="mt-2 text-sm text-muted-foreground">
           Or{" "}
