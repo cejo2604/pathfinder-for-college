@@ -165,11 +165,29 @@ function ResetPasswordPage() {
             </Button>
           </form>
         ) : (
-          <div className="mt-7 rounded-2xl border border-border bg-card p-5">
-            <Button className="w-full" onClick={() => void navigate({ to: "/auth" })}>
+          <form onSubmit={resend} className="mt-7 space-y-4 rounded-2xl border border-border bg-card p-5">
+            <div>
+              <Label htmlFor="resendEmail">Email</Label>
+              <Input
+                id="resendEmail"
+                type="email"
+                autoComplete="email"
+                required
+                value={resendEmail}
+                onChange={(e) => setResendEmail(e.target.value)}
+                className="mt-1.5"
+              />
+            </div>
+            {error && <p className="text-sm text-destructive">{error}</p>}
+            {message && <p className="text-sm text-muted-foreground">{message}</p>}
+            <Button type="submit" className="w-full gap-1.5" disabled={busy}>
+              {busy && <Loader2 className="size-4 animate-spin" />}
+              Send a new reset link
+            </Button>
+            <Button type="button" variant="outline" className="w-full" onClick={() => void navigate({ to: "/auth" })}>
               Back to sign in
             </Button>
-          </div>
+          </form>
         )}
       </div>
     </div>
