@@ -33,6 +33,26 @@ function ResetPasswordPage() {
   const [message, setMessage] = useState<string | null>(null);
   const [validLink, setValidLink] = useState(false);
   const [checking, setChecking] = useState(true);
+  const [resendEmail, setResendEmail] = useState("");
+
+  const resend = async (event: React.FormEvent) => {
+    event.preventDefault();
+    setError(null);
+    setMessage(null);
+    setBusy(true);
+    try {
+      const { error: resetError } = await supabase.auth.resetPasswordForEmail(resendEmail, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+      if (resetError) throw resetError;
+      setMessage("If that email is registered, a new reset link is on its way.");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not send the reset link. Try again.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
 
   useEffect(() => {
     let cancelled = false;
