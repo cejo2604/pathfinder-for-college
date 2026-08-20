@@ -116,12 +116,18 @@ function ResetPasswordPage() {
       <div className="w-full max-w-md">
         <h1 className="font-display text-3xl leading-tight">Reset your password</h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          {validLink
-            ? "Choose a new password for your Fork account."
-            : "This password reset link is invalid or expired. Return to sign in and request a new one."}
+          {checking
+            ? "Checking your reset link…"
+            : validLink
+              ? "Choose a new password for your Fork account."
+              : "This reset link is invalid or expired. Enter your email to get a new one."}
         </p>
 
-        {validLink ? (
+        {checking ? (
+          <div className="mt-7 grid place-items-center rounded-2xl border border-border bg-card p-8">
+            <Loader2 className="size-5 animate-spin text-muted-foreground" />
+          </div>
+        ) : validLink ? (
           <form onSubmit={submit} className="mt-7 space-y-4 rounded-2xl border border-border bg-card p-5">
             <div>
               <Label htmlFor="password">New password</Label>
