@@ -114,7 +114,7 @@ export function ForkNav() {
                   <Link to="/auth">Sign in to save your paths</Link>
                 </DropdownMenuItem>
               )}
-              {!signedIn && <DropdownMenuItem onSelect={() => reset()}>Clear demo data</DropdownMenuItem>}
+              {!signedIn && <DropdownMenuItem onSelect={() => reset()}>Clear my entries</DropdownMenuItem>}
             </DropdownMenuContent>
           </DropdownMenu>
         </nav>
@@ -151,7 +151,7 @@ function ShellSkeleton() {
 
 export function ForkShell({ children }: { children: ReactNode }) {
   // Nothing profile-derived renders until the owner's own data is loaded, so
-  // no other account's (or demo) values can flash during loading.
+  // no other account's values can flash during loading.
   const { profileReady } = useFork();
   return (
     <div className="min-h-screen bg-background">

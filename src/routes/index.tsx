@@ -1,15 +1,9 @@
 import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
-import { GitBranch, Sparkles } from "lucide-react";
+import { GitBranch } from "lucide-react";
 
 import { ForkLogo, PlanningEstimateNote } from "@/components/fork/ForkShell";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { DEMO_STUDENT, DEMO_STUDENTS } from "@/lib/fork/data";
+import { EXAMPLE_PROFILE } from "@/lib/fork/data";
 import { formatCurrency, simulatePaths } from "@/lib/fork/engine";
 import { useFork } from "@/lib/fork/state";
 
@@ -32,17 +26,11 @@ export const Route = createFileRoute("/")({
   component: Landing,
 });
 
-const PREVIEW = simulatePaths(["baseline", "switch_cs", "cs_minor"], { profile: DEMO_STUDENT });
+const PREVIEW = simulatePaths(["baseline", "switch_cs", "cs_minor"], { profile: EXAMPLE_PROFILE });
 
 function Landing() {
-  const { loadDemoStudent, startBlank, session } = useFork();
+  const { startBlank, session } = useFork();
   const navigate = useNavigate();
-
-  const startDemo = (id?: string) => {
-    loadDemoStudent(id);
-    void navigate({ to: "/home" });
-  };
-
 
   const startFresh = () => {
     startBlank();
@@ -75,33 +63,13 @@ function Landing() {
               <Button size="lg" className="rounded-full px-10 shadow-lift" onClick={startFresh}>
                 Start here
               </Button>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button size="default" variant="outline" className="gap-2 rounded-full px-5">
-                    <Sparkles className="size-4" /> Try a demo student
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="start" className="w-80">
-                  {DEMO_STUDENTS.map((student) => (
-                    <DropdownMenuItem
-                      key={student.id}
-                      className="flex-col items-start gap-0.5"
-                      onSelect={() => startDemo(student.id)}
-                    >
-                      <span className="text-sm font-medium">{student.label}</span>
-                      <span className="text-xs text-muted-foreground">{student.description}</span>
-                    </DropdownMenuItem>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
-
               <Button asChild size="default" variant="ghost" className="rounded-full px-4">
                 <Link to="/import">Import my academic history</Link>
               </Button>
             </div>
 
             <p className="mt-6 text-sm text-muted-foreground">
-              No sign-up needed to try the demo. Upload a transcript or degree audit when you want Fork to simulate{" "}
+              Sign in to build your profile. Upload a transcript or degree audit when you want Fork to simulate{" "}
               <Link to="/import" className="font-medium text-foreground underline-offset-4 hover:underline">
                 your own
               </Link>{" "}
@@ -123,7 +91,7 @@ function Landing() {
             <div className="mt-6 flex justify-center">
               <div className="rounded-2xl bg-navy px-6 py-3 text-center text-navy-foreground shadow-node">
                 <p className="text-[0.65rem] uppercase tracking-[0.18em] opacity-70">You</p>
-                <p className="font-display text-lg leading-tight">Biology sophomore</p>
+                <p className="font-display text-lg leading-tight">Sophomore</p>
               </div>
             </div>
 

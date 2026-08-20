@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { ArrowRight, Sparkles, Upload } from "lucide-react";
+import { ArrowRight, Upload } from "lucide-react";
 import { useState } from "react";
 
 
@@ -35,7 +35,7 @@ export const Route = createFileRoute("/profile")({
 function ProfilePage() {
   const profile = useForkProfile();
   const navigate = useNavigate();
-  const { profile: loaded, loadDemoStudent, setProfile, signedIn } = useFork();
+  const { profile: loaded, setProfile, signedIn } = useFork();
 
   const completed = profile.courses.filter((c) => c.status === "completed");
   const current = profile.courses.filter((c) => c.status === "in_progress");

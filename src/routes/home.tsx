@@ -1,6 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { Sparkles } from "lucide-react";
 
 import { ForkShell } from "@/components/fork/ForkShell";
 import { PathCompareDialog } from "@/components/fork/PathCompareDialog";
@@ -27,7 +26,7 @@ export const Route = createFileRoute("/home")({
 
 function MyPath() {
   const profile = useForkProfile();
-  const { profile: loaded, loadDemoStudent, careerId, priorities, signedIn, choosePath } = useFork();
+  const { profile: loaded, careerId, priorities, signedIn, choosePath } = useFork();
   const navigate = useNavigate();
 
   // Any catalog program can be simulated from here — the student picks it.
@@ -77,7 +76,7 @@ function MyPath() {
 
   return (
     <ForkShell>
-      {!loaded && signedIn && (
+      {!loaded && (
         <div className="mb-8 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-primary/30 bg-primary/5 p-4">
           <p className="text-sm">Your profile is empty. Add your academic record so Fork can simulate your paths.</p>
           <Button size="sm" className="gap-1.5" onClick={() => void navigate({ to: "/profile" })}>
@@ -85,17 +84,6 @@ function MyPath() {
           </Button>
         </div>
       )}
-      {!loaded && !signedIn && (
-        <div className="mb-8 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-primary/30 bg-primary/5 p-4">
-          <p className="text-sm">
-            You&apos;re previewing the demo student. Load {profile.name} to save choices as you explore.
-          </p>
-          <Button size="sm" className="gap-1.5" onClick={() => loadDemoStudent()}>
-            <Sparkles className="size-3.5" /> Load demo student
-          </Button>
-        </div>
-      )}
-
       <header>
         <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
           {show(profile.school, "Add your school")} · {show(profile.year, "Add your year")}
