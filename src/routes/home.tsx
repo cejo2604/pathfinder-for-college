@@ -1,5 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
+import { Sparkles } from "lucide-react";
 
 import { ForkShell } from "@/components/fork/ForkShell";
 import { PathCompareDialog } from "@/components/fork/PathCompareDialog";
