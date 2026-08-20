@@ -32,12 +32,74 @@ function ResetPasswordPage() {
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [validLink, setValidLink] = useState(false);
+  const [checking, setChecking] = useState(true);
+  const [resendEmail, setResendEmail] = useState("");
+
+  const resend = async (event: React.FormEvent) => {
+    event.preventDefault();
+    setError(null);
+    setMessage(null);
+    setBusy(true);
+    try {
+      const { error: resetError } = await supabase.auth.resetPasswordForEmail(resendEmail, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+      if (resetError) throw resetError;
+      setMessage("If that email is registered, a new reset link is on its way.");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not send the reset link. Try again.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
 
   useEffect(() => {
-    // Supabase password-recovery links carry the recovery token in the URL hash.
-    const hash = window.location.hash;
-    const params = new URLSearchParams(hash.replace(/^#/, ""));
-    setValidLink(params.get("type") === "recovery");
+    let cancelled = false;
+
+    // Recovery links arrive in several shapes: a hash with access/refresh tokens,
+    // a PKCE `?code=`, or an already-established recovery session.
+    const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
+      if (cancelled) return;
+      if (event === "PASSWORD_RECOVERY" || session) {
+        setValidLink(true);
+        setChecking(false);
+      }
+    });
+
+    const resolve = async () => {
+      const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ""));
+      const queryParams = new URLSearchParams(window.location.search);
+      const code = queryParams.get("code");
+      const accessToken = hashParams.get("access_token");
+      const refreshToken = hashParams.get("refresh_token");
+
+      try {
+        if (accessToken && refreshToken) {
+          await supabase.auth.setSession({ access_token: accessToken, refresh_token: refreshToken });
+        } else if (code) {
+          await supabase.auth.exchangeCodeForSession(code);
+        }
+      } catch {
+        // fall through to the session check below
+      }
+
+      const { data } = await supabase.auth.getSession();
+      if (cancelled) return;
+      setValidLink(
+        Boolean(data.session) ||
+          hashParams.get("type") === "recovery" ||
+          queryParams.get("type") === "recovery",
+      );
+      setChecking(false);
+    };
+
+    void resolve();
+
+    return () => {
+      cancelled = true;
+      sub.subscription.unsubscribe();
+    };
   }, []);
 
   const submit = async (event: React.FormEvent) => {
@@ -74,12 +136,18 @@ function ResetPasswordPage() {
       <div className="w-full max-w-md">
         <h1 className="font-display text-3xl leading-tight">Reset your password</h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          {validLink
-            ? "Choose a new password for your Fork account."
-            : "This password reset link is invalid or expired. Return to sign in and request a new one."}
+          {checking
+            ? "Checking your reset link…"
+            : validLink
+              ? "Choose a new password for your Fork account."
+              : "This reset link is invalid or expired. Enter your email to get a new one."}
         </p>
 
-        {validLink ? (
+        {checking ? (
+          <div className="mt-7 grid place-items-center rounded-2xl border border-border bg-card p-8">
+            <Loader2 className="size-5 animate-spin text-muted-foreground" />
+          </div>
+        ) : validLink ? (
           <form onSubmit={submit} className="mt-7 space-y-4 rounded-2xl border border-border bg-card p-5">
             <div>
               <Label htmlFor="password">New password</Label>
@@ -117,11 +185,29 @@ function ResetPasswordPage() {
             </Button>
           </form>
         ) : (
-          <div className="mt-7 rounded-2xl border border-border bg-card p-5">
-            <Button className="w-full" onClick={() => void navigate({ to: "/auth" })}>
+          <form onSubmit={resend} className="mt-7 space-y-4 rounded-2xl border border-border bg-card p-5">
+            <div>
+              <Label htmlFor="resendEmail">Email</Label>
+              <Input
+                id="resendEmail"
+                type="email"
+                autoComplete="email"
+                required
+                value={resendEmail}
+                onChange={(e) => setResendEmail(e.target.value)}
+                className="mt-1.5"
+              />
+            </div>
+            {error && <p className="text-sm text-destructive">{error}</p>}
+            {message && <p className="text-sm text-muted-foreground">{message}</p>}
+            <Button type="submit" className="w-full gap-1.5" disabled={busy}>
+              {busy && <Loader2 className="size-4 animate-spin" />}
+              Send a new reset link
+            </Button>
+            <Button type="button" variant="outline" className="w-full" onClick={() => void navigate({ to: "/auth" })}>
               Back to sign in
             </Button>
-          </div>
+          </form>
         )}
       </div>
     </div>
