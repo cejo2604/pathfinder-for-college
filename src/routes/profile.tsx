@@ -41,30 +41,36 @@ function ProfilePage() {
   const current = profile.courses.filter((c) => c.status === "in_progress");
   const waitlisted = profile.courses.filter((c) => c.status === "waitlisted");
 
+  // A profile "exists" once the student has entered the basics.
+  const hasProfile = Boolean(loaded && (profile.name.trim() || profile.school.trim() || profile.major.trim()));
+
   return (
     <ForkShell>
       <header className="max-w-2xl">
         <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Profile</p>
-        <h1 className="mt-3 font-display text-4xl leading-tight sm:text-5xl">Your academic position</h1>
+        <h1 className="mt-3 font-display text-4xl leading-tight sm:text-5xl">
+          {hasProfile ? "Your academic position" : "Create your profile"}
+        </h1>
         <p className="mt-3 text-muted-foreground">
-          {signedIn
-            ? "This is your own record — nothing is shared with anyone else. Every number in the simulator traces back to this page."
-            : "Nothing here is required to try Fork — the demo student fills it all in. Every number in the simulator traces back to this page."}
+          {hasProfile
+            ? "Everything below is editable — fix anything that changed or was entered wrong, and it saves automatically."
+            : "Tell Fork where you stand academically. Every field can be edited later, so nothing here is final."}
         </p>
         <div className="mt-5 flex flex-wrap gap-2">
-          <Button className="gap-1.5" onClick={() => void navigate({ to: "/import" })}>
+          <Button variant="outline" className="gap-1.5" onClick={() => void navigate({ to: "/import" })}>
             <Upload className="size-4" /> Import my academic history
           </Button>
           <Button className="gap-1.5" size="lg" onClick={() => void navigate({ to: "/home" })}>
-            Create my profile <ArrowRight className="size-4" />
+            {hasProfile ? "Go to my path" : "Save and continue"} <ArrowRight className="size-4" />
           </Button>
-          {!loaded && !signedIn && (
-            <Button variant="outline" className="gap-1.5" onClick={() => loadDemoStudent()}>
-              <Sparkles className="size-4" /> Load demo student
+          {!signedIn && (
+            <Button variant="ghost" className="gap-1.5" onClick={() => void navigate({ to: "/auth" })}>
+              Sign in to save
             </Button>
           )}
         </div>
       </header>
+
 
 
       <div className="mt-10 grid gap-6 lg:grid-cols-2">
