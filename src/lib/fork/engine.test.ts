@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { COURSES, DEMO_STUDENT, FIRST_PLANNED_TERM, PLANNING_ASSUMPTIONS, courseByCode } from "./data";
+import { COURSES, EXAMPLE_PROFILE, FIRST_PLANNED_TERM, PLANNING_ASSUMPTIONS, courseByCode } from "./data";
 import {
   ALL_PATH_IDS,
   DEGREE_CREDITS,
@@ -15,7 +15,7 @@ import {
 } from "./engine";
 import { BASELINE_PATH_ID, PATHS } from "./paths";
 
-const opts = { profile: DEMO_STUDENT };
+const opts = { profile: EXAMPLE_PROFILE };
 const paths = simulatePaths(ALL_PATH_IDS, opts);
 const baseline = simulatePath(BASELINE_PATH_ID, opts);
 
@@ -77,12 +77,12 @@ describe("engine invariants", () => {
 
   it("never schedules a course before its prerequisites or repeats completed work", () => {
     const completed = new Set(
-      DEMO_STUDENT.courses.filter((c) => c.status === "completed").map((c) => c.code),
+      EXAMPLE_PROFILE.courses.filter((c) => c.status === "completed").map((c) => c.code),
     );
     for (const path of paths) {
       const taken = new Set(completed);
       // In-progress work finishes before the first planned term.
-      for (const c of DEMO_STUDENT.courses) if (c.status === "in_progress") taken.add(c.code);
+      for (const c of EXAMPLE_PROFILE.courses) if (c.status === "in_progress") taken.add(c.code);
       for (const term of path.terms) {
         for (const code of term.courses) {
           const course = courseByCode(code);
@@ -112,7 +112,7 @@ describe("engine invariants", () => {
 
   it("re-ranks deterministically when priorities change", () => {
     const costFirst = simulatePath("baseline", {
-      profile: DEMO_STUDENT,
+      profile: EXAMPLE_PROFILE,
       priorities: [
         "minimize_cost",
         "graduate_on_time",
@@ -173,7 +173,7 @@ describe("determinism", () => {
   });
 
   it("does not mutate any input", () => {
-    const profile = structuredClone(DEMO_STUDENT);
+    const profile = structuredClone(EXAMPLE_PROFILE);
     const before = canonical(profile);
     const catalogBefore = canonical(COURSES);
     const specsBefore = canonical(PATHS);
@@ -185,7 +185,7 @@ describe("determinism", () => {
 });
 
 describe("baseline facts", () => {
-  const facts = baselineFacts(DEMO_STUDENT);
+  const facts = baselineFacts(EXAMPLE_PROFILE);
 
   it("matches the simulated baseline path by value", () => {
     expect(facts.credits).toBe(baseline.creditsRemaining);
@@ -217,21 +217,21 @@ describe("baseline facts", () => {
     expect(() => {
       (facts as unknown as Record<string, unknown>)["credits"] = 999;
     }).toThrow();
-    expect(canonical(baselineFacts(DEMO_STUDENT))).toBe(before);
+    expect(canonical(baselineFacts(EXAMPLE_PROFILE))).toBe(before);
   });
 
   it("uses the student's own program, not a hardcoded major", () => {
-    expect(facts.programLabel).toContain(DEMO_STUDENT.major);
-    const other = baselineFacts({ ...structuredClone(DEMO_STUDENT), major: "Sociology" });
+    expect(facts.programLabel).toContain(EXAMPLE_PROFILE.major);
+    const other = baselineFacts({ ...structuredClone(EXAMPLE_PROFILE), major: "Sociology" });
     expect(other.programLabel).toContain("Sociology");
   });
 });
 
 describe("priorities are ranking-only", () => {
   it("changes overall fit ranking but no academic fact", () => {
-    const reversed = [...DEMO_STUDENT.priorities].reverse();
+    const reversed = [...EXAMPLE_PROFILE.priorities].reverse();
     for (const path of paths) {
-      const other = simulatePath(path.id, { profile: DEMO_STUDENT, priorities: reversed });
+      const other = simulatePath(path.id, { profile: EXAMPLE_PROFILE, priorities: reversed });
       expect(other.creditsRemaining).toBe(path.creditsRemaining);
       expect(other.estimatedCost).toBe(path.estimatedCost);
       expect(other.estimatedCompletionDate).toBe(path.estimatedCompletionDate);
@@ -285,7 +285,7 @@ describe("career fit", () => {
   });
 
   it("ignores unconfirmed imported rows", () => {
-    const withPending = structuredClone(DEMO_STUDENT);
+    const withPending = structuredClone(EXAMPLE_PROFILE);
     withPending.courses = [
       ...withPending.courses,
       { code: "COMP 480", status: "completed", term: "Fall 2025", source: "import", verified: false },
@@ -350,14 +350,14 @@ describe("risk formula", () => {
 
 describe("institution guardrail", () => {
   it("fails closed when the institution id is missing", () => {
-    const { institutionId: _omit, ...rest } = structuredClone(DEMO_STUDENT);
-    const result = simulate(ALL_PATH_IDS, { profile: rest as typeof DEMO_STUDENT });
+    const { institutionId: _omit, ...rest } = structuredClone(EXAMPLE_PROFILE);
+    const result = simulate(ALL_PATH_IDS, { profile: rest as typeof EXAMPLE_PROFILE });
     expect(result.status).toBe("unsupported");
     if (result.status === "unsupported") expect(result.support.reason).toBe("missing");
   });
 
   it("fails closed when the institution id is unrecognized", () => {
-    const profile = { ...structuredClone(DEMO_STUDENT), institutionId: "some_other_school" };
+    const profile = { ...structuredClone(EXAMPLE_PROFILE), institutionId: "some_other_school" };
     const result = simulate(ALL_PATH_IDS, { profile });
     expect(result.status).toBe("unsupported");
     if (result.status === "unsupported") expect(result.support.reason).toBe("unrecognized");
@@ -365,7 +365,7 @@ describe("institution guardrail", () => {
   });
 
   it("validates the institution before generating any path", () => {
-    const profile = { ...structuredClone(DEMO_STUDENT), institutionId: "nope" };
+    const profile = { ...structuredClone(EXAMPLE_PROFILE), institutionId: "nope" };
     expect(() => simulatePath("not_a_real_path", { profile })).toThrow(UnsupportedInstitutionError);
   });
 

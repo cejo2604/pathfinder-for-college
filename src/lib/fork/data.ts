@@ -339,7 +339,7 @@ export const TRANSFER_TUITION_PER_CREDIT = PLANNING_ASSUMPTIONS.outOfInstitution
 export const SUPPORTED_INSTITUTION_IDS = ["fork_demo_institution"] as const;
 export const DEFAULT_INSTITUTION_ID = SUPPORTED_INSTITUTION_IDS[0];
 
-export const DEMO_STUDENT: StudentProfile = {
+export const EXAMPLE_PROFILE: StudentProfile = {
   name: "Maya Rodriguez",
   school: "University of North Carolina",
   institutionId: DEFAULT_INSTITUTION_ID,
@@ -365,7 +365,7 @@ export const DEMO_STUDENT: StudentProfile = {
   goal: "I want to work in healthcare technology.",
   goalCategory: "Healthcare technology",
   courses: [
-    // 54 completed credits, verified from the demo institutional record.
+    // 54 completed credits, verified from the institutional record.
     { code: "BIOL 101", status: "completed", term: "Fall 2024", grade: "A-" },
     { code: "BIOL 102", status: "completed", term: "Spring 2025", grade: "B+" },
     { code: "BIOL 201", status: "completed", term: "Fall 2025", grade: "A" },
@@ -385,174 +385,6 @@ export const DEMO_STUDENT: StudentProfile = {
   ],
 };
 
-/**
- * Second demo record with coursework: a CS-leaning sophomore.
- */
-export const DEMO_STUDENT_CS: StudentProfile = {
-  name: "Devon Carter",
-  school: "University of North Carolina",
-  institutionId: DEFAULT_INSTITUTION_ID,
-  degree: "Bachelor of Science in Engineering",
-  major: "Computer Science",
-  minor: "Data Science minor",
-
-  year: "Sophomore",
-  graduationTarget: "May 2028",
-  creditsCompleted: 45,
-  gpa: 3.4,
-  interests: ["Technology", "Problem solving", "Design"],
-  careerInterests: ["Software engineering", "Data science"],
-  skills: ["Python", "Debugging", "Version control"],
-  priorities: [
-    "career_opportunities",
-    "graduate_on_time",
-    "flexibility",
-    "minimize_cost",
-    "stay_close_to_major",
-    "minimize_coursework",
-  ],
-  goal: "I want to become a software engineer.",
-  goalCategory: "Software engineering",
-  courses: [
-    { code: "COMP 110", status: "completed", term: "Fall 2024", grade: "A" },
-    { code: "COMP 210", status: "completed", term: "Spring 2025", grade: "B+" },
-    { code: "MATH 152", status: "completed", term: "Fall 2024", grade: "B" },
-    { code: "MATH 233", status: "completed", term: "Fall 2025", grade: "A-" },
-    { code: "STAT 155", status: "completed", term: "Spring 2025", grade: "B+" },
-    { code: "DATA 110", status: "completed", term: "Fall 2025", grade: "A" },
-    // Remaining 25 completed credits are general-education requirements.
-    { code: "GEN ED", status: "completed", term: "2024 – 2026", grade: "—" },
-    { code: "COMP 301", status: "in_progress", term: "Spring 2026" },
-    { code: "DATA 220", status: "in_progress", term: "Spring 2026" },
-  ],
-};
-
-/**
- * Third demo record with coursework: a business-analytics junior on a B.B.A. track.
- */
-export const DEMO_STUDENT_HINF: StudentProfile = {
-  name: "Priya Raman",
-  school: "University of North Carolina",
-  institutionId: DEFAULT_INSTITUTION_ID,
-  degree: "Bachelor of Business Administration",
-  major: "Business Analytics",
-  minor: "Data Science minor",
-
-  year: "Junior",
-  graduationTarget: "December 2027",
-  creditsCompleted: 30,
-  gpa: 3.8,
-  interests: ["Business", "Data", "Strategy"],
-  careerInterests: ["Data science", "Business analytics"],
-  skills: ["Spreadsheet analysis", "Financial modeling"],
-  priorities: [
-    "minimize_cost",
-    "career_opportunities",
-    "graduate_on_time",
-    "stay_close_to_major",
-    "flexibility",
-    "minimize_coursework",
-  ],
-  goal: "I want to work with business and product data.",
-  goalCategory: "Data science",
-  courses: [
-    { code: "BUSI 101", status: "completed", term: "Fall 2024", grade: "A" },
-    { code: "ECON 101", status: "completed", term: "Fall 2024", grade: "B+" },
-    { code: "BUSI 210", status: "completed", term: "Spring 2025", grade: "A" },
-    { code: "STAT 155", status: "completed", term: "Spring 2025", grade: "A-" },
-    { code: "DATA 110", status: "completed", term: "Fall 2025", grade: "A" },
-    // Remaining 15 completed credits are general-education requirements.
-    { code: "GEN ED", status: "completed", term: "2024 – 2026", grade: "—" },
-    { code: "BUSI 310", status: "in_progress", term: "Spring 2026" },
-    { code: "DATA 220", status: "in_progress", term: "Spring 2026" },
-  ],
-};
-
-/**
- * Demo record with no degree plan yet: undecided first-year, no coursework on file.
- */
-export const DEMO_STUDENT_UNDECIDED: StudentProfile = {
-  ...createEmptyProfile(),
-  name: "Jordan Blake",
-  school: "University of North Carolina",
-  degree: "Associate of Science",
-
-  year: "Freshman",
-  gpa: 3.2,
-  interests: ["Technology", "Healthcare"],
-  careerInterests: ["Still exploring"],
-  goal: "I don't know what to major in yet.",
-};
-
-/**
- * Second demo record with no degree plan: transfer student still deciding.
- */
-export const DEMO_STUDENT_EXPLORING: StudentProfile = {
-  ...createEmptyProfile(),
-  name: "Alex Nguyen",
-  school: "University of North Carolina",
-  degree: "Bachelor of Business Administration",
-  year: "Sophomore",
-  gpa: 3.0,
-  interests: ["Business", "Design"],
-  careerInterests: ["Still exploring"],
-  goal: "I want to see which path costs the least.",
-};
-
-export interface DemoStudentOption {
-  id: string;
-  label: string;
-  description: string;
-  profile: StudentProfile;
-}
-
-/** The demo students offered in demo mode: three with coursework, two without a degree plan. */
-export const DEMO_STUDENTS: DemoStudentOption[] = [
-  {
-    id: "maya",
-    label: "Maya Rodriguez — Biology sophomore",
-    description: "B.S. Biology · 54 credits on file, exploring healthcare technology.",
-    profile: DEMO_STUDENT,
-  },
-  {
-    id: "devon",
-    label: "Devon Carter — CS sophomore",
-    description: "B.S.E. Computer Science with a Data Science minor · 45 credits on file.",
-    profile: DEMO_STUDENT_CS,
-  },
-  {
-    id: "priya",
-    label: "Priya Raman — Business Analytics junior",
-    description: "B.B.A. Business Analytics with a Data Science minor · 30 credits on file.",
-    profile: DEMO_STUDENT_HINF,
-  },
-  {
-    id: "jordan",
-    label: "Jordan Blake — undecided freshman",
-    description: "Associate of Science track · no degree plan or coursework yet.",
-    profile: DEMO_STUDENT_UNDECIDED,
-  },
-  {
-    id: "alex",
-    label: "Alex Nguyen — exploring sophomore",
-    description: "B.B.A. track · no degree plan on file, comparing cost-first options.",
-    profile: DEMO_STUDENT_EXPLORING,
-  },
-];
-
-
-export const demoStudentById = (id: string) => DEMO_STUDENTS.find((s) => s.id === id);
-
-/**
- * Anonymized sample profile for demos where the named demo student should not appear.
- * Same shape and credit math as the demo record so the deterministic engine behaves identically.
- */
-export const SAMPLE_STUDENT: StudentProfile = {
-  ...DEMO_STUDENT,
-  name: "Sample Student",
-  school: "Sample State University",
-  goal: "I want to work in healthcare technology.",
-};
 
 
 /**
