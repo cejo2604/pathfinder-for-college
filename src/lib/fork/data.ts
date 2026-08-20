@@ -339,9 +339,13 @@ export const TRANSFER_TUITION_PER_CREDIT = PLANNING_ASSUMPTIONS.outOfInstitution
 export const SUPPORTED_INSTITUTION_IDS = ["fork_demo_institution"] as const;
 export const DEFAULT_INSTITUTION_ID = SUPPORTED_INSTITUTION_IDS[0];
 
+/**
+ * Illustrative profile used only for the landing-page preview graphic and
+ * engine tests. It is never loaded into a student's session.
+ */
 export const EXAMPLE_PROFILE: StudentProfile = {
-  name: "Maya Rodriguez",
-  school: "University of North Carolina",
+  name: "Example Student",
+  school: "Example State University",
   institutionId: DEFAULT_INSTITUTION_ID,
   degree: "Bachelor of Science",
   major: "Biology",
