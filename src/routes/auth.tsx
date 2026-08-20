@@ -116,10 +116,16 @@ function AuthPage() {
         </div>
 
         <h1 className="mt-6 font-display text-3xl leading-tight">
-          {mode === "signin" ? "Welcome back" : "Create your account"}
+          {mode === "signin"
+            ? "Welcome back"
+            : mode === "signup"
+              ? "Create your account"
+              : "Reset your password"}
         </h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          Your profile, simulated paths and semester plan are saved to your account — only you can see them.
+          {mode === "forgot"
+            ? "Enter your email and we’ll send you a link to choose a new password."
+            : "Your profile, simulated paths and semester plan are saved to your account — only you can see them."}
         </p>
 
         <form onSubmit={submit} className="mt-7 space-y-4 rounded-2xl border border-border bg-card p-5">
@@ -135,31 +141,66 @@ function AuthPage() {
               className="mt-1.5"
             />
           </div>
-          <div>
-            <Label htmlFor="password">Password</Label>
-            <Input
-              id="password"
-              type="password"
-              autoComplete={mode === "signin" ? "current-password" : "new-password"}
-              required
-              minLength={6}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="mt-1.5"
-            />
-          </div>
+          {mode !== "forgot" && (
+            <div>
+              <Label htmlFor="password">Password</Label>
+              <Input
+                id="password"
+                type="password"
+                autoComplete={mode === "signin" ? "current-password" : "new-password"}
+                required
+                minLength={6}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="mt-1.5"
+              />
+            </div>
+          )}
+          {mode === "signup" && (
+            <div>
+              <Label htmlFor="confirmPassword">Confirm password</Label>
+              <Input
+                id="confirmPassword"
+                type="password"
+                autoComplete="new-password"
+                required
+                minLength={6}
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                className="mt-1.5"
+              />
+            </div>
+          )}
+
+          {mode === "signin" && (
+            <div className="text-right">
+              <button
+                type="button"
+                className="text-sm font-medium text-foreground underline underline-offset-4"
+                onClick={() => setMode("forgot")}
+              >
+                Forgot password?
+              </button>
+            </div>
+          )}
 
           {error && <p className="text-sm text-destructive">{error}</p>}
           {message && <p className="text-sm text-muted-foreground">{message}</p>}
 
           <Button type="submit" className="w-full gap-1.5" disabled={busy}>
             {busy && <Loader2 className="size-4 animate-spin" />}
-            {mode === "signin" ? "Sign in" : "Create account"}
+            {mode === "signin"
+              ? "Sign in"
+              : mode === "signup"
+                ? "Create account"
+                : "Send reset link"}
           </Button>
 
-          <Button type="button" variant="outline" className="w-full" onClick={() => void google()}>
-            Continue with Google
-          </Button>
+          {mode !== "forgot" && (
+            <Button type="button" variant="outline" className="w-full" onClick={() => void google()}>
+              Continue with Google
+            </Button>
+          )}
         </form>
 
         <div className="mt-5 rounded-2xl border border-border bg-muted/40 p-5">
