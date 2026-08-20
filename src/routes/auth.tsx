@@ -229,14 +229,42 @@ function AuthPage() {
 
 
         <p className="mt-4 text-sm text-muted-foreground">
-          {mode === "signin" ? "New to Fork?" : "Already have an account?"}{" "}
-          <button
-            type="button"
-            className="font-medium text-foreground underline underline-offset-4"
-            onClick={() => setMode(mode === "signin" ? "signup" : "signin")}
-          >
-            {mode === "signin" ? "Create an account" : "Sign in"}
-          </button>
+          {mode === "signin" && (
+            <>
+              New to Fork?{" "}
+              <button
+                type="button"
+                className="font-medium text-foreground underline underline-offset-4"
+                onClick={() => setMode("signup")}
+              >
+                Create an account
+              </button>
+            </>
+          )}
+          {mode === "signup" && (
+            <>
+              Already have an account?{" "}
+              <button
+                type="button"
+                className="font-medium text-foreground underline underline-offset-4"
+                onClick={() => setMode("signin")}
+              >
+                Sign in
+              </button>
+            </>
+          )}
+          {mode === "forgot" && (
+            <>
+              Remember your password?{" "}
+              <button
+                type="button"
+                className="font-medium text-foreground underline underline-offset-4"
+                onClick={() => setMode("signin")}
+              >
+                Sign in
+              </button>
+            </>
+          )}
         </p>
         <p className="mt-2 text-sm text-muted-foreground">
           Or{" "}
