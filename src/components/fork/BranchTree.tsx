@@ -187,6 +187,7 @@ function BranchNode({
   selected,
   best,
   onSelect,
+  nodeRef,
 }: {
   path: SimulatedPath;
   index: number;
@@ -194,6 +195,7 @@ function BranchNode({
   selected: boolean;
   best: boolean;
   onSelect: (id: string) => void;
+  nodeRef: (el: HTMLButtonElement | null) => void;
 }) {
   const cost = useCountUp(path.estimatedCost, animate, 800);
 
