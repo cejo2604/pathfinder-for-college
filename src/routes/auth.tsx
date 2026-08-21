@@ -150,7 +150,15 @@ function AuthPage() {
           options: { emailRedirectTo: `${window.location.origin}/profile` },
         });
         if (signUpError) throw signUpError;
-        if (!data.session) setMessage("Check your email to confirm your account, then sign in.");
+        // Supabase returns a user with no identities when the email is already
+        // registered — no confirmation email is sent in that case.
+        if (!data.session && (data.user?.identities?.length ?? 0) === 0) {
+          setMode("signin");
+          setMessage("That email already has an account — sign in instead, or use “Forgot password?”.");
+        } else if (!data.session) {
+          setMessage("Check your email to confirm your account, then sign in.");
+        }
+
       } else {
         const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
         if (signInError) throw signInError;
