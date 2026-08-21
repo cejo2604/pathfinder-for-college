@@ -91,6 +91,7 @@ function AuthPage() {
 
       const { error: updateError } = await supabase.auth.updateUser({ password });
       if (updateError) throw updateError;
+      setResetDone(true);
       setMessage("Password updated. Signing you in…");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not reset your password. Try again.");
