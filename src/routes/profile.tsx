@@ -373,6 +373,257 @@ function NumberField({
   );
 }
 
+function CourseworkSection({
+  draft,
+  onChange,
+}: {
+  draft: StudentProfile;
+  onChange: (patch: Partial<StudentProfile>) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const [addOpen, setAddOpen] = useState(false);
+  const [deleteIndex, setDeleteIndex] = useState<number | null>(null);
+
+  const [newCourse, setNewCourse] = useState<StudentCourse>({
+    code: "",
+    status: "completed",
+    term: "",
+    grade: "",
+    verified: true,
+    source: "manual",
+  });
+
+  const completed = draft.courses
+    .map((c, i) => ({ course: c, index: i }))
+    .filter((c) => c.course.status === "completed");
+  const current = draft.courses
+    .map((c, i) => ({ course: c, index: i }))
+    .filter((c) => c.course.status === "in_progress");
+  const waitlisted = draft.courses
+    .map((c, i) => ({ course: c, index: i }))
+    .filter((c) => c.course.status === "waitlisted");
+
+  const courseOptions = COURSES.map((c) => c.code);
+
+  const updateNewCourse = (patch: Partial<StudentCourse>) => {
+    setNewCourse((prev) => ({ ...prev, ...patch }));
+  };
+
+  const handleAdd = () => {
+    const code = newCourse.code.trim();
+    const term = newCourse.term.trim();
+    if (!code || !term) return;
+    onChange({ courses: [...draft.courses, { ...newCourse, code, term }] });
+    setNewCourse({
+      code: "",
+      status: "completed",
+      term: "",
+      grade: "",
+      verified: true,
+      source: "manual",
+    });
+    setAddOpen(false);
+  };
+
+  const handleDelete = () => {
+    if (deleteIndex === null) return;
+    onChange({ courses: draft.courses.filter((_, i) => i !== deleteIndex) });
+    setDeleteIndex(null);
+  };
+
+  const deleteLabel = (i: number) => {
+    const c = draft.courses[i];
+    const course = courseByCode(c.code);
+    return `${c.code}${course ? ` — ${course.title}` : ""}`;
+  };
+
+  return (
+    <Collapsible open={open} onOpenChange={setOpen}>
+      <CollapsibleTrigger asChild>
+        <button type="button" className="flex w-full items-center justify-between text-left">
+          <h2 className="font-display text-xl">Coursework</h2>
+          <ChevronDown
+            className={`size-5 shrink-0 text-muted-foreground transition-transform ${open ? "rotate-180" : ""}`}
+          />
+        </button>
+      </CollapsibleTrigger>
+      <CollapsibleContent>
+        <div className="mt-4 space-y-5 text-sm">
+          <div className="flex items-center justify-between">
+            <h3 className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+              Completed ({draft.creditsCompleted} credits)
+            </h3>
+            <Dialog open={addOpen} onOpenChange={setAddOpen}>
+              <DialogTrigger asChild>
+                <Button variant="outline" size="sm" className="gap-1">
+                  <Plus className="size-4" /> Add Coursework
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Add coursework</DialogTitle>
+                  <DialogDescription>
+                    Enter a course you have completed, are taking, or are waitlisted for.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="grid gap-4 py-4">
+                  <AutofillField
+                    label="Course code"
+                    value={newCourse.code}
+                    options={courseOptions}
+                    placeholder="e.g. BIOL 101"
+                    onChange={(code) => updateNewCourse({ code })}
+                  />
+                  <div>
+                    <Label className="text-xs uppercase tracking-[0.1em] text-muted-foreground">Status</Label>
+                    <Select
+                      value={newCourse.status}
+                      onValueChange={(status) => updateNewCourse({ status: status as StudentCourse["status"] })}
+                    >
+                      <SelectTrigger className="mt-1.5">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="completed">Completed</SelectItem>
+                        <SelectItem value="in_progress">In progress</SelectItem>
+                        <SelectItem value="waitlisted">Waitlisted</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <Field
+                    label="Term"
+                    value={newCourse.term}
+                    placeholder="e.g. Fall 2025"
+                    onChange={(term) => updateNewCourse({ term })}
+                  />
+                  <Field
+                    label="Grade"
+                    value={newCourse.grade ?? ""}
+                    placeholder="Optional"
+                    onChange={(grade) => updateNewCourse({ grade: grade || undefined })}
+                  />
+                  {newCourse.status === "waitlisted" && (
+                    <NumberField
+                      label="Waitlist position"
+                      value={newCourse.waitlistPosition ?? 0}
+                      placeholder="Optional"
+                      onCommit={(waitlistPosition) => updateNewCourse({ waitlistPosition: waitlistPosition || undefined })}
+                    />
+                  )}
+                </div>
+                <DialogFooter>
+                  <Button variant="outline" onClick={() => setAddOpen(false)}>
+                    Cancel
+                  </Button>
+                  <Button onClick={handleAdd} disabled={!newCourse.code.trim() || !newCourse.term.trim()}>
+                    Add course
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          </div>
+
+          <ul className="mt-2 divide-y divide-border/70">
+            {completed.map(({ course: sc, index }) => {
+              const course = courseByCode(sc.code);
+              return (
+                <li key={`${sc.code}-${sc.term}`} className="flex items-center justify-between gap-2 py-1.5">
+                  <span className="flex items-baseline gap-2">
+                    <span className="font-medium">{sc.code}</span>
+                    {course ? ` — ${course.title}` : " — General education requirements"}
+                  </span>
+                  <span className="flex items-center gap-2">
+                    <span className="shrink-0 text-muted-foreground">
+                      {sc.term}
+                      {sc.grade ? ` · ${sc.grade}` : ""}
+                    </span>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="size-7 text-muted-foreground hover:text-destructive"
+                      aria-label={`Delete ${sc.code}`}
+                      onClick={() => setDeleteIndex(index)}
+                    >
+                      <Trash2 className="size-4" />
+                    </Button>
+                  </span>
+                </li>
+              );
+            })}
+          </ul>
+
+          <div>
+            <h3 className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">In progress</h3>
+            <ul className="mt-2 flex flex-wrap gap-2">
+              {current.map(({ course: sc, index }) => (
+                <li key={`${sc.code}-${index}`} className="flex items-center gap-1 rounded-full bg-muted px-3 py-1">
+                  {sc.code}
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="size-5 text-muted-foreground hover:text-destructive"
+                    aria-label={`Delete ${sc.code}`}
+                    onClick={() => setDeleteIndex(index)}
+                  >
+                    <Trash2 className="size-3.5" />
+                  </Button>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {waitlisted.length > 0 && (
+            <div>
+              <h3 className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">Waitlisted</h3>
+              <ul className="mt-2 flex flex-wrap gap-2">
+                {waitlisted.map(({ course: sc, index }) => (
+                  <li
+                    key={`${sc.code}-wl-${index}`}
+                    className="flex items-center gap-1 rounded-full border border-gold/50 bg-gold/10 px-3 py-1"
+                  >
+                    {sc.code}
+                    {sc.waitlistPosition ? ` · #${sc.waitlistPosition}` : ""}
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="size-5 text-muted-foreground hover:text-destructive"
+                      aria-label={`Delete ${sc.code}`}
+                      onClick={() => setDeleteIndex(index)}
+                    >
+                      <Trash2 className="size-3.5" />
+                    </Button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+      </CollapsibleContent>
+
+      <Dialog open={deleteIndex !== null} onOpenChange={(isOpen) => !isOpen && setDeleteIndex(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete course?</DialogTitle>
+            <DialogDescription>
+              This will remove {deleteIndex !== null ? deleteLabel(deleteIndex) : "this course"} from your coursework.
+              This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeleteIndex(null)}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={handleDelete}>
+              Delete
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </Collapsible>
+  );
+}
+
+
 
 
 
