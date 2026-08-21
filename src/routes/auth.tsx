@@ -296,19 +296,14 @@ function AuthPage() {
 
           <Button type="submit" className="w-full gap-1.5" disabled={busy}>
             {busy && <Loader2 className="size-4 animate-spin" />}
-            {mode === "signin"
-              ? "Sign in"
-              : mode === "signup"
-                ? "Create account"
-                : "Send reset link"}
+            {mode === "signin" ? "Sign in" : "Create account"}
           </Button>
 
-          {mode !== "forgot" && (
-            <Button type="button" variant="outline" className="w-full" onClick={() => void google()}>
-              Continue with Google
-            </Button>
-          )}
+          <Button type="button" variant="outline" className="w-full" onClick={() => void google()}>
+            Continue with Google
+          </Button>
         </form>
+        )}
 
         <p className="mt-4 text-sm text-muted-foreground">
           {mode === "signin" && (
