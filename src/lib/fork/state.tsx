@@ -123,7 +123,9 @@ export function ForkProvider({ children }: { children: ReactNode }) {
     let restored: ForkState = { ...initialState, ownerId: userId };
     if (carry) {
       restored = { ...carry, ownerId: userId };
-    } else {
+    } else if (userId) {
+      // Only an authenticated owner has stored state; anonymous work is
+      // memory-only so nothing can pose as a signed-in profile on next visit.
       try {
         const raw = window.localStorage.getItem(storageKeyFor(userId));
         if (raw) {
@@ -134,9 +136,17 @@ export function ForkProvider({ children }: { children: ReactNode }) {
       } catch {
         /* ignore unreadable storage */
       }
+    } else {
+      // Signed out: drop any leftover anonymous entries from earlier visits.
+      try {
+        window.localStorage.removeItem(storageKeyFor(null));
+      } catch {
+        /* ignore */
+      }
     }
     setState(restored);
     setHydrated(true);
+
 
     if (!userId) {
       setRemoteReady(true);
