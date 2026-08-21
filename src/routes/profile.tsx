@@ -171,7 +171,7 @@ function ProfilePage() {
 
 
 
-      <div className="mt-10 grid gap-6 lg:grid-cols-2">
+      <div className="mt-10 grid items-start gap-6 lg:grid-cols-2">
         <section className="rounded-2xl border border-border bg-card p-5">
           <h2 className="font-display text-xl">Academic</h2>
           <div className="mt-4 grid gap-4 sm:grid-cols-2">
