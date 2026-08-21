@@ -242,7 +242,7 @@ function ProfilePage() {
         </section>
 
 
-        <section className="rounded-2xl border border-border bg-card p-2">
+        <section className="rounded-2xl border border-border bg-card p-1">
           <CourseworkSection draft={draft} onChange={(patch) => updateDraft(patch)} />
         </section>
 
