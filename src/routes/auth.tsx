@@ -124,17 +124,19 @@ function AuthPage() {
 
     setBusy(true);
     try {
-      // The emailed code proves ownership of the address before any password change.
-      // Accept either the 6-digit code or the token from the emailed link.
-      const raw = code.trim();
-      const fromLink = raw.includes("token_hash=")
-        ? (new URLSearchParams(raw.slice(raw.indexOf("?") + 1)).get("token_hash") ?? "")
-        : "";
-      const isSixDigit = /^\d{6}$/.test(raw);
-      const { error: verifyError } = isSixDigit
-        ? await supabase.auth.verifyOtp({ email, token: raw, type: "recovery" })
-        : await supabase.auth.verifyOtp({ token_hash: fromLink || raw, type: "recovery" });
-      if (verifyError) throw verifyError;
+      // The emailed code/link proves ownership of the address before any password change.
+      if (!recoveryReady) {
+        const raw = code.trim();
+        const fromLink = raw.includes("token_hash=")
+          ? (new URLSearchParams(raw.slice(raw.indexOf("?") + 1)).get("token_hash") ?? "")
+          : "";
+        const isSixDigit = /^\d{6}$/.test(raw);
+        const { error: verifyError } = isSixDigit
+          ? await supabase.auth.verifyOtp({ email, token: raw, type: "recovery" })
+          : await supabase.auth.verifyOtp({ token_hash: fromLink || raw, type: "recovery" });
+        if (verifyError) throw verifyError;
+      }
+
 
       const { error: updateError } = await supabase.auth.updateUser({ password });
       if (updateError) throw updateError;
