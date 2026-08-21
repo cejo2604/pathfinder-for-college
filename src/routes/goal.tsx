@@ -155,7 +155,7 @@ function GoalPage() {
       <section className="mt-8 max-w-2xl rounded-2xl border border-border bg-card p-5">
         <h2 className="font-display text-xl">Which major or minor are you considering?</h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          Confirm a selection and Fork pre-loads it into the simulation cards on My Path.
+          Confirm a selection and Fork pre-loads it into the simulation cards on your Plan page.
         </p>
         <div className="mt-4 grid gap-3 sm:grid-cols-2">
           <div>
@@ -211,7 +211,7 @@ function GoalPage() {
                 majorId: majorId === NONE ? null : majorId,
                 minorId: minorId === NONE ? null : minorId,
               });
-              void navigate({ to: "/plan" });
+              void navigate({ to: "/home" });
             }}
           >
             Confirm selection <ArrowRight className="size-4" />
