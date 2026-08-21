@@ -31,6 +31,7 @@ function AuthPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [code, setCode] = useState("");
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -42,6 +43,57 @@ function AuthPage() {
   }, [session, navigate]);
 
 
+
+  const sendCode = async () => {
+    setBusy(true);
+    setError(null);
+    setMessage(null);
+    try {
+      const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/auth`,
+      });
+      if (resetError) throw resetError;
+      setMessage("If that email is registered, a verification code is on its way.");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not send the code. Try again.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const resetWithCode = async (event: React.FormEvent) => {
+    event.preventDefault();
+    setError(null);
+    setMessage(null);
+
+    if (password !== confirmPassword) {
+      setError("Passwords do not match.");
+      return;
+    }
+    if (password.length < 6) {
+      setError("Password must be at least 6 characters.");
+      return;
+    }
+
+    setBusy(true);
+    try {
+      // The emailed code proves ownership of the address before any password change.
+      const { error: verifyError } = await supabase.auth.verifyOtp({
+        email,
+        token: code.trim(),
+        type: "recovery",
+      });
+      if (verifyError) throw verifyError;
+
+      const { error: updateError } = await supabase.auth.updateUser({ password });
+      if (updateError) throw updateError;
+      setMessage("Password updated. Signing you in…");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not reset your password. Try again.");
+    } finally {
+      setBusy(false);
+    }
+  };
 
   const submit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -57,12 +109,6 @@ function AuthPage() {
         });
         if (signUpError) throw signUpError;
         if (!data.session) setMessage("Check your email to confirm your account, then sign in.");
-      } else if (mode === "forgot") {
-        const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
-          redirectTo: `${window.location.origin}/reset-password`,
-        });
-        if (resetError) throw resetError;
-        setMessage("If that email is registered, you’ll receive a reset link shortly.");
       } else {
         const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
         if (signInError) throw signInError;
