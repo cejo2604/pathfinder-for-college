@@ -164,7 +164,6 @@ function GoalPage() {
               value={majorId}
               onValueChange={(v) => {
                 setMajorId(v);
-                setConfirmed(false);
               }}
             >
               <SelectTrigger className="mt-2" aria-label="Choose a major you are considering">
