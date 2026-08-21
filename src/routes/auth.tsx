@@ -159,10 +159,12 @@ function AuthPage() {
           setMessage("Check your email to confirm your account, then sign in.");
         }
 
-      } else {
-        const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
-        if (signInError) throw signInError;
-      }
+        } else {
+          const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+          if (signInError) throw signInError;
+          // Successful email/password sign-in: go straight to the profile page.
+          void navigate({ to: "/profile" });
+        }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong. Try again.");
     } finally {
