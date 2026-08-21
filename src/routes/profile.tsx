@@ -125,9 +125,26 @@ function ProfilePage() {
             : "Tell Fork where you stand academically. Press Save profile when you're ready to continue."}
         </p>
         <div className="mt-5 flex flex-col gap-2 items-start">
-          <Button variant="outline" className="gap-1.5" onClick={() => void navigate({ to: "/import" })}>
-            <Upload className="size-4" /> Import my academic history
-          </Button>
+          <div className="flex flex-wrap gap-2">
+            <Button variant="outline" className="gap-1.5" onClick={() => void navigate({ to: "/import" })}>
+              <Upload className="size-4" /> Import my academic history
+            </Button>
+            {!signedIn && (
+              <Button variant="ghost" className="gap-1.5" onClick={() => void navigate({ to: "/auth" })}>
+                Sign in to save
+              </Button>
+            )}
+            {signedIn && (
+              <Button
+                variant="outline"
+                className="gap-1.5"
+                onClick={handleSave}
+                disabled={saveStatus === "saving"}
+              >
+                {saveStatus === "saving" ? "Saving..." : "Save profile"}
+              </Button>
+            )}
+          </div>
           <Button
             className="gap-1.5"
             size="lg"
@@ -136,21 +153,6 @@ function ProfilePage() {
           >
             {hasProfile ? "Go to my path" : "Save and continue"} <ArrowRight className="size-4" />
           </Button>
-          {!signedIn && (
-            <Button variant="ghost" className="gap-1.5" onClick={() => void navigate({ to: "/auth" })}>
-              Sign in to save
-            </Button>
-          )}
-          {signedIn && (
-            <Button
-              variant="outline"
-              className="gap-1.5"
-              onClick={handleSave}
-              disabled={saveStatus === "saving"}
-            >
-              {saveStatus === "saving" ? "Saving..." : "Save profile"}
-            </Button>
-          )}
         </div>
         {saveStatus === "success" && (
           <div className="mt-3 flex items-center gap-2 text-sm text-green-600">
