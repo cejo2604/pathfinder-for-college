@@ -124,7 +124,7 @@ function ProfilePage() {
             ? "Everything below is editable. Press Save profile when you're ready to update your record."
             : "Tell Fork where you stand academically. Press Save profile when you're ready to continue."}
         </p>
-        <div className="mt-5 flex flex-wrap gap-2">
+        <div className="mt-5 flex flex-col gap-2 items-start">
           <Button variant="outline" className="gap-1.5" onClick={() => void navigate({ to: "/import" })}>
             <Upload className="size-4" /> Import my academic history
           </Button>
@@ -240,7 +240,7 @@ function ProfilePage() {
         </section>
 
 
-        <section className="rounded-2xl border border-border bg-card p-5">
+        <section className="rounded-2xl border border-border bg-card p-3">
           <CourseworkSection draft={draft} onChange={(patch) => updateDraft(patch)} />
         </section>
 
