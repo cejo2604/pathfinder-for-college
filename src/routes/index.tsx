@@ -65,9 +65,6 @@ function Landing() {
               <Button size="lg" className="rounded-full px-10 shadow-lift" onClick={startFresh}>
                 Start here
               </Button>
-              <Button asChild size="default" variant="ghost" className="rounded-full px-4">
-                <Link to="/import">Import my academic history</Link>
-              </Button>
             </div>
 
             <p className="mt-6 text-sm text-muted-foreground">
