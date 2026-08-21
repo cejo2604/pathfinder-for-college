@@ -257,21 +257,19 @@ function AuthPage() {
               className="mt-1.5"
             />
           </div>
-          {(
-            <div>
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                autoComplete={mode === "signin" ? "current-password" : "new-password"}
-                required
-                minLength={6}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="mt-1.5"
-              />
-            </div>
-          )}
+          <div>
+            <Label htmlFor="password">Password</Label>
+            <Input
+              id="password"
+              type="password"
+              autoComplete={mode === "signin" ? "current-password" : "new-password"}
+              required
+              minLength={6}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="mt-1.5"
+            />
+          </div>
           {mode === "signup" && (
             <div>
               <Label htmlFor="confirmPassword">Confirm password</Label>
