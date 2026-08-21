@@ -171,7 +171,7 @@ function ProfilePage() {
 
 
 
-      <div className="mt-10 grid gap-6 lg:grid-cols-2">
+      <div className="mt-10 grid items-start gap-6 lg:grid-cols-2">
         <section className="rounded-2xl border border-border bg-card p-5">
           <h2 className="font-display text-xl">Academic</h2>
           <div className="mt-4 grid gap-4 sm:grid-cols-2">
@@ -452,7 +452,7 @@ function CourseworkSection({
         </button>
       </CollapsibleTrigger>
       <CollapsibleContent>
-        <div className="mt-2 space-y-2 text-sm">
+        <div className="mt-1 space-y-1 text-sm">
           <div className="flex items-center justify-between">
             <h3 className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
               Completed ({draft.creditsCompleted} credits)
