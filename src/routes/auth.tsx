@@ -38,9 +38,12 @@ function AuthPage() {
 
   useEffect(() => {
     if (!session) return;
+    // Verifying a recovery code creates a session mid-flow; stay put until the
+    // new password has actually been written.
+    if (mode === "forgot" && !resetDone) return;
     // The profile page shows the saved record, or the empty form to create one.
     void navigate({ to: "/profile" });
-  }, [session, navigate]);
+  }, [session, navigate, mode, resetDone]);
 
 
 
