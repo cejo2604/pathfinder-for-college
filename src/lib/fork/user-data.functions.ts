@@ -77,7 +77,28 @@ export const loadForkData = createServerFn({ method: "GET" })
     ]);
 
     const row = profileRes.data as ProfileRow | null;
-    const hasProfile = Boolean(row && (row.name || row.major || row.school));
+    // The signup trigger creates a blank row, so "saved" means any field the
+    // student could have filled in — not just name/major/school.
+    const hasProfile = Boolean(
+      row &&
+        (row.name?.trim() ||
+          row.major?.trim() ||
+          row.school?.trim() ||
+          row.degree?.trim() ||
+          row.minor?.trim() ||
+          row.year?.trim() ||
+          row.graduation_target?.trim() ||
+          row.goal?.trim() ||
+          row.goal_category?.trim() ||
+          row.career_id ||
+          row.credits_completed > 0 ||
+          Number(row.gpa) > 0 ||
+          (row.interests?.length ?? 0) > 0 ||
+          (row.career_interests?.length ?? 0) > 0 ||
+          (row.skills?.length ?? 0) > 0 ||
+          (Array.isArray(row.courses) && row.courses.length > 0)),
+    );
+
 
     return {
       profile: row && hasProfile ? toProfile(row) : null,
