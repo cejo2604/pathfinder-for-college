@@ -29,14 +29,16 @@ export const Route = createFileRoute("/")({
 const PREVIEW = simulatePaths(["baseline", "switch_cs", "cs_minor"], { profile: EXAMPLE_PROFILE });
 
 function Landing() {
-  const { startBlank, session } = useFork();
+  const { startBlank, session, signOut } = useFork();
   const navigate = useNavigate();
 
-  const startFresh = () => {
+  const startFresh = async () => {
+    // Never continue into whatever account happens to be signed in: always start at sign-in.
+    if (session) await signOut();
     startBlank();
-    // Already signed in? /auth would bounce right back, so go straight to the profile form.
-    void navigate({ to: session ? "/profile" : "/auth" });
+    void navigate({ to: "/auth" });
   };
+
 
 
   return (
