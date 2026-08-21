@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Sparkles } from "lucide-react";
 
 import { ForkShell } from "@/components/fork/ForkShell";
@@ -27,15 +27,23 @@ export const Route = createFileRoute("/home")({
 
 function MyPath() {
   const profile = useForkProfile();
-  const { profile: loaded, careerId, priorities, signedIn, choosePath } = useFork();
+  const { profile: loaded, careerId, priorities, signedIn, choosePath, targetMajorId, targetMinorId } = useFork();
   const navigate = useNavigate();
 
   // Any catalog program can be simulated from here — the student picks it.
   const majors = useMemo(() => selectableMajors(profile), [profile]);
   const minors = useMemo(() => selectableMinors(profile), [profile]);
   const NONE = "__none";
-  const [majorId, setMajorId] = useState(NONE);
-  const [minorId, setMinorId] = useState(NONE);
+  const [majorId, setMajorId] = useState(targetMajorId ?? NONE);
+  const [minorId, setMinorId] = useState(targetMinorId ?? NONE);
+
+  // A selection confirmed on the goal page pre-fills these cards.
+  useEffect(() => {
+    if (targetMajorId) setMajorId(targetMajorId);
+  }, [targetMajorId]);
+  useEffect(() => {
+    if (targetMinorId) setMinorId(targetMinorId);
+  }, [targetMinorId]);
   const [compareId, setCompareId] = useState<string | null>(null);
 
   const pickedMajor = majorId === NONE ? "" : majorId;

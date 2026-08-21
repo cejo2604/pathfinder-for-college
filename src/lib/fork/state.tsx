@@ -33,6 +33,9 @@ export interface ForkState {
   chosenPathId: string | null;
   doneActions: string[];
   savedPaths: SavedPathRow[];
+  /** Program ids the student confirmed on the goal page, pre-filled on My Path. */
+  targetMajorId: string | null;
+  targetMinorId: string | null;
   /** Authenticated user id that owns this state, or null for anonymous/demo work. */
   ownerId: string | null;
 }
@@ -47,6 +50,8 @@ const initialState: ForkState = {
   chosenPathId: null,
   doneActions: [],
   savedPaths: [],
+  targetMajorId: null,
+  targetMinorId: null,
   ownerId: null,
 };
 
@@ -63,6 +68,7 @@ interface ForkContextValue extends ForkState {
   setProfile: (patch: Partial<StudentProfile>) => void;
   setPriorities: (priorities: Priority[]) => void;
   setCareerId: (id: string) => void;
+  setTargetPrograms: (targets: { majorId?: string | null; minorId?: string | null }) => void;
   runScenario: (scenarioId: string, question: string) => void;
   toggleComparison: (pathId: string) => void;
   setComparison: (ids: string[]) => void;
@@ -280,6 +286,12 @@ export function ForkProvider({ children }: { children: ReactNode }) {
         patch({ careerId });
         persistProfile();
       },
+      setTargetPrograms: ({ majorId, minorId }) =>
+        setState((s) => ({
+          ...s,
+          targetMajorId: majorId === undefined ? s.targetMajorId : majorId,
+          targetMinorId: minorId === undefined ? s.targetMinorId : minorId,
+        })),
       runScenario: (scenarioId, scenarioQuestion) => patch({ scenarioId, scenarioQuestion, comparison: [] }),
       toggleComparison: (pathId) =>
         setState((s) => {

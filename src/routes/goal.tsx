@@ -1,13 +1,17 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { ArrowRight } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { ForkShell } from "@/components/fork/ForkShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { CAREERS } from "@/lib/fork/data";
+import { selectableMajors, selectableMinors } from "@/lib/fork/program-paths";
 import { useFork, useForkProfile } from "@/lib/fork/state";
+
+const NONE = "__none";
 
 export const Route = createFileRoute("/goal")({
   head: () => ({
@@ -63,7 +67,17 @@ const DISCOVERY_RESULT = [
 function GoalPage() {
   const profile = useForkProfile();
   const navigate = useNavigate();
-  const { setProfile, setCareerId } = useFork();
+  const { setProfile, setCareerId, setTargetPrograms, targetMajorId, targetMinorId } = useFork();
+  const majors = useMemo(() => selectableMajors(profile), [profile]);
+  const minors = useMemo(() => selectableMinors(profile), [profile]);
+  const [majorId, setMajorId] = useState(targetMajorId ?? NONE);
+  const [minorId, setMinorId] = useState(targetMinorId ?? NONE);
+  const [confirmed, setConfirmed] = useState(false);
+
+  useEffect(() => {
+    setMajorId(targetMajorId ?? NONE);
+    setMinorId(targetMinorId ?? NONE);
+  }, [targetMajorId, targetMinorId]);
   const [freeText, setFreeText] = useState(profile.goal);
   const [discovering, setDiscovering] = useState(false);
   const [answers, setAnswers] = useState<number[]>([]);
@@ -137,6 +151,85 @@ function GoalPage() {
             Set goal <ArrowRight className="size-4" />
           </Button>
         </form>
+      </section>
+
+      <section className="mt-8 max-w-2xl rounded-2xl border border-border bg-card p-5">
+        <h2 className="font-display text-xl">Which major or minor are you considering?</h2>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Confirm a selection and Fork pre-loads it into the simulation cards on My Path.
+        </p>
+        <div className="mt-4 grid gap-3 sm:grid-cols-2">
+          <div>
+            <label className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">Major</label>
+            <Select
+              value={majorId}
+              onValueChange={(v) => {
+                setMajorId(v);
+                setConfirmed(false);
+              }}
+            >
+              <SelectTrigger className="mt-2" aria-label="Choose a major you are considering">
+                <SelectValue placeholder="Choose a major" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={NONE}>No selection</SelectItem>
+                {majors.map((p) => (
+                  <SelectItem key={p.id} value={p.id}>
+                    {p.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <label className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">Minor</label>
+            <Select
+              value={minorId}
+              onValueChange={(v) => {
+                setMinorId(v);
+                setConfirmed(false);
+              }}
+            >
+              <SelectTrigger className="mt-2" aria-label="Choose a minor you are considering">
+                <SelectValue placeholder="Choose a minor" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={NONE}>No selection</SelectItem>
+                {minors.map((p) => (
+                  <SelectItem key={p.id} value={p.id}>
+                    {p.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+        <div className="mt-4 flex flex-wrap items-center gap-3">
+          <Button
+            type="button"
+            className="gap-1.5"
+            disabled={majorId === NONE && minorId === NONE}
+            onClick={() => {
+              setTargetPrograms({
+                majorId: majorId === NONE ? null : majorId,
+                minorId: minorId === NONE ? null : minorId,
+              });
+              setConfirmed(true);
+            }}
+          >
+            Confirm selection <ArrowRight className="size-4" />
+          </Button>
+          {confirmed && (
+            <Button type="button" variant="outline" onClick={() => void navigate({ to: "/home" })}>
+              See it on My Path
+            </Button>
+          )}
+        </div>
+        {confirmed && (
+          <p className="mt-3 text-sm text-muted-foreground">
+            Confirmed. Your simulation cards on My Path now use this selection.
+          </p>
+        )}
       </section>
 
       {discovering && (
