@@ -242,7 +242,7 @@ function ProfilePage() {
         </section>
 
 
-        <section className="rounded-2xl border border-border bg-card p-2">
+        <section className="rounded-2xl border border-border bg-card p-1">
           <CourseworkSection draft={draft} onChange={(patch) => updateDraft(patch)} />
         </section>
 
@@ -452,7 +452,7 @@ function CourseworkSection({
         </button>
       </CollapsibleTrigger>
       <CollapsibleContent>
-        <div className="mt-3 space-y-3 text-sm">
+        <div className="mt-2 space-y-2 text-sm">
           <div className="flex items-center justify-between">
             <h3 className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
               Completed ({draft.creditsCompleted} credits)
