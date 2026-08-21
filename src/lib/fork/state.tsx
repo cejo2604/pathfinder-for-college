@@ -65,7 +65,9 @@ interface ForkContextValue extends ForkState {
   signedIn: boolean;
   signOut: () => Promise<void>;
   startBlank: () => void;
+  saveProfile: (draft?: StudentProfile) => Promise<void>;
   setProfile: (patch: Partial<StudentProfile>) => void;
+
   setPriorities: (priorities: Priority[]) => void;
   setCareerId: (id: string) => void;
   setTargetPrograms: (targets: { majorId?: string | null; minorId?: string | null }) => void;
