@@ -54,35 +54,40 @@ export function BranchTree({
     const wrap = wrapRef.current;
     const root = rootRef.current;
     if (!wrap || !root) return;
-    const wrapBox = wrap.getBoundingClientRect();
     // Below md the cards stack, so the SVG connectors are hidden entirely.
-    const stacked = window.matchMedia("(max-width: 767px)").matches;
-    if (stacked) {
+    if (window.matchMedia("(max-width: 767px)").matches) {
       setGeo(null);
       return;
     }
-    const rootBox = root.getBoundingClientRect();
+    // offset* is immune to the rise/hover transforms, unlike getBoundingClientRect.
+    const offsetIn = (el: HTMLElement) => {
+      let x = 0;
+      let y = 0;
+      let node: HTMLElement | null = el;
+      while (node && node !== wrap) {
+        x += node.offsetLeft;
+        y += node.offsetTop;
+        node = node.offsetParent as HTMLElement | null;
+      }
+      return { x, y };
+    };
+
+    const rootPos = offsetIn(root);
     const ends: Geometry["ends"] = [];
     for (const path of paths) {
       const el = cardRefs.current[path.id];
       if (!el) continue;
-      const box = el.getBoundingClientRect();
-      ends.push({
-        id: path.id,
-        x: box.left - wrapBox.left + box.width / 2,
-        y: box.top - wrapBox.top,
-      });
+      const pos = offsetIn(el);
+      ends.push({ id: path.id, x: pos.x + el.offsetWidth / 2, y: pos.y });
     }
     setGeo({
-      width: wrapBox.width,
-      height: wrapBox.height,
-      start: {
-        x: rootBox.left - wrapBox.left + rootBox.width / 2,
-        y: rootBox.bottom - wrapBox.top,
-      },
+      width: wrap.offsetWidth,
+      height: wrap.offsetHeight,
+      start: { x: rootPos.x + root.offsetWidth / 2, y: rootPos.y + root.offsetHeight },
       ends,
     });
   }, [paths]);
+
 
   useLayoutEffect(() => {
     measure();
