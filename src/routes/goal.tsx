@@ -214,22 +214,12 @@ function GoalPage() {
                 majorId: majorId === NONE ? null : majorId,
                 minorId: minorId === NONE ? null : minorId,
               });
-              setConfirmed(true);
+              void navigate({ to: "/plan" });
             }}
           >
             Confirm selection <ArrowRight className="size-4" />
           </Button>
-          {confirmed && (
-            <Button type="button" variant="outline" onClick={() => void navigate({ to: "/home" })}>
-              See it on My Path
-            </Button>
-          )}
         </div>
-        {confirmed && (
-          <p className="mt-3 text-sm text-muted-foreground">
-            Confirmed. Your simulation cards on My Path now use this selection.
-          </p>
-        )}
       </section>
 
       {discovering && (
