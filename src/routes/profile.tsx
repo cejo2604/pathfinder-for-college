@@ -227,60 +227,7 @@ function ProfilePage() {
 
 
         <section className="rounded-2xl border border-border bg-card p-5">
-          <h2 className="font-display text-xl">Coursework</h2>
-          <div className="mt-4 space-y-5 text-sm">
-            <div>
-              <h3 className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
-                Completed ({draft.creditsCompleted} credits)
-              </h3>
-
-              <ul className="mt-2 divide-y divide-border/70">
-                {completed.map((sc) => {
-                  const course = courseByCode(sc.code);
-                  return (
-                    <li key={`${sc.code}-${sc.term}`} className="flex items-baseline justify-between gap-2 py-1.5">
-                      <span>
-                        <span className="font-medium">{sc.code}</span>
-                        {course ? ` — ${course.title}` : " — General education requirements"}
-                      </span>
-                      <span className="shrink-0 text-muted-foreground">
-                        {sc.term}
-                        {sc.grade ? ` · ${sc.grade}` : ""}
-                      </span>
-                    </li>
-                  );
-                })}
-              </ul>
-            </div>
-            <div>
-              <h3 className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
-                In progress
-              </h3>
-              <ul className="mt-2 flex flex-wrap gap-2">
-                {current.map((sc, i) => (
-                  <li key={`${sc.code}-${i}`} className="rounded-full bg-muted px-3 py-1">
-                    {sc.code}
-                  </li>
-                ))}
-              </ul>
-            </div>
-            {waitlisted.length > 0 && (
-              <div>
-                <h3 className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
-                  Waitlisted
-                </h3>
-                <ul className="mt-2 flex flex-wrap gap-2">
-                  {waitlisted.map((sc, i) => (
-                    <li key={`${sc.code}-wl-${i}`} className="rounded-full border border-gold/50 bg-gold/10 px-3 py-1">
-                      {sc.code}
-                      {sc.waitlistPosition ? ` · #${sc.waitlistPosition}` : ""}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-
-          </div>
+          <CourseworkSection draft={draft} onChange={(patch) => updateDraft(patch)} />
         </section>
 
         <section className="rounded-2xl border border-border bg-card p-5">
