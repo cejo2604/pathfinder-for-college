@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { AlertCircle, ArrowRight, Check, Upload } from "lucide-react";
+import { AlertCircle, ArrowRight, Check, ChevronDown, Plus, Trash2, Upload } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { AutofillField } from "@/components/fork/AutofillField";
@@ -7,12 +7,29 @@ import { ForkShell } from "@/components/fork/ForkShell";
 import { SchoolField } from "@/components/fork/SchoolField";
 import { TagField } from "@/components/fork/TagField";
 import { Button } from "@/components/ui/button";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { DEGREES, FIELDS_OF_STUDY, MINORS, YEARS } from "@/lib/fork/academics";
-import { courseByCode } from "@/lib/fork/data";
+import { COURSES, courseByCode } from "@/lib/fork/data";
 import { CAREER_INTEREST_OPTIONS, INTEREST_OPTIONS, SKILL_OPTIONS } from "@/lib/fork/interests";
-import type { StudentProfile } from "@/lib/fork/data";
+import type { StudentCourse, StudentProfile } from "@/lib/fork/data";
 
 import { useFork, useForkProfile } from "@/lib/fork/state";
 
