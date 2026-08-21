@@ -35,25 +35,68 @@ export const Route = createFileRoute("/profile")({
 function ProfilePage() {
   const profile = useForkProfile();
   const navigate = useNavigate();
-  const { profile: loaded, setProfile, signedIn } = useFork();
+  const { profile: loaded, setProfile, signedIn, saveProfile, profileReady } = useFork();
 
-  const completed = profile.courses.filter((c) => c.status === "completed");
-  const current = profile.courses.filter((c) => c.status === "in_progress");
-  const waitlisted = profile.courses.filter((c) => c.status === "waitlisted");
+  const [draft, setDraft] = useState<StudentProfile>(profile);
+  const [draftInitialized, setDraftInitialized] = useState(false);
+  const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "success" | "error">("idle");
+  const [saveError, setSaveError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!draftInitialized && profileReady) {
+      setDraft(profile);
+      setDraftInitialized(true);
+    }
+  }, [draftInitialized, profileReady, profile]);
+
+  const updateDraft = (patch: Partial<StudentProfile>) => {
+    setDraft((prev) => ({ ...prev, ...patch }));
+  };
+
+  const handleSave = async () => {
+    if (!signedIn) return;
+    setSaveStatus("saving");
+    setSaveError(null);
+    try {
+      await saveProfile(draft);
+      setProfile({ ...draft });
+      setSaveStatus("success");
+    } catch (error) {
+      setSaveStatus("error");
+      setSaveError(error instanceof Error ? error.message : "Could not save profile");
+    }
+  };
+
+  const handleContinue = async () => {
+    if (signedIn) {
+      try {
+        await saveProfile(draft);
+        setProfile({ ...draft });
+      } catch (error) {
+        setSaveStatus("error");
+        setSaveError(error instanceof Error ? error.message : "Could not save profile");
+        return;
+      }
+    }
+    void navigate({ to: "/home" });
+  };
+
+  const completed = draft.courses.filter((c) => c.status === "completed");
+  const current = draft.courses.filter((c) => c.status === "in_progress");
+  const waitlisted = draft.courses.filter((c) => c.status === "waitlisted");
 
   // A profile "exists" once the student has entered anything Fork can use.
   const hasProfile = Boolean(
     loaded &&
-      (profile.name.trim() ||
-        profile.school.trim() ||
-        profile.major.trim() ||
-        profile.degree.trim() ||
-        profile.year.trim() ||
-        profile.graduationTarget.trim() ||
-        profile.gpa > 0 ||
-        profile.courses.length > 0),
+      (draft.name.trim() ||
+        draft.school.trim() ||
+        draft.major.trim() ||
+        draft.degree.trim() ||
+        draft.year.trim() ||
+        draft.graduationTarget.trim() ||
+        draft.gpa > 0 ||
+        draft.courses.length > 0),
   );
-
 
   return (
     <ForkShell>
@@ -64,14 +107,19 @@ function ProfilePage() {
         </h1>
         <p className="mt-3 text-muted-foreground">
           {hasProfile
-            ? "Everything below is editable — fix anything that changed or was entered wrong, and it saves automatically."
-            : "Tell Fork where you stand academically. Every field can be edited later, so nothing here is final."}
+            ? "Everything below is editable. Press Save profile when you're ready to update your record."
+            : "Tell Fork where you stand academically. Press Save profile when you're ready to continue."}
         </p>
         <div className="mt-5 flex flex-wrap gap-2">
           <Button variant="outline" className="gap-1.5" onClick={() => void navigate({ to: "/import" })}>
             <Upload className="size-4" /> Import my academic history
           </Button>
-          <Button className="gap-1.5" size="lg" onClick={() => void navigate({ to: "/home" })}>
+          <Button
+            className="gap-1.5"
+            size="lg"
+            onClick={handleContinue}
+            disabled={saveStatus === "saving"}
+          >
             {hasProfile ? "Go to my path" : "Save and continue"} <ArrowRight className="size-4" />
           </Button>
           {!signedIn && (
@@ -79,8 +127,31 @@ function ProfilePage() {
               Sign in to save
             </Button>
           )}
+          {signedIn && (
+            <Button
+              variant="outline"
+              className="gap-1.5"
+              onClick={handleSave}
+              disabled={saveStatus === "saving"}
+            >
+              {saveStatus === "saving" ? "Saving..." : "Save profile"}
+            </Button>
+          )}
         </div>
+        {saveStatus === "success" && (
+          <div className="mt-3 flex items-center gap-2 text-sm text-green-600">
+            <Check className="size-4" />
+            Profile saved successfully.
+          </div>
+        )}
+        {saveStatus === "error" && saveError && (
+          <div className="mt-3 flex items-center gap-2 text-sm text-destructive">
+            <AlertCircle className="size-4" />
+            {saveError}
+          </div>
+        )}
       </header>
+
 
 
 
