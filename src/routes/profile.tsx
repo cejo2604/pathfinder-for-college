@@ -231,8 +231,9 @@ function ProfilePage() {
           <div className="mt-4 space-y-5 text-sm">
             <div>
               <h3 className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
-                Completed ({profile.creditsCompleted} credits)
+                Completed ({draft.creditsCompleted} credits)
               </h3>
+
               <ul className="mt-2 divide-y divide-border/70">
                 {completed.map((sc) => {
                   const course = courseByCode(sc.code);
