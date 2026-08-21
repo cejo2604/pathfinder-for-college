@@ -201,6 +201,7 @@ function BranchNode({
 
   return (
     <button
+      ref={nodeRef}
       type="button"
       onClick={() => onSelect(path.id)}
       style={animate ? { animationDelay: `${0.25 + index * 0.12}s` } : undefined}
