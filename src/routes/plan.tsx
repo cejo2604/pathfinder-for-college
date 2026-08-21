@@ -129,7 +129,7 @@ function PlanPage() {
             <Button size="sm" variant="outline" className="h-7 text-sm" onClick={() => void navigate({ to: "/compare" })}>
               Compare against other paths
             </Button>
-            <Button size="sm" variant="ghost" className="h-7 gap-1 text-sm" onClick={() => void navigate({ to: "/career" })}>
+            <Button size="sm" variant="outline" className="h-7 gap-1 text-sm" onClick={() => void navigate({ to: "/career" })}>
               <Check className="size-3.5" /> Career reference
             </Button>
           </div>
