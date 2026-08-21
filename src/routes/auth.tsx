@@ -31,7 +31,7 @@ function AuthPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [code, setCode] = useState("");
+  
   const [resetDone, setResetDone] = useState(false);
   // True once the emailed link/code has been verified: only the new password is left.
   const [recoveryReady, setRecoveryReady] = useState(false);
@@ -99,7 +99,7 @@ function AuthPage() {
         redirectTo: `${window.location.origin}/auth`,
       });
       if (resetError) throw resetError;
-      setMessage("If that email is registered, a reset email is on its way. Open it on this device, or paste the code below.");
+      setMessage("If that email is registered, a reset email is on its way. Open it on this device to choose a new password here.");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not send the code. Try again.");
     } finally {
@@ -108,7 +108,7 @@ function AuthPage() {
   };
 
 
-  const resetWithCode = async (event: React.FormEvent) => {
+  const resetPassword = async (event: React.FormEvent) => {
     event.preventDefault();
     setError(null);
     setMessage(null);
@@ -124,18 +124,6 @@ function AuthPage() {
 
     setBusy(true);
     try {
-      // The emailed code/link proves ownership of the address before any password change.
-      if (!recoveryReady) {
-        const raw = code.trim();
-        const fromLink = raw.includes("token_hash=")
-          ? (new URLSearchParams(raw.slice(raw.indexOf("?") + 1)).get("token_hash") ?? "")
-          : "";
-        const isSixDigit = /^\d{6}$/.test(raw);
-        const { error: verifyError } = isSixDigit
-          ? await supabase.auth.verifyOtp({ email, token: raw, type: "recovery" })
-          : await supabase.auth.verifyOtp({ token_hash: fromLink || raw, type: "recovery" });
-        if (verifyError) throw verifyError;
-      }
 
 
       const { error: updateError } = await supabase.auth.updateUser({ password });
@@ -205,46 +193,57 @@ function AuthPage() {
         <p className="mt-2 text-sm text-muted-foreground">
           {mode === "forgot"
             ? recoveryReady
-              ? "Your reset link is verified. Choose a new password below."
-              : "We’ll email you a reset link and code. Open the link on this device, or paste the code here with your new password."
+              ? "Choose a new password below."
+              : "Enter your email and we’ll send a one-click reset email. Open it on this device to set your new password right here."
             : "Your profile, simulated paths and semester plan are saved to your account — only you can see them."}
         </p>
 
         {mode === "forgot" ? (
-          <form onSubmit={resetWithCode} className="mt-7 space-y-4 rounded-2xl border border-border bg-card p-5">
-            {!recoveryReady && (
+          <form onSubmit={resetPassword} className="mt-7 space-y-4 rounded-2xl border border-border bg-card p-5">
+            {!recoveryReady ? (
               <>
                 <div>
                   <Label htmlFor="resetEmail">Email</Label>
-                  <div className="mt-1.5 flex gap-2">
-                    <Input
-                      id="resetEmail"
-                      type="email"
-                      autoComplete="email"
-                      required
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                    />
-                    <Button type="button" variant="outline" disabled={busy || !email} onClick={() => void sendCode()}>
-                      Send code
-                    </Button>
-                  </div>
-                </div>
-                <div>
-                  <Label htmlFor="code">Verification code</Label>
                   <Input
-                    id="code"
-                    inputMode="numeric"
-                    autoComplete="one-time-code"
+                    id="resetEmail"
+                    type="email"
+                    autoComplete="email"
                     required
-                    value={code}
-                    onChange={(e) => setCode(e.target.value)}
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
                     className="mt-1.5"
                   />
                 </div>
-              </>
-            )}
 
+                {error && <p className="text-sm text-destructive">{error}</p>}
+                {message && <p className="text-sm text-muted-foreground">{message}</p>}
+
+                <Button
+                  type="button"
+                  className="w-full gap-1.5"
+                  disabled={busy || !email}
+                  onClick={() => void sendCode()}
+                >
+                  {busy && <Loader2 className="size-4 animate-spin" />}
+                  Send reset email
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => {
+                    setMode("signin");
+                    setPassword("");
+                    setConfirmPassword("");
+                    setError(null);
+                    setMessage(null);
+                  }}
+                >
+                  Back to Sign In
+                </Button>
+              </>
+            ) : (
+              <>
             <div>
               <Label htmlFor="newPassword">New password</Label>
               <Input
@@ -285,7 +284,6 @@ function AuthPage() {
               className="w-full"
               onClick={() => {
                 setMode("signin");
-                setCode("");
                 setPassword("");
                 setConfirmPassword("");
                 setError(null);
@@ -294,6 +292,8 @@ function AuthPage() {
             >
               Back to Sign In
             </Button>
+              </>
+            )}
           </form>
         ) : (
         <form onSubmit={submit} className="mt-7 space-y-4 rounded-2xl border border-border bg-card p-5">
