@@ -33,6 +33,8 @@ function AuthPage() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [code, setCode] = useState("");
   const [resetDone, setResetDone] = useState(false);
+  // True once the emailed link/code has been verified: only the new password is left.
+  const [recoveryReady, setRecoveryReady] = useState(false);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -46,7 +48,47 @@ function AuthPage() {
     void navigate({ to: "/profile" });
   }, [session, navigate, mode, resetDone]);
 
+  // Arriving from the emailed reset link: land straight on the new-password form.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const hash = new URLSearchParams(window.location.hash.replace(/^#/, ""));
+    const search = new URLSearchParams(window.location.search);
+    const tokenHash = search.get("token_hash");
+    const pkce = search.get("code");
+    const isRecovery =
+      hash.get("type") === "recovery" ||
+      search.get("type") === "recovery" ||
+      Boolean(tokenHash) ||
+      Boolean(pkce) ||
+      Boolean(hash.get("access_token"));
+    if (!isRecovery) return;
 
+    setMode("forgot");
+    setBusy(true);
+    void (async () => {
+      try {
+        if (tokenHash) {
+          const { error: verifyError } = await supabase.auth.verifyOtp({ token_hash: tokenHash, type: "recovery" });
+          if (verifyError) throw verifyError;
+        } else if (pkce) {
+          const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(pkce);
+          if (exchangeError) throw exchangeError;
+        } else {
+          // Hash tokens are consumed by the Supabase client on load.
+          const { data } = await supabase.auth.getSession();
+          if (!data.session) throw new Error("This reset link has expired. Request a new one.");
+        }
+        setRecoveryReady(true);
+        setMessage("Link verified — choose your new password.");
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "This reset link is invalid or expired. Request a new one.");
+      } finally {
+        setBusy(false);
+        window.history.replaceState({}, "", "/auth");
+      }
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const sendCode = async () => {
     setBusy(true);
@@ -57,13 +99,14 @@ function AuthPage() {
         redirectTo: `${window.location.origin}/auth`,
       });
       if (resetError) throw resetError;
-      setMessage("If that email is registered, a verification code is on its way.");
+      setMessage("If that email is registered, a reset email is on its way. Open it on this device, or paste the code below.");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not send the code. Try again.");
     } finally {
       setBusy(false);
     }
   };
+
 
   const resetWithCode = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -81,17 +124,19 @@ function AuthPage() {
 
     setBusy(true);
     try {
-      // The emailed code proves ownership of the address before any password change.
-      // Accept either the 6-digit code or the token from the emailed link.
-      const raw = code.trim();
-      const fromLink = raw.includes("token_hash=")
-        ? (new URLSearchParams(raw.slice(raw.indexOf("?") + 1)).get("token_hash") ?? "")
-        : "";
-      const isSixDigit = /^\d{6}$/.test(raw);
-      const { error: verifyError } = isSixDigit
-        ? await supabase.auth.verifyOtp({ email, token: raw, type: "recovery" })
-        : await supabase.auth.verifyOtp({ token_hash: fromLink || raw, type: "recovery" });
-      if (verifyError) throw verifyError;
+      // The emailed code/link proves ownership of the address before any password change.
+      if (!recoveryReady) {
+        const raw = code.trim();
+        const fromLink = raw.includes("token_hash=")
+          ? (new URLSearchParams(raw.slice(raw.indexOf("?") + 1)).get("token_hash") ?? "")
+          : "";
+        const isSixDigit = /^\d{6}$/.test(raw);
+        const { error: verifyError } = isSixDigit
+          ? await supabase.auth.verifyOtp({ email, token: raw, type: "recovery" })
+          : await supabase.auth.verifyOtp({ token_hash: fromLink || raw, type: "recovery" });
+        if (verifyError) throw verifyError;
+      }
+
 
       const { error: updateError } = await supabase.auth.updateUser({ password });
       if (updateError) throw updateError;
@@ -159,40 +204,47 @@ function AuthPage() {
         </h1>
         <p className="mt-2 text-sm text-muted-foreground">
           {mode === "forgot"
-            ? "We’ll email you a verification code. Enter it here with your new password — the code proves the email is yours."
+            ? recoveryReady
+              ? "Your reset link is verified. Choose a new password below."
+              : "We’ll email you a reset link and code. Open the link on this device, or paste the code here with your new password."
             : "Your profile, simulated paths and semester plan are saved to your account — only you can see them."}
         </p>
 
         {mode === "forgot" ? (
           <form onSubmit={resetWithCode} className="mt-7 space-y-4 rounded-2xl border border-border bg-card p-5">
-            <div>
-              <Label htmlFor="resetEmail">Email</Label>
-              <div className="mt-1.5 flex gap-2">
-                <Input
-                  id="resetEmail"
-                  type="email"
-                  autoComplete="email"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                />
-                <Button type="button" variant="outline" disabled={busy || !email} onClick={() => void sendCode()}>
-                  Send code
-                </Button>
-              </div>
-            </div>
-            <div>
-              <Label htmlFor="code">Verification code</Label>
-              <Input
-                id="code"
-                inputMode="numeric"
-                autoComplete="one-time-code"
-                required
-                value={code}
-                onChange={(e) => setCode(e.target.value)}
-                className="mt-1.5"
-              />
-            </div>
+            {!recoveryReady && (
+              <>
+                <div>
+                  <Label htmlFor="resetEmail">Email</Label>
+                  <div className="mt-1.5 flex gap-2">
+                    <Input
+                      id="resetEmail"
+                      type="email"
+                      autoComplete="email"
+                      required
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                    />
+                    <Button type="button" variant="outline" disabled={busy || !email} onClick={() => void sendCode()}>
+                      Send code
+                    </Button>
+                  </div>
+                </div>
+                <div>
+                  <Label htmlFor="code">Verification code</Label>
+                  <Input
+                    id="code"
+                    inputMode="numeric"
+                    autoComplete="one-time-code"
+                    required
+                    value={code}
+                    onChange={(e) => setCode(e.target.value)}
+                    className="mt-1.5"
+                  />
+                </div>
+              </>
+            )}
+
             <div>
               <Label htmlFor="newPassword">New password</Label>
               <Input
