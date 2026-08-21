@@ -72,7 +72,6 @@ function GoalPage() {
   const minors = useMemo(() => selectableMinors(profile), [profile]);
   const [majorId, setMajorId] = useState(targetMajorId ?? NONE);
   const [minorId, setMinorId] = useState(targetMinorId ?? NONE);
-  const [confirmed, setConfirmed] = useState(false);
 
   useEffect(() => {
     setMajorId(targetMajorId ?? NONE);
