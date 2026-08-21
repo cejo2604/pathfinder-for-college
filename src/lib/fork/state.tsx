@@ -284,7 +284,15 @@ export function ForkProvider({ children }: { children: ReactNode }) {
         });
         persistProfile();
       },
+      saveProfile: async (draft) => {
+        const profileToSave = draft ?? stateRef.current.profile;
+        if (!profileToSave) return;
+        await saveForkProfile({
+          data: { profile: { ...profileToSave, priorities: stateRef.current.priorities }, careerId: stateRef.current.careerId },
+        });
+      },
       setProfile: (p) => {
+
         typedThisSession.current = true;
         setState((s) => ({
           ...s,
