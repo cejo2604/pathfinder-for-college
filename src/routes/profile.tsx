@@ -291,23 +291,24 @@ function ProfilePage() {
           <div className="mt-4 space-y-5 text-sm">
             <TagField
               label="Interests"
-              items={profile.interests}
+              items={draft.interests}
               options={INTEREST_OPTIONS}
-              onChange={(interests) => setProfile({ interests })}
+              onChange={(interests) => updateDraft({ interests })}
             />
             <TagField
               label="Career interests"
-              items={profile.careerInterests}
+              items={draft.careerInterests}
               options={CAREER_INTEREST_OPTIONS}
-              onChange={(careerInterests) => setProfile({ careerInterests })}
+              onChange={(careerInterests) => updateDraft({ careerInterests })}
             />
             <TagField
               label="Skills"
-              items={profile.skills}
+              items={draft.skills}
               options={SKILL_OPTIONS}
-              onChange={(skills) => setProfile({ skills })}
+              onChange={(skills) => updateDraft({ skills })}
             />
           </div>
+
           <Button variant="outline" className="mt-5" onClick={() => void navigate({ to: "/goal" })}>
             Change my goal
           </Button>
