@@ -41,8 +41,19 @@ function ProfilePage() {
   const current = profile.courses.filter((c) => c.status === "in_progress");
   const waitlisted = profile.courses.filter((c) => c.status === "waitlisted");
 
-  // A profile "exists" once the student has entered the basics.
-  const hasProfile = Boolean(loaded && (profile.name.trim() || profile.school.trim() || profile.major.trim()));
+  // A profile "exists" once the student has entered anything Fork can use.
+  const hasProfile = Boolean(
+    loaded &&
+      (profile.name.trim() ||
+        profile.school.trim() ||
+        profile.major.trim() ||
+        profile.degree.trim() ||
+        profile.year.trim() ||
+        profile.graduationTarget.trim() ||
+        profile.gpa > 0 ||
+        profile.courses.length > 0),
+  );
+
 
   return (
     <ForkShell>
