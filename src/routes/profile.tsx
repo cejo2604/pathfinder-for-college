@@ -1,8 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { ArrowRight, Upload } from "lucide-react";
-import { useState } from "react";
-
-
+import { AlertCircle, ArrowRight, Check, Upload } from "lucide-react";
+import { useEffect, useState } from "react";
 
 import { AutofillField } from "@/components/fork/AutofillField";
 import { ForkShell } from "@/components/fork/ForkShell";
@@ -14,8 +12,10 @@ import { Label } from "@/components/ui/label";
 import { DEGREES, FIELDS_OF_STUDY, MINORS, YEARS } from "@/lib/fork/academics";
 import { courseByCode } from "@/lib/fork/data";
 import { CAREER_INTEREST_OPTIONS, INTEREST_OPTIONS, SKILL_OPTIONS } from "@/lib/fork/interests";
+import type { StudentProfile } from "@/lib/fork/data";
 
 import { useFork, useForkProfile } from "@/lib/fork/state";
+
 
 export const Route = createFileRoute("/profile")({
   head: () => ({
