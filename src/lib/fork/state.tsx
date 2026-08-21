@@ -199,13 +199,15 @@ export function ForkProvider({ children }: { children: ReactNode }) {
   }, [authLoading, userId]);
 
   useEffect(() => {
-    if (!hydrated) return;
+    // Anonymous/demo work never touches storage — only a real signed-in owner's.
+    if (!hydrated || !state.ownerId) return;
     try {
       window.localStorage.setItem(storageKeyFor(state.ownerId), JSON.stringify(state));
     } catch {
       /* ignore full storage */
     }
   }, [state, hydrated]);
+
 
   // Debounced profile persistence.
   const profileTimer = useRef<number | undefined>(undefined);
