@@ -72,7 +72,6 @@ function GoalPage() {
   const minors = useMemo(() => selectableMinors(profile), [profile]);
   const [majorId, setMajorId] = useState(targetMajorId ?? NONE);
   const [minorId, setMinorId] = useState(targetMinorId ?? NONE);
-  const [confirmed, setConfirmed] = useState(false);
 
   useEffect(() => {
     setMajorId(targetMajorId ?? NONE);
@@ -165,7 +164,6 @@ function GoalPage() {
               value={majorId}
               onValueChange={(v) => {
                 setMajorId(v);
-                setConfirmed(false);
               }}
             >
               <SelectTrigger className="mt-2" aria-label="Choose a major you are considering">
@@ -187,7 +185,6 @@ function GoalPage() {
               value={minorId}
               onValueChange={(v) => {
                 setMinorId(v);
-                setConfirmed(false);
               }}
             >
               <SelectTrigger className="mt-2" aria-label="Choose a minor you are considering">
@@ -214,22 +211,12 @@ function GoalPage() {
                 majorId: majorId === NONE ? null : majorId,
                 minorId: minorId === NONE ? null : minorId,
               });
-              setConfirmed(true);
+              void navigate({ to: "/plan" });
             }}
           >
             Confirm selection <ArrowRight className="size-4" />
           </Button>
-          {confirmed && (
-            <Button type="button" variant="outline" onClick={() => void navigate({ to: "/home" })}>
-              See it on My Path
-            </Button>
-          )}
         </div>
-        {confirmed && (
-          <p className="mt-3 text-sm text-muted-foreground">
-            Confirmed. Your simulation cards on My Path now use this selection.
-          </p>
-        )}
       </section>
 
       {discovering && (
