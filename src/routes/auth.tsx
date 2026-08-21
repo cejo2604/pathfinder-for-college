@@ -248,7 +248,7 @@ function AuthPage() {
               className="mt-1.5"
             />
           </div>
-          {mode !== "forgot" && (
+          {(
             <div>
               <Label htmlFor="password">Password</Label>
               <Input
