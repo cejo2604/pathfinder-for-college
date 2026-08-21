@@ -284,7 +284,6 @@ function AuthPage() {
               className="w-full"
               onClick={() => {
                 setMode("signin");
-                setCode("");
                 setPassword("");
                 setConfirmPassword("");
                 setError(null);
@@ -293,6 +292,8 @@ function AuthPage() {
             >
               Back to Sign In
             </Button>
+              </>
+            )}
           </form>
         ) : (
         <form onSubmit={submit} className="mt-7 space-y-4 rounded-2xl border border-border bg-card p-5">
