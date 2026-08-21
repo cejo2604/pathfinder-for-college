@@ -288,16 +288,19 @@ function ImportPage() {
         );
       }
       await refresh();
+      return found.length === 0;
     } catch {
       setError("Your academic history could not be confirmed.");
+      return false;
     }
   };
 
   const onConfirm = async () => {
     if (!activeDoc) return;
     setBusy("confirming");
-    await runConfirm(activeDoc);
+    const complete = await runConfirm(activeDoc);
     setBusy(null);
+    if (complete) void navigate({ to: "/goal" });
   };
 
   const resolveConflicts = (chosen: Set<keyof ExtractedProfileFields>) => {
@@ -309,6 +312,7 @@ function ImportPage() {
     applyToProfile(verified, credits, activeDoc.extractedProfile, chosen);
     setConflicts(null);
     toast.success("Your profile is up to date.");
+    void navigate({ to: "/goal" });
   };
 
   /* ------------------------------------------------------------------ views */
@@ -579,8 +583,8 @@ function ImportPage() {
                     Confirm My Academic History
                   </Button>
                   {activeDoc.processingStatus === "confirmed" && (
-                    <Button variant="outline" className="gap-1.5" onClick={() => void navigate({ to: "/home" })}>
-                      Go to My Path <ArrowRight className="size-4" />
+                    <Button variant="outline" className="gap-1.5" onClick={() => void navigate({ to: "/goal" })}>
+                      Go to my goals <ArrowRight className="size-4" />
                     </Button>
                   )}
                 </div>
