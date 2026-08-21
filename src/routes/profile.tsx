@@ -502,14 +502,16 @@ function CourseworkSection({
                     label="Grade"
                     value={newCourse.grade ?? ""}
                     placeholder="Optional"
-                    onChange={(grade) => updateNewCourse({ grade: grade || undefined })}
+                    onChange={(grade) => updateNewCourse({ ...(grade ? { grade } : {}) })}
                   />
                   {newCourse.status === "waitlisted" && (
                     <NumberField
                       label="Waitlist position"
                       value={newCourse.waitlistPosition ?? 0}
                       placeholder="Optional"
-                      onCommit={(waitlistPosition) => updateNewCourse({ waitlistPosition: waitlistPosition || undefined })}
+                      onCommit={(waitlistPosition) =>
+                        updateNewCourse({ ...(waitlistPosition ? { waitlistPosition } : {}) })
+                      }
                     />
                   )}
                 </div>
