@@ -452,7 +452,7 @@ function CourseworkSection({
         </button>
       </CollapsibleTrigger>
       <CollapsibleContent>
-        <div className="mt-2 space-y-2 text-sm">
+        <div className="mt-1 space-y-1 text-sm">
           <div className="flex items-center justify-between">
             <h3 className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
               Completed ({draft.creditsCompleted} credits)
