@@ -431,8 +431,10 @@ function CourseworkSection({
     setDeleteIndex(null);
   };
 
-  const deleteLabel = (i: number) => {
+  const deleteLabel = (i: number | null) => {
+    if (i === null) return "this course";
     const c = draft.courses[i];
+    if (!c) return "this course";
     const course = courseByCode(c.code);
     return `${c.code}${course ? ` — ${course.title}` : ""}`;
   };
