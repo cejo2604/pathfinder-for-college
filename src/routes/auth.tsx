@@ -31,17 +31,78 @@ function AuthPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [code, setCode] = useState("");
+  const [resetDone, setResetDone] = useState(false);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!session) return;
+    // Verifying a recovery code creates a session mid-flow; stay put until the
+    // new password has actually been written.
+    if (mode === "forgot" && !resetDone) return;
     // The profile page shows the saved record, or the empty form to create one.
     void navigate({ to: "/profile" });
-  }, [session, navigate]);
+  }, [session, navigate, mode, resetDone]);
 
 
+
+  const sendCode = async () => {
+    setBusy(true);
+    setError(null);
+    setMessage(null);
+    try {
+      const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/auth`,
+      });
+      if (resetError) throw resetError;
+      setMessage("If that email is registered, a verification code is on its way.");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not send the code. Try again.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const resetWithCode = async (event: React.FormEvent) => {
+    event.preventDefault();
+    setError(null);
+    setMessage(null);
+
+    if (password !== confirmPassword) {
+      setError("Passwords do not match.");
+      return;
+    }
+    if (password.length < 6) {
+      setError("Password must be at least 6 characters.");
+      return;
+    }
+
+    setBusy(true);
+    try {
+      // The emailed code proves ownership of the address before any password change.
+      // Accept either the 6-digit code or the token from the emailed link.
+      const raw = code.trim();
+      const fromLink = raw.includes("token_hash=")
+        ? (new URLSearchParams(raw.slice(raw.indexOf("?") + 1)).get("token_hash") ?? "")
+        : "";
+      const isSixDigit = /^\d{6}$/.test(raw);
+      const { error: verifyError } = isSixDigit
+        ? await supabase.auth.verifyOtp({ email, token: raw, type: "recovery" })
+        : await supabase.auth.verifyOtp({ token_hash: fromLink || raw, type: "recovery" });
+      if (verifyError) throw verifyError;
+
+      const { error: updateError } = await supabase.auth.updateUser({ password });
+      if (updateError) throw updateError;
+      setResetDone(true);
+      setMessage("Password updated. Signing you in…");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not reset your password. Try again.");
+    } finally {
+      setBusy(false);
+    }
+  };
 
   const submit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -57,12 +118,6 @@ function AuthPage() {
         });
         if (signUpError) throw signUpError;
         if (!data.session) setMessage("Check your email to confirm your account, then sign in.");
-      } else if (mode === "forgot") {
-        const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
-          redirectTo: `${window.location.origin}/reset-password`,
-        });
-        if (resetError) throw resetError;
-        setMessage("If that email is registered, you’ll receive a reset link shortly.");
       } else {
         const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
         if (signInError) throw signInError;
@@ -104,10 +159,91 @@ function AuthPage() {
         </h1>
         <p className="mt-2 text-sm text-muted-foreground">
           {mode === "forgot"
-            ? "Enter your email and we’ll send you a link to choose a new password."
+            ? "We’ll email you a verification code. Enter it here with your new password — the code proves the email is yours."
             : "Your profile, simulated paths and semester plan are saved to your account — only you can see them."}
         </p>
 
+        {mode === "forgot" ? (
+          <form onSubmit={resetWithCode} className="mt-7 space-y-4 rounded-2xl border border-border bg-card p-5">
+            <div>
+              <Label htmlFor="resetEmail">Email</Label>
+              <div className="mt-1.5 flex gap-2">
+                <Input
+                  id="resetEmail"
+                  type="email"
+                  autoComplete="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+                <Button type="button" variant="outline" disabled={busy || !email} onClick={() => void sendCode()}>
+                  Send code
+                </Button>
+              </div>
+            </div>
+            <div>
+              <Label htmlFor="code">Verification code</Label>
+              <Input
+                id="code"
+                inputMode="numeric"
+                autoComplete="one-time-code"
+                required
+                value={code}
+                onChange={(e) => setCode(e.target.value)}
+                className="mt-1.5"
+              />
+            </div>
+            <div>
+              <Label htmlFor="newPassword">New password</Label>
+              <Input
+                id="newPassword"
+                type="password"
+                autoComplete="new-password"
+                required
+                minLength={6}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="mt-1.5"
+              />
+            </div>
+            <div>
+              <Label htmlFor="confirmNewPassword">Confirm new password</Label>
+              <Input
+                id="confirmNewPassword"
+                type="password"
+                autoComplete="new-password"
+                required
+                minLength={6}
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                className="mt-1.5"
+              />
+            </div>
+
+            {error && <p className="text-sm text-destructive">{error}</p>}
+            {message && <p className="text-sm text-muted-foreground">{message}</p>}
+
+            <Button type="submit" className="w-full gap-1.5" disabled={busy}>
+              {busy && <Loader2 className="size-4 animate-spin" />}
+              Reset Password
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full"
+              onClick={() => {
+                setMode("signin");
+                setCode("");
+                setPassword("");
+                setConfirmPassword("");
+                setError(null);
+                setMessage(null);
+              }}
+            >
+              Back to Sign In
+            </Button>
+          </form>
+        ) : (
         <form onSubmit={submit} className="mt-7 space-y-4 rounded-2xl border border-border bg-card p-5">
           <div>
             <Label htmlFor="email">Email</Label>
@@ -121,21 +257,19 @@ function AuthPage() {
               className="mt-1.5"
             />
           </div>
-          {mode !== "forgot" && (
-            <div>
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                autoComplete={mode === "signin" ? "current-password" : "new-password"}
-                required
-                minLength={6}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="mt-1.5"
-              />
-            </div>
-          )}
+          <div>
+            <Label htmlFor="password">Password</Label>
+            <Input
+              id="password"
+              type="password"
+              autoComplete={mode === "signin" ? "current-password" : "new-password"}
+              required
+              minLength={6}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="mt-1.5"
+            />
+          </div>
           {mode === "signup" && (
             <div>
               <Label htmlFor="confirmPassword">Confirm password</Label>
@@ -169,19 +303,14 @@ function AuthPage() {
 
           <Button type="submit" className="w-full gap-1.5" disabled={busy}>
             {busy && <Loader2 className="size-4 animate-spin" />}
-            {mode === "signin"
-              ? "Sign in"
-              : mode === "signup"
-                ? "Create account"
-                : "Send reset link"}
+            {mode === "signin" ? "Sign in" : "Create account"}
           </Button>
 
-          {mode !== "forgot" && (
-            <Button type="button" variant="outline" className="w-full" onClick={() => void google()}>
-              Continue with Google
-            </Button>
-          )}
+          <Button type="button" variant="outline" className="w-full" onClick={() => void google()}>
+            Continue with Google
+          </Button>
         </form>
+        )}
 
         <p className="mt-4 text-sm text-muted-foreground">
           {mode === "signin" && (
