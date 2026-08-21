@@ -31,7 +31,7 @@ function AuthPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [code, setCode] = useState("");
+  
   const [resetDone, setResetDone] = useState(false);
   // True once the emailed link/code has been verified: only the new password is left.
   const [recoveryReady, setRecoveryReady] = useState(false);
@@ -99,7 +99,7 @@ function AuthPage() {
         redirectTo: `${window.location.origin}/auth`,
       });
       if (resetError) throw resetError;
-      setMessage("If that email is registered, a reset email is on its way. Open it on this device, or paste the code below.");
+      setMessage("If that email is registered, a reset email is on its way. Open it on this device to choose a new password here.");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not send the code. Try again.");
     } finally {
