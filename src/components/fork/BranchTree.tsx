@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import { formatCurrency, type SimulatedPath } from "@/lib/fork/engine";
 import { useCountUp } from "@/lib/fork/state";
@@ -26,6 +26,13 @@ interface BranchTreeProps {
   onSelect: (id: string) => void;
 }
 
+type Geometry = {
+  width: number;
+  height: number;
+  start: { x: number; y: number };
+  ends: { id: string; x: number; y: number }[];
+};
+
 export function BranchTree({
   paths,
   currentLabel,
@@ -38,55 +45,116 @@ export function BranchTree({
   const animate = animateProp && !usePrefersReducedMotion();
   const n = Math.max(paths.length, 1);
 
+  const wrapRef = useRef<HTMLDivElement>(null);
+  const rootRef = useRef<HTMLDivElement>(null);
+  const cardRefs = useRef<Record<string, HTMLElement | null>>({});
+  const [geo, setGeo] = useState<Geometry | null>(null);
+
+  const measure = useCallback(() => {
+    const wrap = wrapRef.current;
+    const root = rootRef.current;
+    if (!wrap || !root) return;
+    const wrapBox = wrap.getBoundingClientRect();
+    // Below md the cards stack, so the SVG connectors are hidden entirely.
+    const stacked = window.matchMedia("(max-width: 767px)").matches;
+    if (stacked) {
+      setGeo(null);
+      return;
+    }
+    const rootBox = root.getBoundingClientRect();
+    const ends: Geometry["ends"] = [];
+    for (const path of paths) {
+      const el = cardRefs.current[path.id];
+      if (!el) continue;
+      const box = el.getBoundingClientRect();
+      ends.push({
+        id: path.id,
+        x: box.left - wrapBox.left + box.width / 2,
+        y: box.top - wrapBox.top,
+      });
+    }
+    setGeo({
+      width: wrapBox.width,
+      height: wrapBox.height,
+      start: {
+        x: rootBox.left - wrapBox.left + rootBox.width / 2,
+        y: rootBox.bottom - wrapBox.top,
+      },
+      ends,
+    });
+  }, [paths]);
+
+  useLayoutEffect(() => {
+    measure();
+    const wrap = wrapRef.current;
+    if (!wrap || typeof ResizeObserver === "undefined") {
+      window.addEventListener("resize", measure);
+      return () => window.removeEventListener("resize", measure);
+    }
+    const observer = new ResizeObserver(() => measure());
+    observer.observe(wrap);
+    if (rootRef.current) observer.observe(rootRef.current);
+    for (const el of Object.values(cardRefs.current)) if (el) observer.observe(el);
+    window.addEventListener("resize", measure);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("resize", measure);
+    };
+  }, [measure]);
 
   return (
-    <div className="w-full">
+    <div ref={wrapRef} className="relative w-full">
+      {/* Connectors: desktop only, measured from the real node positions */}
+      {geo && geo.ends.length > 0 && (
+        <svg
+          className="pointer-events-none absolute inset-0 z-0 hidden h-full w-full md:block"
+          width={geo.width}
+          height={geo.height}
+          viewBox={`0 0 ${geo.width} ${geo.height}`}
+          aria-hidden="true"
+        >
+          {geo.ends.map((end, i) => {
+            const selected = selectedId === end.id;
+            const midY = geo.start.y + (end.y - geo.start.y) * 0.55;
+            return (
+              <path
+                key={end.id}
+                d={`M ${geo.start.x} ${geo.start.y} C ${geo.start.x} ${midY}, ${end.x} ${midY}, ${end.x} ${end.y}`}
+                fill="none"
+                strokeWidth={selected ? 2.5 : 1.5}
+                stroke={selected ? "var(--primary)" : "var(--border)"}
+                pathLength={1}
+                style={
+                  animate
+                    ? ({
+                        strokeDasharray: 1,
+                        ["--fork-len" as string]: "1",
+                        animation: `fork-grow .65s cubic-bezier(.22,1,.36,1) ${0.1 + i * 0.12}s both`,
+                      } as React.CSSProperties)
+                    : undefined
+                }
+              />
+            );
+          })}
+        </svg>
+      )}
+
       {/* Root node */}
-      <div className="flex justify-center">
-        <div className="rounded-2xl bg-navy px-6 py-4 text-center text-navy-foreground shadow-node">
+      <div className="relative z-10 flex justify-center">
+        <div
+          ref={rootRef}
+          className="rounded-2xl bg-navy px-6 py-4 text-center text-navy-foreground shadow-node"
+        >
           <p className="text-[0.7rem] uppercase tracking-[0.18em] opacity-70">You are here</p>
           <p className="font-display text-xl leading-tight">{currentLabel}</p>
           <p className="text-xs opacity-80">{currentSub}</p>
         </div>
       </div>
 
-      {/* Connectors: desktop only */}
-      <svg
-        className="hidden h-20 w-full md:block"
-        viewBox="0 0 100 100"
-        preserveAspectRatio="none"
-        aria-hidden="true"
-      >
-        {paths.map((path, i) => {
-          const x = ((i + 0.5) * 100) / n;
-          const selected = selectedId === path.id;
-          return (
-            <path
-              key={path.id}
-              d={`M 50 0 C 50 55, ${x} 45, ${x} 100`}
-              fill="none"
-              vectorEffect="non-scaling-stroke"
-              strokeWidth={selected ? 2.5 : 1.5}
-              stroke={selected ? "var(--primary)" : "var(--border)"}
-              pathLength={1}
-              style={
-                animate
-                  ? ({
-                      strokeDasharray: 1,
-                      ["--fork-len" as string]: "1",
-                      animation: `fork-grow .65s cubic-bezier(.22,1,.36,1) ${0.1 + i * 0.12}s both`,
-                    } as React.CSSProperties)
-                  : undefined
-              }
-            />
-          );
-        })}
-      </svg>
-
       {/* Branch nodes */}
       <div
         className={cn(
-          "mt-4 grid gap-4 md:mt-0",
+          "relative z-10 mt-4 grid gap-4 md:mt-20",
           n === 2 && "md:grid-cols-2",
           n === 3 && "md:grid-cols-3",
           n >= 4 && "md:grid-cols-4",
@@ -101,12 +169,16 @@ export function BranchTree({
             selected={selectedId === path.id}
             best={bestId === path.id}
             onSelect={onSelect}
+            nodeRef={(el) => {
+              cardRefs.current[path.id] = el;
+            }}
           />
         ))}
       </div>
     </div>
   );
 }
+
 
 function BranchNode({
   path,
