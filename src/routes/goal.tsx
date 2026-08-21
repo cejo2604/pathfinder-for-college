@@ -185,7 +185,6 @@ function GoalPage() {
               value={minorId}
               onValueChange={(v) => {
                 setMinorId(v);
-                setConfirmed(false);
               }}
             >
               <SelectTrigger className="mt-2" aria-label="Choose a minor you are considering">
