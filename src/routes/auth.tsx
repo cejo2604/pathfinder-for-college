@@ -193,46 +193,57 @@ function AuthPage() {
         <p className="mt-2 text-sm text-muted-foreground">
           {mode === "forgot"
             ? recoveryReady
-              ? "Your reset link is verified. Choose a new password below."
-              : "We’ll email you a reset link and code. Open the link on this device, or paste the code here with your new password."
+              ? "Choose a new password below."
+              : "Enter your email and we’ll send a one-click reset email. Open it on this device to set your new password right here."
             : "Your profile, simulated paths and semester plan are saved to your account — only you can see them."}
         </p>
 
         {mode === "forgot" ? (
-          <form onSubmit={resetWithCode} className="mt-7 space-y-4 rounded-2xl border border-border bg-card p-5">
-            {!recoveryReady && (
+          <form onSubmit={resetPassword} className="mt-7 space-y-4 rounded-2xl border border-border bg-card p-5">
+            {!recoveryReady ? (
               <>
                 <div>
                   <Label htmlFor="resetEmail">Email</Label>
-                  <div className="mt-1.5 flex gap-2">
-                    <Input
-                      id="resetEmail"
-                      type="email"
-                      autoComplete="email"
-                      required
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                    />
-                    <Button type="button" variant="outline" disabled={busy || !email} onClick={() => void sendCode()}>
-                      Send code
-                    </Button>
-                  </div>
-                </div>
-                <div>
-                  <Label htmlFor="code">Verification code</Label>
                   <Input
-                    id="code"
-                    inputMode="numeric"
-                    autoComplete="one-time-code"
+                    id="resetEmail"
+                    type="email"
+                    autoComplete="email"
                     required
-                    value={code}
-                    onChange={(e) => setCode(e.target.value)}
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
                     className="mt-1.5"
                   />
                 </div>
-              </>
-            )}
 
+                {error && <p className="text-sm text-destructive">{error}</p>}
+                {message && <p className="text-sm text-muted-foreground">{message}</p>}
+
+                <Button
+                  type="button"
+                  className="w-full gap-1.5"
+                  disabled={busy || !email}
+                  onClick={() => void sendCode()}
+                >
+                  {busy && <Loader2 className="size-4 animate-spin" />}
+                  Send reset email
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => {
+                    setMode("signin");
+                    setPassword("");
+                    setConfirmPassword("");
+                    setError(null);
+                    setMessage(null);
+                  }}
+                >
+                  Back to Sign In
+                </Button>
+              </>
+            ) : (
+              <>
             <div>
               <Label htmlFor="newPassword">New password</Label>
               <Input
