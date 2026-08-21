@@ -65,7 +65,9 @@ interface ForkContextValue extends ForkState {
   signedIn: boolean;
   signOut: () => Promise<void>;
   startBlank: () => void;
+  saveProfile: (draft?: StudentProfile) => Promise<void>;
   setProfile: (patch: Partial<StudentProfile>) => void;
+
   setPriorities: (priorities: Priority[]) => void;
   setCareerId: (id: string) => void;
   setTargetPrograms: (targets: { majorId?: string | null; minorId?: string | null }) => void;
@@ -282,7 +284,15 @@ export function ForkProvider({ children }: { children: ReactNode }) {
         });
         persistProfile();
       },
+      saveProfile: async (draft) => {
+        const profileToSave = draft ?? stateRef.current.profile;
+        if (!profileToSave) return;
+        await saveForkProfile({
+          data: { profile: { ...profileToSave, priorities: stateRef.current.priorities }, careerId: stateRef.current.careerId },
+        });
+      },
       setProfile: (p) => {
+
         typedThisSession.current = true;
         setState((s) => ({
           ...s,

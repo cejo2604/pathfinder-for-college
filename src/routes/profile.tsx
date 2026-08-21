@@ -1,8 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { ArrowRight, Upload } from "lucide-react";
-import { useState } from "react";
-
-
+import { AlertCircle, ArrowRight, Check, Upload } from "lucide-react";
+import { useEffect, useState } from "react";
 
 import { AutofillField } from "@/components/fork/AutofillField";
 import { ForkShell } from "@/components/fork/ForkShell";
@@ -14,8 +12,10 @@ import { Label } from "@/components/ui/label";
 import { DEGREES, FIELDS_OF_STUDY, MINORS, YEARS } from "@/lib/fork/academics";
 import { courseByCode } from "@/lib/fork/data";
 import { CAREER_INTEREST_OPTIONS, INTEREST_OPTIONS, SKILL_OPTIONS } from "@/lib/fork/interests";
+import type { StudentProfile } from "@/lib/fork/data";
 
 import { useFork, useForkProfile } from "@/lib/fork/state";
+
 
 export const Route = createFileRoute("/profile")({
   head: () => ({
@@ -35,25 +35,68 @@ export const Route = createFileRoute("/profile")({
 function ProfilePage() {
   const profile = useForkProfile();
   const navigate = useNavigate();
-  const { profile: loaded, setProfile, signedIn } = useFork();
+  const { profile: loaded, setProfile, signedIn, saveProfile, profileReady } = useFork();
 
-  const completed = profile.courses.filter((c) => c.status === "completed");
-  const current = profile.courses.filter((c) => c.status === "in_progress");
-  const waitlisted = profile.courses.filter((c) => c.status === "waitlisted");
+  const [draft, setDraft] = useState<StudentProfile>(profile);
+  const [draftInitialized, setDraftInitialized] = useState(false);
+  const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "success" | "error">("idle");
+  const [saveError, setSaveError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!draftInitialized && profileReady) {
+      setDraft(profile);
+      setDraftInitialized(true);
+    }
+  }, [draftInitialized, profileReady, profile]);
+
+  const updateDraft = (patch: Partial<StudentProfile>) => {
+    setDraft((prev) => ({ ...prev, ...patch }));
+  };
+
+  const handleSave = async () => {
+    if (!signedIn) return;
+    setSaveStatus("saving");
+    setSaveError(null);
+    try {
+      await saveProfile(draft);
+      setProfile({ ...draft });
+      setSaveStatus("success");
+    } catch (error) {
+      setSaveStatus("error");
+      setSaveError(error instanceof Error ? error.message : "Could not save profile");
+    }
+  };
+
+  const handleContinue = async () => {
+    if (signedIn) {
+      try {
+        await saveProfile(draft);
+        setProfile({ ...draft });
+      } catch (error) {
+        setSaveStatus("error");
+        setSaveError(error instanceof Error ? error.message : "Could not save profile");
+        return;
+      }
+    }
+    void navigate({ to: "/home" });
+  };
+
+  const completed = draft.courses.filter((c) => c.status === "completed");
+  const current = draft.courses.filter((c) => c.status === "in_progress");
+  const waitlisted = draft.courses.filter((c) => c.status === "waitlisted");
 
   // A profile "exists" once the student has entered anything Fork can use.
   const hasProfile = Boolean(
     loaded &&
-      (profile.name.trim() ||
-        profile.school.trim() ||
-        profile.major.trim() ||
-        profile.degree.trim() ||
-        profile.year.trim() ||
-        profile.graduationTarget.trim() ||
-        profile.gpa > 0 ||
-        profile.courses.length > 0),
+      (draft.name.trim() ||
+        draft.school.trim() ||
+        draft.major.trim() ||
+        draft.degree.trim() ||
+        draft.year.trim() ||
+        draft.graduationTarget.trim() ||
+        draft.gpa > 0 ||
+        draft.courses.length > 0),
   );
-
 
   return (
     <ForkShell>
@@ -64,14 +107,19 @@ function ProfilePage() {
         </h1>
         <p className="mt-3 text-muted-foreground">
           {hasProfile
-            ? "Everything below is editable — fix anything that changed or was entered wrong, and it saves automatically."
-            : "Tell Fork where you stand academically. Every field can be edited later, so nothing here is final."}
+            ? "Everything below is editable. Press Save profile when you're ready to update your record."
+            : "Tell Fork where you stand academically. Press Save profile when you're ready to continue."}
         </p>
         <div className="mt-5 flex flex-wrap gap-2">
           <Button variant="outline" className="gap-1.5" onClick={() => void navigate({ to: "/import" })}>
             <Upload className="size-4" /> Import my academic history
           </Button>
-          <Button className="gap-1.5" size="lg" onClick={() => void navigate({ to: "/home" })}>
+          <Button
+            className="gap-1.5"
+            size="lg"
+            onClick={handleContinue}
+            disabled={saveStatus === "saving"}
+          >
             {hasProfile ? "Go to my path" : "Save and continue"} <ArrowRight className="size-4" />
           </Button>
           {!signedIn && (
@@ -79,8 +127,31 @@ function ProfilePage() {
               Sign in to save
             </Button>
           )}
+          {signedIn && (
+            <Button
+              variant="outline"
+              className="gap-1.5"
+              onClick={handleSave}
+              disabled={saveStatus === "saving"}
+            >
+              {saveStatus === "saving" ? "Saving..." : "Save profile"}
+            </Button>
+          )}
         </div>
+        {saveStatus === "success" && (
+          <div className="mt-3 flex items-center gap-2 text-sm text-green-600">
+            <Check className="size-4" />
+            Profile saved successfully.
+          </div>
+        )}
+        {saveStatus === "error" && saveError && (
+          <div className="mt-3 flex items-center gap-2 text-sm text-destructive">
+            <AlertCircle className="size-4" />
+            {saveError}
+          </div>
+        )}
       </header>
+
 
 
 
@@ -90,77 +161,79 @@ function ProfilePage() {
           <div className="mt-4 grid gap-4 sm:grid-cols-2">
             <Field
               label="Name"
-              value={profile.name}
+              value={draft.name}
               placeholder="Your full name"
-              onChange={(name) => setProfile({ name })}
+              onChange={(name) => updateDraft({ name })}
             />
-            <SchoolField value={profile.school} onChange={(school) => setProfile({ school })} />
+            <SchoolField value={draft.school} onChange={(school) => updateDraft({ school })} />
             <AutofillField
               label="Degree"
-              value={profile.degree}
+              value={draft.degree}
               options={DEGREES}
               placeholder="Bachelor of Science (BS)"
-              onChange={(degree) => setProfile({ degree })}
+              onChange={(degree) => updateDraft({ degree })}
             />
             <AutofillField
               label="Major"
-              value={profile.major}
+              value={draft.major}
               options={FIELDS_OF_STUDY}
               placeholder="Start typing a field of study"
-              onChange={(major) => setProfile({ major })}
+              onChange={(major) => updateDraft({ major })}
             />
             <AutofillField
               label="Minor"
-              value={profile.minor ?? ""}
+              value={draft.minor ?? ""}
               options={MINORS}
               placeholder="Optional"
-              onChange={(minor) => setProfile({ minor: minor || null })}
+              onChange={(minor) => updateDraft({ minor: minor || null })}
             />
             <AutofillField
               label="Year"
-              value={profile.year}
+              value={draft.year}
               options={YEARS}
               showAllOnFocus
               maxSuggestions={9}
               placeholder="Sophomore"
-              onChange={(year) => setProfile({ year })}
+              onChange={(year) => updateDraft({ year })}
             />
 
             <Field
               label="Expected graduation"
-              value={profile.graduationTarget}
+              value={draft.graduationTarget}
               placeholder="May 2028"
-              onChange={(graduationTarget) => setProfile({ graduationTarget })}
+              onChange={(graduationTarget) => updateDraft({ graduationTarget })}
             />
             <NumberField
               label="Credits completed"
-              value={profile.creditsCompleted}
+              value={draft.creditsCompleted}
               step={1}
               max={300}
               placeholder="e.g. 58"
-              onCommit={(creditsCompleted) => setProfile({ creditsCompleted })}
+              onCommit={(creditsCompleted) => updateDraft({ creditsCompleted })}
             />
             <NumberField
               label="GPA"
-              value={profile.gpa}
+              value={draft.gpa}
               step={0.01}
               max={4.5}
               decimals={2}
               placeholder="e.g. 3.60"
-              onCommit={(gpa) => setProfile({ gpa })}
+              onCommit={(gpa) => updateDraft({ gpa })}
             />
 
 
           </div>
         </section>
 
+
         <section className="rounded-2xl border border-border bg-card p-5">
           <h2 className="font-display text-xl">Coursework</h2>
           <div className="mt-4 space-y-5 text-sm">
             <div>
               <h3 className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
-                Completed ({profile.creditsCompleted} credits)
+                Completed ({draft.creditsCompleted} credits)
               </h3>
+
               <ul className="mt-2 divide-y divide-border/70">
                 {completed.map((sc) => {
                   const course = courseByCode(sc.code);
@@ -218,23 +291,24 @@ function ProfilePage() {
           <div className="mt-4 space-y-5 text-sm">
             <TagField
               label="Interests"
-              items={profile.interests}
+              items={draft.interests}
               options={INTEREST_OPTIONS}
-              onChange={(interests) => setProfile({ interests })}
+              onChange={(interests) => updateDraft({ interests })}
             />
             <TagField
               label="Career interests"
-              items={profile.careerInterests}
+              items={draft.careerInterests}
               options={CAREER_INTEREST_OPTIONS}
-              onChange={(careerInterests) => setProfile({ careerInterests })}
+              onChange={(careerInterests) => updateDraft({ careerInterests })}
             />
             <TagField
               label="Skills"
-              items={profile.skills}
+              items={draft.skills}
               options={SKILL_OPTIONS}
-              onChange={(skills) => setProfile({ skills })}
+              onChange={(skills) => updateDraft({ skills })}
             />
           </div>
+
           <Button variant="outline" className="mt-5" onClick={() => void navigate({ to: "/goal" })}>
             Change my goal
           </Button>
