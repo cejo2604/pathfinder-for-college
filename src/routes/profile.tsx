@@ -98,9 +98,6 @@ function ProfilePage() {
     void navigate({ to: "/home" });
   };
 
-  const completed = draft.courses.filter((c) => c.status === "completed");
-  const current = draft.courses.filter((c) => c.status === "in_progress");
-  const waitlisted = draft.courses.filter((c) => c.status === "waitlisted");
 
   // A profile "exists" once the student has entered anything Fork can use.
   const hasProfile = Boolean(
