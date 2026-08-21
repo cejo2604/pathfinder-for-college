@@ -33,6 +33,8 @@ function AuthPage() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [code, setCode] = useState("");
   const [resetDone, setResetDone] = useState(false);
+  // True once the emailed link/code has been verified: only the new password is left.
+  const [recoveryReady, setRecoveryReady] = useState(false);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -46,7 +48,47 @@ function AuthPage() {
     void navigate({ to: "/profile" });
   }, [session, navigate, mode, resetDone]);
 
+  // Arriving from the emailed reset link: land straight on the new-password form.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const hash = new URLSearchParams(window.location.hash.replace(/^#/, ""));
+    const search = new URLSearchParams(window.location.search);
+    const tokenHash = search.get("token_hash");
+    const pkce = search.get("code");
+    const isRecovery =
+      hash.get("type") === "recovery" ||
+      search.get("type") === "recovery" ||
+      Boolean(tokenHash) ||
+      Boolean(pkce) ||
+      Boolean(hash.get("access_token"));
+    if (!isRecovery) return;
 
+    setMode("forgot");
+    setBusy(true);
+    void (async () => {
+      try {
+        if (tokenHash) {
+          const { error: verifyError } = await supabase.auth.verifyOtp({ token_hash: tokenHash, type: "recovery" });
+          if (verifyError) throw verifyError;
+        } else if (pkce) {
+          const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(pkce);
+          if (exchangeError) throw exchangeError;
+        } else {
+          // Hash tokens are consumed by the Supabase client on load.
+          const { data } = await supabase.auth.getSession();
+          if (!data.session) throw new Error("This reset link has expired. Request a new one.");
+        }
+        setRecoveryReady(true);
+        setMessage("Link verified — choose your new password.");
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "This reset link is invalid or expired. Request a new one.");
+      } finally {
+        setBusy(false);
+        window.history.replaceState({}, "", "/auth");
+      }
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const sendCode = async () => {
     setBusy(true);
@@ -57,13 +99,14 @@ function AuthPage() {
         redirectTo: `${window.location.origin}/auth`,
       });
       if (resetError) throw resetError;
-      setMessage("If that email is registered, a verification code is on its way.");
+      setMessage("If that email is registered, a reset email is on its way. Open it on this device, or paste the code below.");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not send the code. Try again.");
     } finally {
       setBusy(false);
     }
   };
+
 
   const resetWithCode = async (event: React.FormEvent) => {
     event.preventDefault();
