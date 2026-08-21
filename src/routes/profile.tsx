@@ -161,69 +161,70 @@ function ProfilePage() {
           <div className="mt-4 grid gap-4 sm:grid-cols-2">
             <Field
               label="Name"
-              value={profile.name}
+              value={draft.name}
               placeholder="Your full name"
-              onChange={(name) => setProfile({ name })}
+              onChange={(name) => updateDraft({ name })}
             />
-            <SchoolField value={profile.school} onChange={(school) => setProfile({ school })} />
+            <SchoolField value={draft.school} onChange={(school) => updateDraft({ school })} />
             <AutofillField
               label="Degree"
-              value={profile.degree}
+              value={draft.degree}
               options={DEGREES}
               placeholder="Bachelor of Science (BS)"
-              onChange={(degree) => setProfile({ degree })}
+              onChange={(degree) => updateDraft({ degree })}
             />
             <AutofillField
               label="Major"
-              value={profile.major}
+              value={draft.major}
               options={FIELDS_OF_STUDY}
               placeholder="Start typing a field of study"
-              onChange={(major) => setProfile({ major })}
+              onChange={(major) => updateDraft({ major })}
             />
             <AutofillField
               label="Minor"
-              value={profile.minor ?? ""}
+              value={draft.minor ?? ""}
               options={MINORS}
               placeholder="Optional"
-              onChange={(minor) => setProfile({ minor: minor || null })}
+              onChange={(minor) => updateDraft({ minor: minor || null })}
             />
             <AutofillField
               label="Year"
-              value={profile.year}
+              value={draft.year}
               options={YEARS}
               showAllOnFocus
               maxSuggestions={9}
               placeholder="Sophomore"
-              onChange={(year) => setProfile({ year })}
+              onChange={(year) => updateDraft({ year })}
             />
 
             <Field
               label="Expected graduation"
-              value={profile.graduationTarget}
+              value={draft.graduationTarget}
               placeholder="May 2028"
-              onChange={(graduationTarget) => setProfile({ graduationTarget })}
+              onChange={(graduationTarget) => updateDraft({ graduationTarget })}
             />
             <NumberField
               label="Credits completed"
-              value={profile.creditsCompleted}
+              value={draft.creditsCompleted}
               step={1}
               max={300}
               placeholder="e.g. 58"
-              onCommit={(creditsCompleted) => setProfile({ creditsCompleted })}
+              onCommit={(creditsCompleted) => updateDraft({ creditsCompleted })}
             />
             <NumberField
               label="GPA"
-              value={profile.gpa}
+              value={draft.gpa}
               step={0.01}
               max={4.5}
               decimals={2}
               placeholder="e.g. 3.60"
-              onCommit={(gpa) => setProfile({ gpa })}
+              onCommit={(gpa) => updateDraft({ gpa })}
             />
 
 
           </div>
         </section>
+
 
         <section className="rounded-2xl border border-border bg-card p-5">
           <h2 className="font-display text-xl">Coursework</h2>
