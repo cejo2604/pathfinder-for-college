@@ -10,6 +10,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
+import { isElectiveSlot } from "@/lib/fork/electives";
 import { formatCurrency, formatDelta, type SimulatedPath } from "@/lib/fork/engine";
 
 /**
