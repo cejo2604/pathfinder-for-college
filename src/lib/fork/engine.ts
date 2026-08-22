@@ -24,6 +24,7 @@ import {
   courseSkillContributions,
 } from "./data";
 import { BASELINE_PATH_ID, PATHS, type PathSpec, type PlannedTerm, pathSpecById } from "./paths";
+import { fillSimulatedElectives } from "./electives";
 import { generatedPathSpec } from "./program-paths";
 
 
