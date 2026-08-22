@@ -55,7 +55,7 @@ export function AssumptionsPanel({
       </p>
 
       <div className="mt-4 space-y-4">
-        {(["verified", "estimated", "unknown"] as const).map((kind) => {
+        {(["verified", "estimated"] as const).map((kind) => {
           const rows = evidence.filter((e) => e.kind === kind);
           if (!rows.length) return null;
           const meta = KIND_META[kind];
