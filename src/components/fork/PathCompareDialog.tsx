@@ -10,6 +10,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
+import { isElectiveSlot } from "@/lib/fork/electives";
 import { formatCurrency, formatDelta, type SimulatedPath } from "@/lib/fork/engine";
 
 /**
@@ -70,7 +71,7 @@ export function PathCompareDialog({
         {(() => {
           const baselineCourses = new Set(baseline.terms.flatMap((t) => t.courses ?? []));
           const added = Array.from(
-            new Set(option.terms.flatMap((t) => t.courses ?? []).filter((c) => c !== "Elective")),
+            new Set(option.terms.flatMap((t) => t.courses ?? []).filter((c) => !isElectiveSlot(c))),
           ).filter((c) => !baselineCourses.has(c));
           if (added.length === 0) return null;
           return (

@@ -5,6 +5,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { cn } from "@/lib/utils";
 import { courseByCode } from "@/lib/fork/data";
+import { simulatedElectiveByCode } from "@/lib/fork/electives";
 import type { SimulatedPath } from "@/lib/fork/engine";
 
 /**
@@ -103,7 +104,7 @@ function TermCard({
         {term.courses.length > 0 && (
           <ul className="divide-y divide-border border-y border-border">
             {term.courses.map((code, ci) => {
-              const course = courseByCode(code);
+              const course = courseByCode(code) ?? simulatedElectiveByCode(code);
               return (
                 <li key={`${term.label}-${code}-${ci}`} className="flex items-baseline justify-between gap-3 py-2 text-sm">
                   <span>

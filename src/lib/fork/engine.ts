@@ -24,6 +24,7 @@ import {
   courseSkillContributions,
 } from "./data";
 import { BASELINE_PATH_ID, PATHS, type PathSpec, type PlannedTerm, pathSpecById } from "./paths";
+import { fillSimulatedElectives } from "./electives";
 import { generatedPathSpec } from "./program-paths";
 
 
@@ -473,7 +474,7 @@ export function simulatePath(specId: string, opts: SimulateOptions): SimulatedPa
     tradeoffs: [...spec.tradeoffs],
     opportunities: [...spec.opportunities],
     unknowns: [...spec.unknowns],
-    terms: spec.terms.map((t) => ({ ...t, courses: [...t.courses], actions: [...t.actions] })),
+    terms: fillSimulatedElectives(spec.terms).map((t) => ({ ...t, courses: [...t.courses], actions: [...t.actions] })),
     nextMoves: [...spec.nextMoves],
     isBaseline,
   };
