@@ -70,7 +70,7 @@ function TermCard({
   doneActions: string[];
   toggleAction: (key: string) => void;
 }) {
-  const [open, setOpen] = useState(index === 0);
+  const [open, setOpen] = useState(false);
   const empty = term.courses.length === 0 && term.actions.length === 0;
 
   return (
