@@ -24,6 +24,8 @@ export function SemesterCards({
   toggleAction: (key: string) => void;
   className?: string | undefined;
 }) {
+  const [openIndex, setOpenIndex] = useState<number | null>(null);
+
   return (
     <section className={cn(className)}>
       <div className="flex flex-wrap items-baseline justify-between gap-2">
@@ -40,6 +42,8 @@ export function SemesterCards({
             term={term}
             doneActions={doneActions}
             toggleAction={toggleAction}
+            open={openIndex === i}
+            onOpenChange={(nextOpen) => setOpenIndex(nextOpen ? i : null)}
           />
         ))}
 
@@ -63,18 +67,21 @@ function TermCard({
   pathId,
   doneActions,
   toggleAction,
+  open,
+  onOpenChange,
 }: {
   term: SimulatedPath["terms"][number];
   index: number;
   pathId: string;
   doneActions: string[];
   toggleAction: (key: string) => void;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
 }) {
-  const [open, setOpen] = useState(false);
   const empty = term.courses.length === 0 && term.actions.length === 0;
 
   return (
-    <Collapsible open={open} onOpenChange={setOpen} className="rounded-2xl border border-border bg-card">
+    <Collapsible open={open} onOpenChange={onOpenChange} className="rounded-2xl border border-border bg-card">
       <CollapsibleTrigger
         disabled={empty}
         className="flex w-full items-center gap-3 rounded-2xl p-5 text-left disabled:cursor-default"
